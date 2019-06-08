@@ -1,0 +1,673 @@
+
+<#
+    .Synopsis
+    Executes an SQL statement.
+
+    .Description
+    Executes an SQL statement.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter Connection
+    ..
+
+    .Parameter Query
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Invoke-SQL {
+    param(
+        [System.Data.SqlClient.SqlConnection]$Connection,
+        [string]$Query
+    )
+    Write-Verbose "Using SQLQuery: $($Query)"
+
+    $QueryType = $Query.SubString(0,$Query.IndexOf(" "))
+    Write-Verbose "Query type: $($QueryType)"
+    
+    $returnDataset = $false
+
+    try {
+        $Connection.Open()
+
+        $Command = New-Object "System.Data.SqlClient.SqlCommand" $Query, $Connection
+        $Adapter = New-Object "System.Data.SqlClient.SQLDataAdapter" $Command
+        $Dataset = New-Object "System.Data.DataSet"
+
+        switch ($QueryType) {
+            Default { continue }
+            "SELECT" {
+                $null = $Adapter.Fill($Dataset)
+                $returnDataset = $true
+
+                Write-Verbose "Returning Dataset"
+                continue
+            }
+            "DELETE" {
+                $rowsAffected = $Command.ExecuteNonQuery()
+
+                Write-Verbose "Deleted Rows: $($rowsAffected)"
+                continue
+            }
+            "INSERT" {
+                $rowsAffected = $Command.ExecuteNonQuery()
+
+                Write-Verbose "Inserted Rows: $($rowsAffected)"
+                continue
+            }
+            "UPDATE" {
+                $rowsAffected = $Command.ExecuteNonQuery()
+
+                Write-Verbose "Updated Rows: $($rowsAffected)"
+                continue
+            }
+        }
+
+        $Connection.Close()
+    }
+    catch {
+        $ErrorMessage = $_.Exception.Message
+        $FailedItem = $_.Exception.ItemName
+        $ErrorMessage
+        $FailedItem
+
+        $Connection.Close()
+
+        Break
+    }
+
+    if ($returnDataset) { return $Dataset }
+}
+
+<#
+    .Synopsis
+    Creates an entry in the VUEMChangesLog table.
+
+    .Description
+    Creates an entry in the VUEMChangesLog table.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdElement
+    ..
+
+    .Parameter UserId
+    ..
+
+    .Parameter ChangeType
+    ..
+
+    .Parameter ObjectName
+    ..
+
+    .Parameter ObjectType
+    ..
+
+    .Parameter NewValue
+    ..
+
+    .Parameter ChangeDescription
+    ..
+
+    .Parameter Reserved01
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function New-ChangesLogEntry {
+    param(
+        [int]$IdSite,
+        [int]$IdElement,
+        [string]$UserId,
+        [string]$ChangeType,
+        [string]$ObjectName,
+        [string]$ObjectType,
+        [string]$NewValue,
+        [string]$ChangeDescription,
+        [string]$Reserved01,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    if (-not $UserId) { $UserId = "[Citrix.WEMSDK] $($env:USERDOMAIN)\$($env:USERNAME)"}
+
+    $SQLQuery = "INSERT INTO VUEMChangesLog (IdSite,IdElement,UserId,ChangeType,ObjectName,ObjectType,ChangeDate,NewValue,ChangeDescription,Reserved01) VALUES ($($IdSite),$($IdElement),'$($UserId)','$($ChangeType)','$($ObjectName)','$($ObjectType)','$(Get-Date)','$($NewValue)',"
+    if ($ChangeDescription) { 
+        $SQLQuery += "'$($ChangeDescription)',"
+    } else { 
+        $SQLQuery += "NULL,"
+    }
+    if ($Reserved01) { 
+        $SQLQuery += "'$($Reserved01)')"
+    } else { 
+        $SQLQuery += "NULL)"
+    }
+
+    $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+}
+
+<#
+    .Synopsis
+    Sets up a database connection.
+
+    .Description
+    Sets up a database connection.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter Server
+    ..
+
+    .Parameter Database
+    ..
+    
+    .Parameter Credential
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function New-WEMDatabaseConnection {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$True)][string]$Server,
+        [Parameter(Mandatory=$True)][string]$Database,
+        [Parameter(Mandatory=$False)][PSCredential]$Credential = [PSCredential]::Empty
+    )
+
+    $ConnectionString = $null
+    if ($Credential -ne [PSCredential]::Empty) {
+        Write-Verbose "Credential provided. Setting up connection using credentials."
+        $ConnectionString = "Server=$Server;Database=$Database;User Id=$($Credential.UserName);Password=$($Credential.GetNetworkCredential().password);"
+    } else {
+        Write-Verbose "No credential provided. Setting up connection using Integrated Security."
+        $ConnectionString = "Data Source=$Server; Integrated Security=SSPI; Initial Catalog=$Database"
+    }
+
+    Write-Verbose "Connection string: $($ConnectionString)"
+
+    $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection" $ConnectionString
+
+    # grab database version
+    $SQLQuery = "SELECT value FROM VUEMParameters WHERE IdSite = 1 AND Name = 'VersionInfo'"
+    $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+    $script:databaseVersion = $result.Tables.Rows.value
+    # 4.4.0.0
+    # 1808.0.1.1
+    # 1903.0.1.1
+    Write-Verbose "Database version $($script:databaseVersion) detected"
+    
+    return $connection
+}
+
+<#
+    .Synopsis
+    Create a new WEM Configuration object in the WEM Database.
+
+    .Description
+    Create a new WEM Configuration object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter Name
+    ..
+
+    .Parameter Description
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function New-WEMConfiguration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [string]$Name,
+        [Parameter(Mandatory=$False)][AllowEmptyString()]
+        [string]$Description,
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    ### TODO
+    ### create new config based on template config?
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        # check if there's already a configuration with that name
+        $SQLQuery = "SELECT * FROM VUEMSites WHERE Name LIKE '$($Name)'"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        if ($result.Tables.Rows) {
+            # name must be unique
+            Write-Error "There's already a configuration named '$($Name)'"
+            $result.Tables.Rows.Count
+            Break
+        }
+
+        Write-Verbose "Name is unique: Continue"
+
+        # build and execute Insert query
+        $SQLQuery = "INSERT INTO VUEMSites (Name, Description, State, RevisionId) VALUES ('$($Name)', '$($Description)', 1, 1)"
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # grab the ID from the newly created record
+        $SQLQuery = "SELECT * FROM VUEMSites WHERE Name = '$($Name)'"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        $IdSite = $result.Tables.Rows.IdSite
+
+        # fill other tables with defaults after adding the Site record
+        # VUEMParameters
+        $SQLQuery = ("INSERT INTO VUEMParameters (IdSite, Name, Value, State, RevisionId) VALUES {0}" -f ($defaultVUEMParameters -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMAgentSettings
+        $SQLQuery = ("INSERT INTO VUEMAgentSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMAgentSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMSystemUtilities
+        $SQLQuery = ("INSERT INTO VUEMSystemUtilities (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMUtilities -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMEnvironmentalSettings
+        $SQLQuery = ("INSERT INTO VUEMEnvironmentalSettings (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMEnvironmentalSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMUPMSettings
+        $SQLQuery = ("INSERT INTO VUEMUPMSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMUPMSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMPersonaSettings
+        $SQLQuery = ("INSERT INTO VUEMPersonaSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMPersonaSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMUSVSettings
+        $SQLQuery = ("INSERT INTO VUEMUSVSettings (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMUSVSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMKioskSettings
+        $SQLQuery = ("INSERT INTO VUEMKioskSettings (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMKioskSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # VUEMSystemMonitoringSettings
+        $SQLQuery = ("INSERT INTO VUEMSystemMonitoringSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMSystemMonitoringSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # AppLockerSettings
+        $SQLQuery = ("INSERT INTO AppLockerSettings (IdSite, State, RevisionId, Value, Setting) VALUES {0}" -f ($defaultApplockerSettings -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # 1903 version!
+        # GroupPolicyGlobalSettings
+        if ($script:databaseVersion -like "1903.*") {
+            $SQLQuery = "INSERT INTO GroupPolicyGlobalSettings (IdSite, Name, Value) VALUES ($($IdSite), 'EnableGroupPolicyEnforcement', '0')"
+            $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        }
+        
+        # VUEMItems
+        $SQLQuery = ("INSERT INTO VUEMItems (IdSite, Name, DistinguishedName, Description, State, Type, Priority, RevisionId) VALUES {0}" -f ($defaultVUEMItems -join ", ")) -f $IdSite
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # Updating the ChangeLog
+        New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdSite -ChangeType "Create" -ObjectName $Name -ObjectType "Global\Site" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+    }
+}
+
+<#
+    .Synopsis
+    Returns one or more WEM Configuration objects from the WEM Database.
+
+    .Description
+    Returns one or more WEM Configuration objects from the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter Name
+    ..
+
+    .Parameter IdSite
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMConfiguration {
+    [CmdletBinding(DefaultParameterSetName="byName")]
+    param(
+        [Parameter(Mandatory=$False, ParameterSetName="byName")]
+        [string]$Name,
+        [Parameter(Mandatory=$False, ParameterSetName="byId")]
+        [int]$IdSite,
+        [Parameter(Mandatory=$True, ParameterSetName="byName")]
+        [Parameter(Mandatory=$True, ParameterSetName="byId")]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        # build query
+        $SQLQuery = "SELECT * FROM VUEMSites"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name')) { $SQLQuery += " WHERE Name = '$($Name)'" }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'idsite')) { $SQLQuery += " WHERE IdSite = $($IdSite)" }
+        
+        # execute query
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        return $result.Tables.Rows
+    }
+}
+
+<#
+    .Synopsis
+    Updates a WEM Configuration object in the WEM Database.
+
+    .Description
+    Updates a WEM Configuration object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter Name
+    ..
+
+    .Parameter Description
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMConfiguration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False)][ValidateNotNullOrEmpty()]
+        [string]$Name,
+        [Parameter(Mandatory=$False)][AllowEmptyString()]
+        [string]$Description,
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    begin {
+        # either parameter Name or Description should be present
+        if (-not [bool]($MyInvocation.BoundParameters.Keys -match 'name') -and -not [bool]($MyInvocation.BoundParameters.Keys -match 'description')) {
+            Write-Error "Provide a value for parameter Name and/or parameter Description"
+            Break
+        }
+
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+    }
+    process {
+        $SQLQuery = "UPDATE VUEMSites SET "
+        if ($Name) { 
+            $SQLQuery += "Name = '$($Name)'"
+            if ([bool]($MyInvocation.BoundParameters.Keys -match 'description')) { $SQLQuery += ", " }
+        }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'description')) {
+            $SQLQuery += "Description = '$($Description)'"
+        }
+        $SQLQuery += " WHERE IdSite = $($IdSite)"
+
+        # do not touch IdSite 1 (default site)
+        if ($IdSite -gt 1 -and $Name.ToLower() -ne "default site") {
+            $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+            # grab extra properties
+            $SQLQuery = "SELECT Name FROM VUEMSites WHERE IdSite = $($IdSite)"
+            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+    
+            # Updating the ChangeLog
+            New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdSite -ChangeType "Update" -ObjectName $result.Tables.Rows.Name -ObjectType "Global\Site" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null 
+
+        } else {
+            Write-Error "You cannot modify the default site"
+        }
+    }
+    end {
+    }
+}
+
+<#
+    .Synopsis
+    Removes a WEM Configuration object recursively from WEM Database.
+
+    .Description
+    Removes a WEM Configuration object recursively from the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Remove-WEMConfiguration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        if ($IdSite -eq 1) {
+            Write-Error "You cannot remove the default site"
+            Break
+        }
+
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        # grab extra properties
+        $SQLQuery = "SELECT Name FROM VUEMSites WHERE IdSite = $($IdSite)"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        $Name = $result.Tables.Rows.Name
+
+        # only continue if the site was found
+        if (-not $Name) { 
+            Write-Error "No site found with IdSite $($IdSite)"
+            Break
+        }
+
+        # delete all table data associated with this site
+        $SQLQuery = ""
+        foreach ($table in $cleanupTables[$script:databaseVersion]) {
+            $SQLQuery += "DELETE FROM $($table) WHERE IdSite = $($IdSite);"
+        }
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # Updating the ChangeLog
+        New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdSite -ChangeType "Delete" -ObjectName $Name -ObjectType "Global\Site" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+    }
+}
+
+function New-WEMApp {
+
+}
+
+<#
+    .Synopsis
+    Retrieves WEM Apps from WEM Database.
+
+    .Description
+    Retrieves WEM Apps from WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdApplication
+    ..
+
+    .Parameter Name
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMApp {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdApplication,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [string]$Name,
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        # build query
+        $SQLQuery = "SELECT * FROM VUEMApps"
+        if ($IdSite -or $Name -or $IdApplication) {
+            $SQLQuery += " WHERE "
+            if ($IdSite) { 
+                $SQLQuery += "IdSite = $($IdSite)"
+                if ($Name -or $IdApplication) { $SQLQuery += " AND " }
+            }
+            if ($IdApplication) { 
+                $SQLQuery += "IdApplication = $($IdApplication)"
+                if ($Name) { $SQLQuery += " AND " }
+            }
+            if ($Name) { $SQLQuery += "Name LIKE '$($Name.Replace("*","%"))'"}
+        }
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # build array of VUEMApps returned by the query
+        $vuemApps = @()
+
+        foreach ($row in $result.Tables.Rows) {
+            $vuemAppReserved = $row.Reserved01
+            [xml]$vuemAppXml = $vuemAppReserved.Substring($vuemAppReserved.ToLower().IndexOf("<array"))
+            $vuemApps += [pscustomobject] @{
+                'IdApplication' = $row.IdApplication
+                'IdSite' = $row.IdSite
+                'Name' = $row.Name
+                'DisplayName' = $row.DisplayName
+                'Description' = $row.Description
+                'State' = $VUEMActionStates[$row.State]
+                'Type' = $VUEMAppAppTypes[$row.AppType]
+                'Action' = $VUEMAppActionTypes[$row.ActionType]
+                'StartMenuTarget' = $row.StartMenuTarget
+                'Target' = $row.TargetPath
+                'Parameters' = $row.Parameters
+                'WorkingDirectory' = $row.WorkingDirectory
+                'WindowStyle' = $row.WindowStyle
+                'HotKey' = $row.Hotkey
+                'IconLocation' = $row.IconLocation
+                'IconIndex' = $row.IconIndex
+                'IconStream' = $row.IconStream
+                'SelfHealingEnabled' = ($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where {$_.Name -like "SelfHealingEnabled"}).Value
+                'EnforceIconLocation' = ($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where {$_.Name -like "EnforceIconLocation"}).Value
+                'EnforceIconXLocation' = ($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where {$_.Name -like "EnforceIconXLocation"}).Value
+                'EnforceIconYLocation' = ($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where {$_.Name -like "EnforceIconYLocation"}).Value
+                'DoNotShowInSelfService' = ($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where {$_.Name -like "DoNotShowInSelfService"}).Value
+                'CreateShortcutInUserFavoritesFolder' = ($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value
+                'Version' = $row.RevisionId
+            }
+        }
+
+        Return $vuemApps
+    }
+}
+
+function Set-WEMApp {
+
+}
+
+function Remove-WEMApp {
+
+}
+
+# module variables
+$defaultApplockerSettings = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
+$defaultVUEMAgentSettings = @("({0},'OfflineModeEnabled','0',1,1)", "({0},'UseCacheEvenIfOnline','0',1,1)", "({0},'processVUEMApps','0',1,1)", "({0},'processVUEMPrinters','0',1,1)", "({0},'processVUEMNetDrives','0',1,1)", "({0},'processVUEMVirtualDrives','0',1,1)", "({0},'processVUEMRegValues','0',1,1)", "({0},'processVUEMEnvVariables','0',1,1)", "({0},'processVUEMPorts','0',1,1)", "({0},'processVUEMIniFilesOps','0',1,1)", "({0},'processVUEMExtTasks','0',1,1)", "({0},'processVUEMFileSystemOps','0',1,1)", "({0},'processVUEMUserDSNs','0',1,1)", "({0},'processVUEMFileAssocs','0',1,1)", "({0},'UIAgentSplashScreenBackGround','',1,1)", "({0},'UIAgentLoadingCircleColor','',1,1)", "({0},'UIAgentLbl1TextColor','',1,1)", "({0},'UIAgentHelpLink','',1,1)", "({0},'AgentServiceDebugMode','0',1,1)", "({0},'LaunchVUEMAgentOnLogon','0',1,1)", "({0},'ProcessVUEMAgentLaunchForAdmins','0',1,1)", "({0},'LaunchVUEMAgentOnReconnect','0',1,1)", "({0},'EnableVirtualDesktopCompatibility','0',1,1)", "({0},'VUEMAgentType','UI',1,1)", "({0},'VUEMAgentDesktopsExtraLaunchDelay','0',1,1)", "({0},'VUEMAgentCacheRefreshDelay','30',1,1)", "({0},'VUEMAgentSQLSettingsRefreshDelay','15',1,1)", "({0},'DeleteDesktopShortcuts','0',1,1)", "({0},'DeleteStartMenuShortcuts','0',1,1)", "({0},'DeleteQuickLaunchShortcuts','0',1,1)", "({0},'DeleteNetworkDrives','0',1,1)", "({0},'DeleteNetworkPrinters','0',1,1)", "({0},'PreserveAutocreatedPrinters','0',1,1)", "({0},'PreserveSpecificPrinters','0',1,1)", "({0},'SpecificPreservedPrinters','PDFCreator;PDFMail;Acrobat Distiller;Amyuni',1,1)", "({0},'EnableAgentLogging','1',1,1)", "({0},'AgentLogFile','%USERPROFILE%\Citrix WEM Agent.log',1,1)", "({0},'AgentDebugMode','0',1,1)", "({0},'RefreshEnvironmentSettings','0',1,1)", "({0},'RefreshSystemSettings','0',1,1)", "({0},'RefreshDesktop','0',1,1)", "({0},'RefreshAppearance','0',1,1)", "({0},'AgentExitForAdminsOnly','1',1,1)", "({0},'AgentAllowUsersToManagePrinters','0',1,1)", "({0},'DeleteTaskBarPinnedShortcuts','0',1,1)", "({0},'DeleteStartMenuPinnedShortcuts','0',1,1)", "({0},'InitialEnvironmentCleanUp','0',1,1)", "({0},'aSyncVUEMAppsProcessing','0',1,1)", "({0},'aSyncVUEMPrintersProcessing','0',1,1)", "({0},'aSyncVUEMNetDrivesProcessing','0',1,1)", "({0},'aSyncVUEMVirtualDrivesProcessing','0',1,1)", "({0},'aSyncVUEMRegValuesProcessing','0',1,1)", "({0},'aSyncVUEMEnvVariablesProcessing','0',1,1)", "({0},'aSyncVUEMPortsProcessing','0',1,1)", "({0},'aSyncVUEMIniFilesOpsProcessing','0',1,1)", "({0},'aSyncVUEMExtTasksProcessing','0',1,1)", "({0},'aSyncVUEMFileSystemOpsProcessing','0',1,1)", "({0},'aSyncVUEMUserDSNsProcessing','0',1,1)", "({0},'aSyncVUEMFileAssocsProcessing','0',1,1)", "({0},'byPassie4uinitCheck','0',1,1)", "({0},'UIAgentCustomLink','',1,1)", "({0},'enforceProcessVUEMApps','0',1,1)", "({0},'enforceProcessVUEMPrinters','0',1,1)", "({0},'enforceProcessVUEMNetDrives','0',1,1)", "({0},'enforceProcessVUEMVirtualDrives','0',1,1)", "({0},'enforceProcessVUEMRegValues','0',1,1)", "({0},'enforceProcessVUEMEnvVariables','0',1,1)", "({0},'enforceProcessVUEMPorts','0',1,1)", "({0},'enforceProcessVUEMIniFilesOps','0',1,1)", "({0},'enforceProcessVUEMExtTasks','0',1,1)", "({0},'enforceProcessVUEMFileSystemOps','0',1,1)", "({0},'enforceProcessVUEMUserDSNs','0',1,1)", "({0},'enforceProcessVUEMFileAssocs','0',1,1)", "({0},'revertUnassignedVUEMApps','0',1,1)", "({0},'revertUnassignedVUEMPrinters','0',1,1)", "({0},'revertUnassignedVUEMNetDrives','0',1,1)", "({0},'revertUnassignedVUEMVirtualDrives','0',1,1)", "({0},'revertUnassignedVUEMRegValues','0',1,1)", "({0},'revertUnassignedVUEMEnvVariables','0',1,1)", "({0},'revertUnassignedVUEMPorts','0',1,1)", "({0},'revertUnassignedVUEMIniFilesOps','0',1,1)", "({0},'revertUnassignedVUEMExtTasks','0',1,1)", "({0},'revertUnassignedVUEMFileSystemOps','0',1,1)", "({0},'revertUnassignedVUEMUserDSNs','0',1,1)", "({0},'revertUnassignedVUEMFileAssocs','0',1,1)", "({0},'AgentLaunchExcludeGroups','0',1,1)", "({0},'AgentLaunchExcludedGroups','',1,1)", "({0},'InitialDesktopUICleaning','0',1,1)", "({0},'EnableUIAgentAutomaticRefresh','0',1,1)", "({0},'UIAgentAutomaticRefreshDelay','30',1,1)", "({0},'AgentAllowUsersToManageApplications','0',1,1)", "({0},'HideUIAgentIconInPublishedApplications','0',1,1)", "({0},'ExecuteOnlyCmdAgentInPublishedApplications','0',1,1)", "({0},'enforceVUEMAppsFiltersProcessing','0',1,1)", "({0},'enforceVUEMPrintersFiltersProcessing','0',1,1)", "({0},'enforceVUEMNetDrivesFiltersProcessing','0',1,1)", "({0},'enforceVUEMVirtualDrivesFiltersProcessing','0',1,1)", "({0},'enforceVUEMRegValuesFiltersProcessing','0',1,1)", "({0},'enforceVUEMEnvVariablesFiltersProcessing','0',1,1)", "({0},'enforceVUEMPortsFiltersProcessing','0',1,1)", "({0},'enforceVUEMIniFilesOpsFiltersProcessing','0',1,1)", "({0},'enforceVUEMExtTasksFiltersProcessing','0',1,1)", "({0},'enforceVUEMFileSystemOpsFiltersProcessing','0',1,1)", "({0},'enforceVUEMUserDSNsFiltersProcessing','0',1,1)", "({0},'enforceVUEMFileAssocsFiltersProcessing','0',1,1)", "({0},'checkAppShortcutExistence','0',1,1)", "({0},'appShortcutExpandEnvironmentVariables','0',1,1)", "({0},'RefreshOnEnvironmentalSettingChange','1',1,1)", "({0},'HideUIAgentSplashScreen','0',1,1)", "({0},'processVUEMAppsOnReconnect','0',1,1)", "({0},'processVUEMPrintersOnReconnect','0',1,1)", "({0},'processVUEMNetDrivesOnReconnect','0',1,1)", "({0},'processVUEMVirtualDrivesOnReconnect','0',1,1)", "({0},'processVUEMRegValuesOnReconnect','0',1,1)", "({0},'processVUEMEnvVariablesOnReconnect','0',1,1)", "({0},'processVUEMPortsOnReconnect','0',1,1)", "({0},'processVUEMIniFilesOpsOnReconnect','0',1,1)", "({0},'processVUEMExtTasksOnReconnect','0',1,1)", "({0},'processVUEMFileSystemOpsOnReconnect','0',1,1)", "({0},'processVUEMUserDSNsOnReconnect','0',1,1)", "({0},'processVUEMFileAssocsOnReconnect','0',1,1)", "({0},'AgentAllowScreenCapture','0',1,1)", "({0},'AgentScreenCaptureEnableSendSupportEmail','0',1,1)", "({0},'AgentScreenCaptureSupportEmailAddress','',1,1)", "({0},'AgentScreenCaptureSupportEmailTemplate','',1,1)", "({0},'AgentEnableApplicationsShortcuts','0',1,1)", "({0},'UIAgentSkinName','Seven',1,1)", "({0},'HideUIAgentSplashScreenInPublishedApplications','0',1,1)", "({0},'MailCustomSubject',NULL,1,1)", "({0},'MailEnableUseSMTP','0',1,1)", "({0},'MailEnableSMTPSSL','0',1,1)", "({0},'MailSMTPPort','0',1,1)", "({0},'MailSMTPServer','',1,1)", "({0},'MailSMTPFromAddress','',1,1)", "({0},'MailSMTPToAddress','',1,1)", "({0},'MailEnableUseSMTPCredentials','0',1,1)", "({0},'MailSMTPUser','',1,1)", "({0},'MailSMTPPassword','',1,1)", "({0},'HideUIAgentSplashScreenOnReconnect','0',1,1)", "({0},'AgentDirectoryServiceTimeoutValue','15000',1,1)", "({0},'AgentBrokerServiceTimeoutValue','15000',1,1)", "({0},'AgentMaxDegreeOfParallelism','0',1,1)", "({0},'AgentPreventExitForAdmins','0',1,1)", "({0},'AgentNetworkResourceCheckTimeoutValue','500',1,1)", "({0},'AgentEnableCrossDomainsUserGroupsSearch','0',1,1)", "({0},'AgentShutdownAfterIdleEnabled','0',1,1)", "({0},'AgentShutdownAfterIdleTime','1800',1,1)", "({0},'AgentShutdownAfterEnabled','0',1,1)", "({0},'AgentShutdownAfter','02:00',1,1)", "({0},'AgentSuspendInsteadOfShutdown','0',1,1)", "({0},'AgentLaunchIncludeGroups','0',1,1)", "({0},'AgentLaunchIncludedGroups','',1,1)", "({0},'DisableAdministrativeRefreshFeedback','0',1,1)")
+$defaultVUEMEnvironmentalSettings = @("({0},'HideCommonPrograms',0,'0',1,1)", "({0},'HideControlPanel',0,'0',1,1)", "({0},'RemoveRunFromStartMenu',0,'0',1,1)", "({0},'HideNetworkIcon',0,'0',1,1)", "({0},'HideAdministrativeTools',0,'0',1,1)", "({0},'HideNetworkConnections',0,'0',1,1)", "({0},'HideHelp',0,'0',1,1)", "({0},'HideWindowsUpdate',0,'0',1,1)", "({0},'HideTurnOff',0,'0',1,1)", "({0},'ForceLogoff',0,'0',1,1)", "({0},'HideFind',0,'0',1,1)", "({0},'DisableRegistryEditing',0,'0',1,1)", "({0},'DisableCmd',0,'0',1,1)", "({0},'NoNetConnectDisconnect',0,'0',1,1)", "({0},'Turnoffnotificationareacleanup',1,'0',1,1)", "({0},'LockTaskbar',1,'0',1,1)", "({0},'TurnOffpersonalizedmenus',1,'0',1,1)", "({0},'ClearRecentprogramslist',1,'0',1,1)", "({0},'RemoveContextMenuManageItem',0,'0',1,1)", "({0},'HideSpecifiedDrivesFromExplorer',1,'0',1,1)", "({0},'ExplorerHiddenDrives',1,'',1,1)", "({0},'DisableDragFullWindows',1,'0',1,1)", "({0},'DisableSmoothScroll',1,'0',1,1)", "({0},'DisableCursorBlink',1,'0',1,1)", "({0},'DisableMinAnimate',1,'0',1,1)", "({0},'SetInteractiveDelay',1,'0',1,1)", "({0},'InteractiveDelayValue',1,'40',1,1)", "({0},'EnableAutoEndTasks',1,'0',1,1)", "({0},'WaitToKillAppTimeout',1,'20000',1,1)", "({0},'SetCursorBlinkRate',1,'0',1,1)", "({0},'CursorBlinkRateValue',1,'-1',1,1)", "({0},'SetMenuShowDelay',1,'0',1,1)", "({0},'MenuShowDelayValue',1,'10',1,1)", "({0},'SetVisualStyleFile',1,'0',1,1)", "({0},'VisualStyleFileValue',1,'%windir%\resources\Themes\Aero\aero.msstyles',1,1)", "({0},'SetWallpaper',1,'0',1,1)", "({0},'Wallpaper',1,'',1,1)", "({0},'WallpaperStyle',1,'0',1,1)", "({0},'processEnvironmentalSettings',2,'0',1,1)", "({0},'RestrictSpecifiedDrivesFromExplorer',1,'0',1,1)", "({0},'ExplorerRestrictedDrives',1,'',1,1)", "({0},'HideNetworkInExplorer',1,'0',1,1)", "({0},'HideLibrairiesInExplorer',1,'0',1,1)", "({0},'NoProgramsCPL',0,'0',1,1)", "({0},'NoPropertiesMyComputer',0,'0',1,1)", "({0},'SetSpecificThemeFile',1,'0',1,1)", "({0},'SpecificThemeFileValue',1,'%windir%\resources\Themes\aero.theme',1,1)", "({0},'DisableSpecifiedKnownFolders',1,'0',1,1)", "({0},'DisabledKnownFolders',1,'',1,1)", "({0},'DisableSilentRegedit',0,'0',1,1)", "({0},'DisableCmdScripts',0,'0',1,1)", "({0},'HideDevicesandPrinters',0,'0',1,1)", "({0},'processEnvironmentalSettingsForAdmins',2,'0',1,1)", "({0},'HideSystemClock',0,'0',1,1)", "({0},'SetDesktopBackGroundColor',0,'0',1,1)", "({0},'DesktopBackGroundColor',0,'',1,1)", "({0},'NoMyComputerIcon',1,'0',1,1)", "({0},'NoRecycleBinIcon',1,'0',1,1)", "({0},'NoPropertiesRecycleBin',0,'0',1,1)", "({0},'NoMyDocumentsIcon',1,'0',1,1)", "({0},'NoPropertiesMyDocuments',0,'0',1,1)", "({0},'NoNtSecurity',0,'0',1,1)", "({0},'DisableTaskMgr',0,'0',1,1)", "({0},'RestrictCpl',0,'0',1,1)", "({0},'RestrictCplList',0,'Display',1,1)", "({0},'DisallowCpl',0,'0',1,1)", "({0},'DisallowCplList',0,'',1,1)", "({0},'BootToDesktopInsteadOfStart',1,'0',1,1)", "({0},'DisableTLcorner',0,'0',1,1)", "({0},'DisableCharmsHint',0,'0',1,1)", "({0},'NoTrayContextMenu',0,'0',1,1)", "({0},'NoViewContextMenu',0,'0',1,1)")
+$defaultVUEMItems = @("({0}, 'S-1-1-0', 'Everyone', 'A group that includes all users, even anonymous users and guests. Membership is controlled by the operating system.', 1, 1, 100, 1)", "({0}, 'S-1-5-32-544', 'BUILTIN\Administrators', 'A built-in group. After the initial installation of the operating system, the only member of the group is the Administrator account. When a computer joins a domain, the Domain Admins group is added to the Administrators group. When a server becomes a domain controller, the Enterprise Admins group also is added to the Administrators group.', 1, 1, 100, 1)")
+$defaultVUEMKioskSettings = @("({0},'PowerDontCheckBattery',0,'0',0,1)", "({0},'PowerShutdownAfterIdleTime',0,'1800',0,1)", "({0},'PowerShutdownAfterSpecifiedTime',0,'02:00',0,1)", "({0},'DesktopModeLogOffWebPortal',0,'0',0,1)", "({0},'EndSessionOption',0,'0',0,1)", "({0},'AutologonRegistryForce',0,'0',0,1)", "({0},'AutologonRegistryIgnoreShiftOverride',0,'0',0,1)", "({0},'AutologonPassword',0,'',0,1)", "({0},'AutologonDomain',0,'',0,1)", "({0},'AutologonUserName',0,'',0,1)", "({0},'AutologonEnable',0,'0',0,1)", "({0},'AdministrationHideDisplaySettings',0,'0',0,1)", "({0},'AdministrationHideKeyboardSettings',0,'0',0,1)", "({0},'AdministrationHideMouseSettings',0,'0',0,1)", "({0},'AdministrationHideClientDetails',0,'0',0,1)", "({0},'AdministrationDisableUnlock',0,'0',0,1)", "({0},'AdministrationHideWindowsVersion',0,'0',0,1)", "({0},'AdministrationDisableProgressBar',0,'0',0,1)", "({0},'AdministrationHidePrinterSettings',0,'0',0,1)", "({0},'AdministrationHideLogOffOption',0,'0',0,1)", "({0},'AdministrationHideRestartOption',0,'0',0,1)", "({0},'AdministrationHideShutdownOption',0,'0',0,1)", "({0},'AdministrationHideVolumeSettings',0,'0',0,1)", "({0},'AdministrationHideHomeButton',0,'0',0,1)", "({0},'AdministrationPreLaunchReceiver',0,'0',0,1)", "({0},'AdministrationIgnoreLastLanguage',0,'0',0,1)", "({0},'AdvancedHideTaskbar',0,'0',0,1)", "({0},'AdvancedLockCtrlAltDel',0,'0',0,1)", "({0},'AdvancedLockAltTab',0,'0',0,1)", "({0},'AdvancedFixBrowserRendering',0,'0',0,1)", "({0},'AdvancedLogOffScreenRedirection',0,'0',0,1)", "({0},'AdvancedSuppressScriptErrors',0,'0',0,1)", "({0},'AdvancedShowWifiSettings',0,'0',0,1)", "({0},'AdvancedHideKioskWhileCitrixSession',0,'0',0,1)", "({0},'AdvancedFixSslSites',0,'0',0,1)", "({0},'AdvancedAlwaysShowAdminMenu',0,'0',0,1)", "({0},'AdvancedFixZOrder',0,'0',0,1)", "({0},'ToolsAppsList',0,'',0,1)", "({0},'ToolsEnabled',0,'0',0,1)", "({0},'IsKioskEnabled',0,'0',0,1)", "({0},'SitesIsListEnabled',0,'0',0,1)", "({0},'SitesNamesAndLinks',0,'',0,1)", "({0},'GeneralStartUrl',0,'',0,1)", "({0},'GeneralTitle',0,'',0,1)", "({0},'GeneralShowNavigationButtons',0,'0',0,1)", "({0},'GeneralWindowMode',0,'0',0,1)", "({0},'GeneralClockEnabled',0,'0',0,1)", "({0},'GeneralClockUses12Hours',0,'0',0,1)", "({0},'GeneralUnlockPassword',0,'fLp34dnRI0DK26rJv8Tmqg==',0,1)", "({0},'GeneralEnableLanguageSelect',0,'0',0,1)", "({0},'GeneralAutoHideAppPanel',0,'0',0,1)", "({0},'GeneralEnableAppPanel',0,'0',0,1)", "({0},'ProcessLauncherEnabled',0,'0',0,1)", "({0},'ProcessLauncherApplication',0,'',0,1)", "({0},'ProcessLauncherArgs',0,'',0,1)", "({0},'ProcessLauncherClearLastUsernameVMWare',0,'0',0,1)", "({0},'ProcessLauncherEnableVMWareViewMode',0,'0',0,1)", "({0},'ProcessLauncherEnableMicrosoftRdsMode',0,'0',0,1)", "({0},'ProcessLauncherEnableCitrixMode',0,'0',0,1)", "({0},'SetCitrixReceiverFSOMode',0,'0',0,1)")
+$defaultVUEMParameters = @("({0},'excludedDriveletters','A;B;C;D',1,1)", "({0},'AllowDriveLetterReuse','0',1,1)")
+$defaultVUEMPersonaSettings = @("({0},'PersonaManagementEnabled','0',1,1)", "({0},'VPEnabled','0',1,1)", "({0},'UploadProfileInterval','10',1,1)", "({0},'SetCentralProfileStore','0',1,1)", "({0},'CentralProfileStore','',1,1)", "({0},'CentralProfileOverride','0',1,1)", "({0},'DeleteLocalProfile','0',1,1)", "({0},'DeleteLocalSettings','0',1,1)", "({0},'RoamLocalSettings','0',1,1)", "({0},'EnableBackgroundDownload','0',1,1)", "({0},'CleanupCLFSFiles','0',1,1)", "({0},'SetDynamicRoamingFiles','0',1,1)", "({0},'DynamicRoamingFiles','',1,1)", "({0},'SetDynamicRoamingFilesExceptions','0',1,1)", "({0},'DynamicRoamingFilesExceptions','',1,1)", "({0},'SetBasicRoamingFiles','0',1,1)", "({0},'BasicRoamingFiles','',1,1)", "({0},'SetBasicRoamingFilesExceptions','0',1,1)", "({0},'BasicRoamingFilesExceptions','',1,1)", "({0},'SetDontRoamFiles','0',1,1)", "({0},'DontRoamFiles','AppData\Local;AppData\Roaming\Citrix\PNAgent\AppCache;AppData\Roaming\Citrix\PNAgent\Icon Cache;AppData\Roaming\Citrix\PNAgent\ResourceCache;AppData\Roaming\ICAClient\Cache;AppData\Roaming\Macromedia\Flash Player\#SharedObjects;AppData\Roaming\Macromedia\Flash Player\macromedia.com\support\flashplayer\sys;AppData\LocalLow;AppData\Local\Microsoft\Windows\Temporary Internet Files;AppData\Local\Microsoft\Windows\Burn;AppData\Local\Microsoft\Windows Live;AppData\Local\Microsoft\Windows Live Contacts;AppData\Local\Microsoft\Terminal Server Client;AppData\Local\Microsoft\Messenger;AppData\Local\Microsoft\OneNote;AppData\Local\Microsoft\Outlook;AppData\Local\Windows Live;AppData\Local\Temp;AppData\Local\Sun;AppData\Local\Google\Chrome\User Data\Default\Cache;AppData\Local\Google\Chrome\User Data\Default\Cached Theme Images;AppData\Roaming\Sun\Java\Deployment\cache;AppData\Roaming\Sun\Java\Deployment\log;AppData\Roaming\Sun\Java\Deployment\tmp;AppData\Local\Mozilla',1,1)", "({0},'SetDontRoamFilesExceptions','0',1,1)", "({0},'DontRoamFilesExceptions','',1,1)", "({0},'SetBackgroundLoadFolders','0',1,1)", "({0},'BackgroundLoadFolders','',1,1)", "({0},'SetBackgroundLoadFoldersExceptions','0',1,1)", "({0},'BackgroundLoadFoldersExceptions','',1,1)", "({0},'SetExcludedProcesses','0',1,1)", "({0},'ExcludedProcesses','',1,1)", "({0},'HideOfflineIcon','0',1,1)", "({0},'HideFileCopyProgress','0',1,1)", "({0},'FileCopyMinSize','50',1,1)", "({0},'EnableTrayIconErrorAlerts','0',1,1)", "({0},'SetLogPath','0',1,1)", "({0},'LogPath','',1,1)", "({0},'SetLoggingDestination','0',1,1)", "({0},'LogToFile','0',1,1)", "({0},'LogToDebugPort','0',1,1)", "({0},'SetLoggingFlags','0',1,1)", "({0},'LogError','0',1,1)", "({0},'LogInformation','0',1,1)", "({0},'LogDebug','0',1,1)", "({0},'SetDebugFlags','0',1,1)", "({0},'DebugError','0',1,1)", "({0},'DebugInformation','0',1,1)", "({0},'DebugPorts','0',1,1)", "({0},'AddAdminGroupToRedirectedFolders','0',1,1)", "({0},'RedirectApplicationData','0',1,1)", "({0},'ApplicationDataRedirectedPath','',1,1)", "({0},'RedirectContacts','0',1,1)", "({0},'ContactsRedirectedPath','',1,1)", "({0},'RedirectCookies','0',1,1)", "({0},'CookiesRedirectedPath','',1,1)", "({0},'RedirectDesktop','0',1,1)", "({0},'DesktopRedirectedPath','',1,1)", "({0},'RedirectDownloads','0',1,1)", "({0},'DownloadsRedirectedPath','',1,1)", "({0},'RedirectFavorites','0',1,1)", "({0},'FavoritesRedirectedPath','',1,1)", "({0},'RedirectHistory','0',1,1)", "({0},'HistoryRedirectedPath','',1,1)", "({0},'RedirectLinks','0',1,1)", "({0},'LinksRedirectedPath','',1,1)", "({0},'RedirectMyDocuments','0',1,1)", "({0},'MyDocumentsRedirectedPath','',1,1)", "({0},'RedirectMyMusic','0',1,1)", "({0},'MyMusicRedirectedPath','',1,1)", "({0},'RedirectMyPictures','0',1,1)", "({0},'MyPicturesRedirectedPath','',1,1)", "({0},'RedirectMyVideos','0',1,1)", "({0},'MyVideosRedirectedPath','',1,1)", "({0},'RedirectNetworkNeighborhood','0',1,1)", "({0},'NetworkNeighborhoodRedirectedPath','',1,1)", "({0},'RedirectPrinterNeighborhood','0',1,1)", "({0},'PrinterNeighborhoodRedirectedPath','',1,1)", "({0},'RedirectRecentItems','0',1,1)", "({0},'RecentItemsRedirectedPath','',1,1)", "({0},'RedirectSavedGames','0',1,1)", "({0},'SavedGamesRedirectedPath','',1,1)", "({0},'RedirectSearches','0',1,1)", "({0},'SearchesRedirectedPath','',1,1)", "({0},'RedirectSendTo','0',1,1)", "({0},'SendToRedirectedPath','',1,1)", "({0},'RedirectStartMenu','0',1,1)", "({0},'StartMenuRedirectedPath','',1,1)", "({0},'RedirectStartupItems','0',1,1)", "({0},'StartupItemsRedirectedPath','',1,1)", "({0},'RedirectTemplates','0',1,1)", "({0},'TemplatesRedirectedPath','',1,1)", "({0},'RedirectTemporaryInternetFiles','0',1,1)", "({0},'TemporaryInternetFilesRedirectedPath','',1,1)", "({0},'SetFRExclusions','0',1,1)", "({0},'FRExclusions','',1,1)", "({0},'SetFRExclusionsExceptions','0',1,1)", "({0},'FRExclusionsExceptions','',1,1)")
+$defaultVUEMSystemMonitoringSettings = @("({0},'EnableSystemMonitoring','0',1,1)", "({0},'EnableGlobalSystemMonitoring','0',1,1)", "({0},'EnableProcessActivityMonitoring','0',1,1)", "({0},'EnableUserExperienceMonitoring','0',1,1)", "({0},'LocalDatabaseRetentionPeriod','3',1,1)", "({0},'LocalDataUploadFrequency','4',1,1)", "({0},'EnableApplicationReportsWindows2K3XPCompliance','0',1,1)", "({0},'ExcludeProcessesFromApplicationReports','1',1,1)", "({0},'ExcludedProcessesFromApplicationReports','dwm;taskhost;vmtoolsd;winlogon;csrss;wisptis;dllhost;consent;msiexec;userinit;LogonUI;mscorsvw;SearchProtocolHost;Rundll32;explorer;regsvr32;WmiPrvSE;services;smss;SearchFilterHost;lsass;svchost;lsm;msdtc;wininit;VGAuthService;SearchIndexer;spoolsv;vmtoolsd;vmacthlp;audiodg;VMwareResolutionSet;mobsync;wsqmcons;schtasks;Defrag;conhost;VSSVC;sdclt;MpCmdRun;WMIADAP;encsvc;wfshell;CpSvc;VDARedirector;CpSvc64;SemsService;ctxrdr;PicaSvc2;encsvc;GfxMgr;PicaSessionAgent;CtxGfx;PicaTwiHost;PicaUserAgent;VDARedirector;PicaShell;PicaEuemRelay;CtxMtHost;CtxSensLoader;ssonsvr;concentr;wfcrun32;pnamain;redirector;concentr;pnamain;pnagent;IMAAdvanceSrv;mfcom;ctxxmlss;Citrix.XenApp.Commands.Remoting.Service;HCAService;cmstart;startssonsvr;ctxhide;mmvdhost;runonce;rdpclip;TabTip;InputPersonalization;TabTip32;TSTheme;ngen;XTE;CtxSvcHost;OSPPSVC;TelemetryService;CtxAudioService;picatzrestore;CheckTermSrv;IMATest;RequestTicket;csc;cvtres;ssoncom;UpmUserMsg;CtxPvD;MultimediaRedirector;gpscript;shutdown;splwow64',1,1)", "({0},'EnableStrictPrivacy','0',1,1)", "({0},'BusinessDayStartHour','8',1,1)", "({0},'BusinessDayEndHour','19',1,1)", "({0},'ReportsBootTimeMinimum','5',1,1)", "({0},'ReportsLoginTimeMinimum','5',1,1)", "({0},'EnableWorkDaysFiltering','1',1,1)", "({0},'WorkDaysFilter','1;1;1;1;1;0;0',1,1)")
+$defaultVUEMUPMSettings = @("({0},'UPMManagementEnabled','0',1,1)", "({0},'ServiceActive','0',1,1)", "({0},'SetProcessedGroups','0',1,1)", "({0},'ProcessedGroupsList','',1,1)", "({0},'ProcessAdmins','0',1,1)", "({0},'SetPathToUserStore','0',1,1)", "({0},'PathToUserStore','Windows',1,1)", "({0},'PSMidSessionWriteBack','0',1,1)", "({0},'OfflineSupport','0',1,1)", "({0},'DeleteCachedProfilesOnLogoff','0',1,1)", "({0},'SetMigrateWindowsProfilesToUserStore','0',1,1)", "({0},'MigrateWindowsProfilesToUserStore','1',1,1)", "({0},'SetLocalProfileConflictHandling','0',1,1)", "({0},'LocalProfileConflictHandling','1',1,1)", "({0},'SetTemplateProfilePath','0',1,1)", "({0},'TemplateProfilePath','',1,1)", "({0},'TemplateProfileOverridesLocalProfile','0',1,1)", "({0},'TemplateProfileOverridesRoamingProfile','0',1,1)", "({0},'SetLoadRetries','0',1,1)", "({0},'LoadRetries','5',1,1)", "({0},'SetUSNDBPath','0',1,1)", "({0},'USNDBPath','',1,1)", "({0},'XenAppOptimizationEnabled','0',1,1)", "({0},'XenAppOptimizationPath','',1,1)", "({0},'ProcessCookieFiles','0',1,1)", "({0},'DeleteRedirectedFolders','0',1,1)", "({0},'LoggingEnabled','0',1,1)", "({0},'SetLogLevels','0',1,1)", "({0},'LogLevels','0;0;0;0;0;0;0;0;0;0;0',1,1)", "({0},'SetMaxLogSize','0',1,1)", "({0},'MaxLogSize','1048576',1,1)", "({0},'SetPathToLogFile','0',1,1)", "({0},'PathToLogFile','',1,1)", "({0},'SetExclusionListRegistry','0',1,1)", "({0},'ExclusionListRegistry','',1,1)", "({0},'SetInclusionListRegistry','0',1,1)", "({0},'InclusionListRegistry','',1,1)", "({0},'SetSyncExclusionListFiles','0',1,1)", "({0},'SyncExclusionListFiles','AppData\Roaming\Microsoft\Windows\Start Menu\Desktop.ini;AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Desktop.ini;AppData\Roaming\Microsoft\Windows\Start Menu\Startup\Desktop.ini',1,1)", "({0},'SetSyncExclusionListDir','0',1,1)", "({0},'SyncExclusionListDir','`$Recycle.Bin;AppData\Local;AppData\Roaming\Citrix\PNAgent\AppCache;AppData\Roaming\Citrix\PNAgent\Icon Cache;AppData\Roaming\Citrix\PNAgent\ResourceCache;AppData\Roaming\ICAClient\Cache;AppData\Roaming\Macromedia\Flash Player\#SharedObjects;AppData\Roaming\Macromedia\Flash Player\macromedia.com\support\flashplayer\sys;AppData\LocalLow;AppData\Local\Microsoft\Windows\Temporary Internet Files;AppData\Local\Microsoft\Windows\Burn;AppData\Local\Microsoft\Windows Live;AppData\Local\Microsoft\Windows Live Contacts;AppData\Local\Microsoft\Terminal Server Client;AppData\Local\Microsoft\Messenger;AppData\Local\Microsoft\OneNote;AppData\Local\Microsoft\Outlook;AppData\Local\Windows Live;AppData\Local\Temp;AppData\Local\Sun;AppData\Local\Google\Chrome\User Data\Default\Cache;AppData\Local\Google\Chrome\User Data\Default\Cached Theme Images;AppData\Roaming\Sun\Java\Deployment\cache;AppData\Roaming\Sun\Java\Deployment\log;AppData\Roaming\Sun\Java\Deployment\tmp;AppData\Local\Mozilla',1,1)", "({0},'SetSyncDirList','0',1,1)", "({0},'SyncDirList','',1,1)", "({0},'SetSyncFileList','0',1,1)", "({0},'SyncFileList','',1,1)", "({0},'SetMirrorFoldersList','0',1,1)", "({0},'MirrorFoldersList','',1,1)", "({0},'SetLargeFileHandlingList','0',1,1)", "({0},'LargeFileHandlingList','',1,1)", "({0},'PSEnabled','0',1,1)", "({0},'PSAlwaysCache','0',1,1)", "({0},'PSAlwaysCacheSize','0',1,1)", "({0},'SetPSPendingLockTimeout','0',1,1)", "({0},'PSPendingLockTimeout','1',1,1)", "({0},'SetPSUserGroupsList','0',1,1)", "({0},'PSUserGroupsList','',1,1)", "({0},'CPEnabled','0',1,1)", "({0},'SetCPUserGroupList','0',1,1)", "({0},'CPUserGroupList','',1,1)", "({0},'SetCPSchemaPath','0',1,1)", "({0},'CPSchemaPath','',1,1)", "({0},'SetCPPath','0',1,1)", "({0},'CPPath','',1,1)", "({0},'CPMigrationFromBaseProfileToCPStore','0',1,1)", "({0},'SetExcludedGroups','0',1,1)", "({0},'ExcludedGroupsList','',1,1)", "({0},'DisableDynamicConfig','0',1,1)", "({0},'LogoffRatherThanTempProfile','0',1,1)", "({0},'SetProfileDeleteDelay','0',1,1)", "({0},'ProfileDeleteDelay','0',1,1)", "({0},'TemplateProfileIsMandatory','0',1,1)", "({0},'PSMidSessionWriteBackReg','0',1,1)", "({0},'CEIPEnabled','1',1,1)", "({0},'LastKnownGoodRegistry','0',1,1)", "({0},'EnableDefaultExclusionListRegistry','0',1,1)", "({0},'ExclusionDefaultRegistry01','1',1,1)", "({0},'ExclusionDefaultRegistry02','1',1,1)", "({0},'ExclusionDefaultRegistry03','1',1,1)", "({0},'EnableDefaultExclusionListDirectories','0',1,1)", "({0},'ExclusionDefaultDir01','1',1,1)", "({0},'ExclusionDefaultDir02','1',1,1)", "({0},'ExclusionDefaultDir03','1',1,1)", "({0},'ExclusionDefaultDir04','1',1,1)", "({0},'ExclusionDefaultDir05','1',1,1)", "({0},'ExclusionDefaultDir06','1',1,1)", "({0},'ExclusionDefaultDir07','1',1,1)", "({0},'ExclusionDefaultDir08','1',1,1)", "({0},'ExclusionDefaultDir09','1',1,1)", "({0},'ExclusionDefaultDir10','1',1,1)", "({0},'ExclusionDefaultDir11','1',1,1)", "({0},'ExclusionDefaultDir12','1',1,1)", "({0},'ExclusionDefaultDir13','1',1,1)", "({0},'ExclusionDefaultDir14','1',1,1)", "({0},'ExclusionDefaultDir15','1',1,1)", "({0},'ExclusionDefaultDir16','1',1,1)", "({0},'ExclusionDefaultDir17','1',1,1)", "({0},'ExclusionDefaultDir18','1',1,1)", "({0},'ExclusionDefaultDir19','1',1,1)", "({0},'ExclusionDefaultDir20','1',1,1)", "({0},'ExclusionDefaultDir21','1',1,1)", "({0},'ExclusionDefaultDir22','1',1,1)", "({0},'ExclusionDefaultDir23','1',1,1)", "({0},'ExclusionDefaultDir24','1',1,1)", "({0},'ExclusionDefaultDir25','1',1,1)", "({0},'ExclusionDefaultDir26','1',1,1)", "({0},'ExclusionDefaultDir27','1',1,1)", "({0},'ExclusionDefaultDir28','1',1,1)", "({0},'ExclusionDefaultDir29','1',1,1)", "({0},'ExclusionDefaultDir30','1',1,1)", "({0},'EnableStreamingExclusionList','0',1,1)", "({0},'StreamingExclusionList','',1,1)", "({0},'EnableLogonExclusionCheck','0',1,1)", "({0},'LogonExclusionCheck','0',1,1)", "({0},'OutlookSearchRoamingEnabled','0',1,1)")
+$defaultVUEMUSVSettings = @("({0},'processUSVConfiguration',0,'0',1,1)", "({0},'processUSVConfigurationForAdmins',0,'0',1,1)", "({0},'SetWindowsRoamingProfilesPath',1,'0',1,1)", "({0},'WindowsRoamingProfilesPath',1,'',1,1)", "({0},'SetRDSRoamingProfilesPath',1,'0',1,1)", "({0},'RDSRoamingProfilesPath',1,'',1,1)", "({0},'SetRDSHomeDrivePath',1,'0',1,1)", "({0},'RDSHomeDrivePath',1,'',1,1)", "({0},'RDSHomeDriveLetter',1,'Z:',1,1)", "({0},'SetRoamingProfilesFoldersExclusions',2,'0',1,1)", "({0},'RoamingProfilesFoldersExclusions',2,'AppData\Roaming\Citrix\PNAgent\AppCache;AppData\Roaming\Citrix\PNAgent\Icon Cache;AppData\Roaming\Citrix\PNAgent\ResourceCache;AppData\Roaming\ICAClient\Cache;AppData\Roaming\Macromedia\Flash Player\#SharedObjects;AppData\Roaming\Macromedia\Flash Player\macromedia.com\support\flashplayer\sys;AppData\Roaming\Sun\Java\Deployment\cache;AppData\Roaming\Sun\Java\Deployment\log;AppData\Roaming\Sun\Java\Deployment\tmp',1,1)", "({0},'DeleteRoamingCachedProfiles',1,'0',1,1)", "({0},'AddAdminGroupToRUP',1,'0',1,1)", "({0},'CompatibleRUPSecurity',1,'0',1,1)", "({0},'DisableSlowLinkDetect',1,'0',1,1)", "({0},'SlowLinkProfileDefault',1,'0',1,1)", "({0},'processFoldersRedirectionConfiguration',3,'0',1,1)", "({0},'DeleteLocalRedirectedFolders',3,'0',1,1)", "({0},'processDesktopRedirection',3,'0',1,1)", "({0},'DesktopRedirectedPath',3,'',1,1)", "({0},'processStartMenuRedirection',3,'0',1,1)", "({0},'StartMenuRedirectedPath',3,'',1,1)", "({0},'processPersonalRedirection',3,'0',1,1)", "({0},'PersonalRedirectedPath',3,'',1,1)", "({0},'processPicturesRedirection',3,'0',1,1)", "({0},'PicturesRedirectedPath',3,'',1,1)", "({0},'MyPicturesFollowsDocuments',3,'0',1,1)", "({0},'processMusicRedirection',3,'0',1,1)", "({0},'MusicRedirectedPath',3,'',1,1)", "({0},'MyMusicFollowsDocuments',3,'0',1,1)", "({0},'processVideoRedirection',3,'0',1,1)", "({0},'VideoRedirectedPath',3,'',1,1)", "({0},'MyVideoFollowsDocuments',3,'0',1,1)", "({0},'processFavoritesRedirection',3,'0',1,1)", "({0},'FavoritesRedirectedPath',3,'',1,1)", "({0},'processAppDataRedirection',3,'0',1,1)", "({0},'AppDataRedirectedPath',3,'',1,1)", "({0},'processContactsRedirection',3,'0',1,1)", "({0},'ContactsRedirectedPath',3,'',1,1)", "({0},'processDownloadsRedirection',3,'0',1,1)", "({0},'DownloadsRedirectedPath',3,'',1,1)", "({0},'processLinksRedirection',3,'0',1,1)", "({0},'LinksRedirectedPath',3,'',1,1)", "({0},'processSearchesRedirection',3,'0',1,1)", "({0},'SearchesRedirectedPath',3,'',1,1)")
+$defaultVUEMUtilities = @("({0},'EnableFastLogoff',0,'0',1,1)", "({0},'ExcludeGroupsFromFastLogoff',0,'0',1,1)", "({0},'FastLogoffExcludedGroups',0,NULL,1,1)", "({0},'EnableCPUSpikesProtection',1,'0',1,1)", "({0},'SpikesProtectionCPUUsageLimitPercent',1,'70',1,1)", "({0},'SpikesProtectionCPUUsageLimitSampleTime',1,'30',1,1)", "({0},'SpikesProtectionIdlePriorityConstraintTime',1,'180',1,1)", "({0},'ExcludeProcessesFromCPUSpikesProtection',1,'0',1,1)", "({0},'CPUSpikesProtectionExcludedProcesses',1,NULL,1,1)", "({0},'EnableMemoryWorkingSetOptimization',2,'0',1,1)", "({0},'MemoryWorkingSetOptimizationIdleSampleTime',2,'120',1,1)", "({0},'ExcludeProcessesFromMemoryWorkingSetOptimization',2,'0',1,1)", "({0},'MemoryWorkingSetOptimizationExcludedProcesses',2,NULL,1,1)", "({0},'EnableProcessesBlackListing',3,'0',1,1)", "({0},'ProcessesManagementBlackListedProcesses',3,NULL,1,1)", "({0},'ProcessesManagementBlackListExcludeLocalAdministrators',3,'0',1,1)", "({0},'ProcessesManagementBlackListExcludeSpecifiedGroups',3,'0',1,1)", "({0},'ProcessesManagementBlackListExcludedSpecifiedGroupsList',3,'',1,1)", "({0},'EnableProcessesWhiteListing',3,'0',1,1)", "({0},'ProcessesManagementWhiteListedProcesses',3,NULL,1,1)", "({0},'ProcessesManagementWhiteListExcludeLocalAdministrators',3,'0',1,1)", "({0},'ProcessesManagementWhiteListExcludeSpecifiedGroups',3,'0',1,1)", "({0},'ProcessesManagementWhiteListExcludedSpecifiedGroupsList',3,'',1,1)", "({0},'EnableProcessesManagement',3,'0',1,1)", "({0},'EnableProcessesClamping',4,'0',1,1)", "({0},'ProcessesClampingList',4,NULL,1,1)", "({0},'EnableProcessesAffinity',5,'0',1,1)", "({0},'ProcessesAffinityList',5,NULL,1,1)", "({0},'EnableProcessesIoPriority',6,'0',1,1)", "({0},'ProcessesIoPriorityList',6,NULL,1,1)", "({0},'EnableProcessesCpuPriority',7,'0',1,1)", "({0},'ProcessesCpuPriorityList',7,NULL,1,1)", "({0},'MemoryWorkingSetOptimizationIdleStateLimitPercent',2,'1',1,1)", "({0},'EnableIntelligentCpuOptimization',1,'0',1,1)", "({0},'EnableIntelligentIoOptimization',1,'0',1,1)", "({0},'SpikesProtectionLimitCPUCoreNumber',1,'0',1,1)", "({0},'SpikesProtectionCPUCoreLimit',1,'1',1,1)", "({0},'AppLockerControllerManagement',1,'1',1,1)", "({0},'AppLockerControllerReplaceModeOn',1,'1',1,1)")
+
+$VUEMActionStates = @{
+    0 = "Disabled"
+    1 = "Enabled"
+    2 = "Maintenance Mode"
+}
+$VUEMAppAppTypes = @{
+    0 = "Installed application"
+    2 = "URL"
+    5 = "File / Folder"
+}
+$VUEMAppActionTypes = @{
+    0 = "Create Application Shortcut"
+}
+$cleanupTables = @{ 
+    "1903.0.1.1" = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMStorefrontSettings","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","GroupPolicyObjects","GroupPolicyGlobalSettings","VUEMSites")
+}
+
+$databaseVersion = ""
