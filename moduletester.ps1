@@ -25,7 +25,14 @@ Remove-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite
 
 # Get-WEMApp
 $apps = Get-WEMApp -Connection $dbconn -Verbose -IdSite 7 -Name "*2016*"
+$apps | Select-Object IdSite, IdApplication, Name, Description
 $apps = Get-WEMApp -Connection $dbconn -Verbose -Name "*2016*"
+$apps | Select-Object IdSite, IdApplication, Name, Description
+Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32
+
+# Set-WEMApp
+Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder 0
+Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder 0
 
 $dbconn.Close()
 $dbconn.Dispose()
