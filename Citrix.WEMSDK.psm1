@@ -163,6 +163,471 @@ function New-ChangesLogEntry {
     $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 }
 
+<#
+    .Synopsis
+    Coverts SQL Data to an Application Action object
+
+    .Description
+    Coverts SQL Data to an Application Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMApplicationObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Application action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = $DataRow.Reserved01
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdApplication
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Application"
+        'Name' = [string]$DataRow.Name
+        'DisplayName' = [string]$DataRow.DisplayName
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'Type' = [string]$tableVUEMAppType[[int]$DataRow.AppType]
+        'ActionType' = [string]$tableVUEMAppActionType[[int]$DataRow.ActionType]
+        'StartMenuTarget' = [string]$DataRow.StartMenuTarget
+        'TargetPath' = [string]$DataRow.TargetPath
+        'Parameters' = [string]$DataRow.Parameters
+        'WorkingDirectory' = [string]$DataRow.WorkingDirectory
+        'WindowStyle' = [string]$DataRow.WindowStyle
+        'HotKey' = [string]$DataRow.Hotkey
+        'IconLocation' = [string]$DataRow.IconLocation
+        'IconIndex' = [int]$DataRow.IconIndex
+        'IconStream' = [string]$DataRow.IconStream
+        'SelfHealingEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+        'EnforceIconLocation' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value
+        'EnforceIconXLocation' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconXLocation"}).Value
+        'EnforceIconYLocation' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconYLocation"}).Value
+        'DoNotShowInSelfService' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value
+        'CreateShortcutInUserFavoritesFolder' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to a Printer Action object
+
+    .Description
+    Coverts SQL Data to a Printer Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMPrinterObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Printer action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = [string]$DataRow.Reserved01
+
+    # account for imported printers (Reserved01 = NULL in the database)
+    if (-not $vuemActionReserved) { $vuemActionReserved = $defaultVUEMPrinterReserved }
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdPrinter
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Printer"
+        'Name' = [string]$DataRow.Name
+        'DisplayName' = [string]$DataRow.DisplayName
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMPrinterActionType[[int]$DataRow.ActionType]
+        'TargetPath' = [string]$DataRow.TargetPath
+        'UseExternalCredentials' = [bool]$DataRow.UseExtCredentials
+        'ExternalUsername' = [string]$DataRow.ExtUsername
+        'ExternalPassword' = [string]$DataRow.ExtPassword
+        'SelfHealingEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to a Network Drive Action object
+
+    .Description
+    Coverts SQL Data to a Network Drive Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMNetDriveObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Network Drive action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = $DataRow.Reserved01
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdNetDrive
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Network Drive"
+        'Name' = [string]$DataRow.Name
+        'DisplayName' = [string]$DataRow.DisplayName
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMNetDriveActionType[[int]$DataRow.ActionType]
+        'TargetPath' = [string]$DataRow.TargetPath
+        'UseExternalCredentials' = [bool]$DataRow.UseExtCredentials
+        'ExternalUsername' = [string]$DataRow.ExtUsername
+        'ExternalPassword' = [string]$DataRow.ExtPassword
+        'SelfHealingEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+        'SetAsHomeDriveEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to a Virtual Drive Action object
+
+    .Description
+    Coverts SQL Data to a Virtual Drive Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMVirtualDriveObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Virtual Drive action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = $DataRow.Reserved01
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdVirtualDrive
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Virtual Drive"
+        'Name' = [string]$DataRow.Name
+        'DisplayName' = [string]$DataRow.DisplayName
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMVirtualDriveActionType[[int]$DataRow.ActionType]
+        'TargetPath' = [string]$DataRow.TargetPath
+        'SetAsHomeDriveEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to a Registry Value Action object
+
+    .Description
+    Coverts SQL Data to a Registry Value Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMRegValueObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Registry Value action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdRegValue
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Registry Entry"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMRegValueActionType[[int]$DataRow.ActionType]
+        'TargetPath' = [string]$DataRow.TargetPath
+        'TargetName' = [string]$DataRow.TargetName
+        'TargetType' = [string]$DataRow.TargetType
+        'TargetValue' = [string]$DataRow.TargetValue
+        'RunOnce' = [bool]$DataRow.RunOnce
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to an Evironment Variable Action object
+
+    .Description
+    Coverts SQL Data to an Environment Variable Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMEnvVariableObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Environment Variable action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = [string]$DataRow.Reserved01
+
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdEnvVariable
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Environment Variable"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMEnvVariableActionType[[int]$DataRow.ActionType]
+        'VariableName' = [string]$DataRow.VariableName
+        'VariableValue' = [string]$DataRow.VariableValue
+        'VariableType' = [string]$DataRow.VariableType
+        'ExecutionOrder' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecOrder"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to a Port Action object
+
+    .Description
+    Coverts SQL Data to a Port Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMPortObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Port action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdPort
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Port"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMPortActionType[[int]$DataRow.ActionType]
+        'PortName' = [string]$DataRow.PortName
+        'TargetPath' = [string]$DataRow.TargetPath
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to an Ini File Action object
+
+    .Description
+    Coverts SQL Data to an Ini File Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMIniFileOpObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Ini File action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdIniFileOp
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"Ini File"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMIniFileOpActionType[[int]$DataRow.ActionType]
+        'TargetPath' = [string]$DataRow.TargetPath
+        'TargetName' = [string]$DataRow.TargetName
+        'TargetValue' = [string]$DataRow.TargetValue
+        'RunOnce' = [bool]$DataRow.RunOnce
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to an External Task Action object
+
+    .Description
+    Coverts SQL Data to an External Task Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMExtTaskObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found External Task action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = $DataRow.Reserved01
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdExtTask
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"External Task"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMExtTaskActionType[[int]$DataRow.ActionType]
+        'TargetPath' = [string]$DataRow.TargetPath
+        'RunHidden' = [bool]$DataRow.RunHidden
+        'WaitForFinish' = [bool]$DataRow.WaitForFinish
+        'TimeOut' = [int]$DataRow.TimeOut
+        'ExecOrder' = [int]$DataRow.ExecOrder
+        'RunOnce' = [bool]$DataRow.RunOnce
+        'ExecuteOnlyAtLogon' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteOnlyAtLogon"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to an Evironment Variable Action object
+
+    .Description
+    Coverts SQL Data to an Environment Variable Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMFileSystemOpObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found FileSystem Operations action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemActionReserved = [string]$DataRow.Reserved01
+
+    [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdFileSystemOp
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"FileSystem Operation"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMFileSystemOpActionType[[int]$DataRow.ActionType]
+        'SourcePath' = [string]$DataRow.SourcePath
+        'TargetPath' = [string]$DataRow.TargetPath
+        'TargetOverwrite' = [bool]$DataRow.TargetOverwrite
+        'RunOnce' = [bool]$DataRow.RunOnce
+        'ExecutionOrder' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecOrder"}).Value
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
 #endregion
 
 #region Module Global variables
@@ -179,6 +644,7 @@ $defaultVUEMUSVSettings = @("({0},'processUSVConfiguration',0,'0',1,1)", "({0},'
 $defaultVUEMUtilities = @("({0},'EnableFastLogoff',0,'0',1,1)", "({0},'ExcludeGroupsFromFastLogoff',0,'0',1,1)", "({0},'FastLogoffExcludedGroups',0,NULL,1,1)", "({0},'EnableCPUSpikesProtection',1,'0',1,1)", "({0},'SpikesProtectionCPUUsageLimitPercent',1,'70',1,1)", "({0},'SpikesProtectionCPUUsageLimitSampleTime',1,'30',1,1)", "({0},'SpikesProtectionIdlePriorityConstraintTime',1,'180',1,1)", "({0},'ExcludeProcessesFromCPUSpikesProtection',1,'0',1,1)", "({0},'CPUSpikesProtectionExcludedProcesses',1,NULL,1,1)", "({0},'EnableMemoryWorkingSetOptimization',2,'0',1,1)", "({0},'MemoryWorkingSetOptimizationIdleSampleTime',2,'120',1,1)", "({0},'ExcludeProcessesFromMemoryWorkingSetOptimization',2,'0',1,1)", "({0},'MemoryWorkingSetOptimizationExcludedProcesses',2,NULL,1,1)", "({0},'EnableProcessesBlackListing',3,'0',1,1)", "({0},'ProcessesManagementBlackListedProcesses',3,NULL,1,1)", "({0},'ProcessesManagementBlackListExcludeLocalAdministrators',3,'0',1,1)", "({0},'ProcessesManagementBlackListExcludeSpecifiedGroups',3,'0',1,1)", "({0},'ProcessesManagementBlackListExcludedSpecifiedGroupsList',3,'',1,1)", "({0},'EnableProcessesWhiteListing',3,'0',1,1)", "({0},'ProcessesManagementWhiteListedProcesses',3,NULL,1,1)", "({0},'ProcessesManagementWhiteListExcludeLocalAdministrators',3,'0',1,1)", "({0},'ProcessesManagementWhiteListExcludeSpecifiedGroups',3,'0',1,1)", "({0},'ProcessesManagementWhiteListExcludedSpecifiedGroupsList',3,'',1,1)", "({0},'EnableProcessesManagement',3,'0',1,1)", "({0},'EnableProcessesClamping',4,'0',1,1)", "({0},'ProcessesClampingList',4,NULL,1,1)", "({0},'EnableProcessesAffinity',5,'0',1,1)", "({0},'ProcessesAffinityList',5,NULL,1,1)", "({0},'EnableProcessesIoPriority',6,'0',1,1)", "({0},'ProcessesIoPriorityList',6,NULL,1,1)", "({0},'EnableProcessesCpuPriority',7,'0',1,1)", "({0},'ProcessesCpuPriorityList',7,NULL,1,1)", "({0},'MemoryWorkingSetOptimizationIdleStateLimitPercent',2,'1',1,1)", "({0},'EnableIntelligentCpuOptimization',1,'0',1,1)", "({0},'EnableIntelligentIoOptimization',1,'0',1,1)", "({0},'SpikesProtectionLimitCPUCoreNumber',1,'0',1,1)", "({0},'SpikesProtectionCPUCoreLimit',1,'1',1,1)", "({0},'AppLockerControllerManagement',1,'1',1,1)", "({0},'AppLockerControllerReplaceModeOn',1,'1',1,1)")
 
 $defaultVUEMAppReserved = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
+$defaultVUEMPrinterReserved = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 
 $tableVUEMState = @{
     0 = "Disabled"
@@ -196,6 +662,82 @@ $tableVUEMAppType = @{
     "URL" = 4
     "File / Folder" = 5
 }
+$tableVUEMAppActionType = @{
+    0 = "Create Application Shortcut"
+}
+$tableVUEMPrinterActionType = @{
+    0 = "Map Network Printer"
+    1 = "Use Device Mapping Printers File"
+}
+$tableVUEMNetDriveActionType = @{
+    0 = "Map Network Drive"
+}
+$tableVUEMVirtualDriveActionType = @{
+    0 = "Map Virtual Drive"
+}
+$tableVUEMRegValueActionType = @{
+    0 = "Create / Set Registry Value"
+    1 = "Delete Registry Value"
+}
+$tableVUEMEnvVariableActionType = @{
+    0 = "Create / Set Environment Variable"
+}
+$tableVUEMPortActionType = @{
+    0 = "Map Client Port"
+}
+$tableVUEMIniFileOpActionType = @{
+    0 = "Map Client Port"
+}
+$tableVUEMExtTaskActionType = @{
+    0 = "Execute External Task"
+}
+$tableVUEMFileSystemOpActionType = @{
+    0 = "Copy Files / Folders"
+    1 = "Delete Files / Folders"
+    2 = "Rename Files / Folders"
+    3 = "Create Directory Symbolic Link"
+    4 = "Create File Symbolic Link"
+    5 = "Create Directory"
+    6 = "Copy Directory Content"
+    7 = "Delete Directory Content"
+    8 = "Move Directory Content"
+}
+$tableVUEMUserDSNActionType = @{
+    0 = "Create / Edit User DSN"
+}
+$tableVUEMFileAssocActionType = @{
+    0 = "Create / Set File Association"
+}
+
+$tableVUEMActionCategory = @{
+    "Application" = "Apps"
+    "Printer" = "Printers"
+    "Network Drive" = "NetDrives"
+    "Virtual Drive" = "VirtualDrives"
+    "Registry Entry" = "RegValues"
+    "Environment Variable" = "EnvVariables"
+    "Port" = "Ports"
+    "Ini File" = "IniFilesOps"
+    "External Task" = "ExtTasks"
+    "File System Operation" = "FileSystemOps"
+    "User DSN" = "UserDSNs"
+    "File Association" = "FileAssocs"
+}
+$tableVUEMActionCategoryId = @{
+    "Application" = "IdApplication"
+    "Printer" = "IdPrinter"
+    "Network Drive" = "IdNetDrive"
+    "Virtual Drive" = "IdVirtualDrive"
+    "Registry Entry" = "IdRegValue"
+    "Environment Variable" = "IdEnvVariable"
+    "Port" = "IdPort"
+    "Ini File" = "IdIniFileOp"
+    "External Task" = "IdExtTask"
+    "File System Operation" = "IdFileSystemOp"
+    "User DSN" = "IdUserDSN"
+    "File Association" = "IdFileAssoc"
+}
+
 $cleanupTables = @{ 
     "1903.0.1.1" = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMStorefrontSettings","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","GroupPolicyObjects","GroupPolicyGlobalSettings","VUEMSites")
 }

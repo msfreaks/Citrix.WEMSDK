@@ -43,7 +43,7 @@ function Remove-WEMConfiguration {
 
         # only continue if the site was found
         if (-not $Name) { 
-            Write-Error "No site found with IdSite $($IdSite)"
+            Write-Warning "No site found with IdSite $($IdSite)"
             Break
         }
 

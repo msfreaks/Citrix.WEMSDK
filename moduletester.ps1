@@ -24,15 +24,19 @@ Get-WEMConfiguration -Connection $dbconn -Verbose -Name "New Name" | Set-WEMConf
 Remove-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite
 
 # Get-WEMApp
-$apps = Get-WEMApp -Connection $dbconn -Verbose -IdSite 7 -Name "*2016*"
+$apps = Get-WEMAction -Connection $dbconn -Verbose -IdSite 12 -Name "*2016*" -Category Application
 $apps | Select-Object IdSite, IdApplication, Name, Description
-$apps = Get-WEMApp -Connection $dbconn -Verbose -Name "*2016*"
+$apps = Get-WEMAction -Connection $dbconn -Verbose -Name "*2016*"
 $apps | Select-Object IdSite, IdApplication, Name, Description
-Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32
+$apps = Get-WEMAction -Connection $dbconn -Verbose -IdSite 8
+Get-WEMAction -Verbose -Connection $dbconn -IdAction 32
+Get-WEMAction -Connection $dbconn -Verbose | Where-Object {$_.Category -like "network drive" -and $_.SetAsHomeDriveEnabled}
+Get-WEMAction -Connection $dbconn -Category "Network Drive" -Verbose | Where-Object {$_.SetAsHomeDriveEnabled}
+
 
 # Set-WEMApp
 Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $true
-Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $false
+Get-WEMAction -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $false
 
 $dbconn.Close()
 $dbconn.Dispose()

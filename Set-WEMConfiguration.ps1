@@ -52,6 +52,12 @@ function Set-WEMConfiguration {
         # grab original site
         $origSite = Get-WEMConfiguration -Connection $Connection -IdSite $IdSite
 
+        # only continue if the site was found
+        if (-not $origSite) { 
+            Write-Warning "No site found with IdSite $($IdSite)"
+            Break
+        }
+        
         # if a new name for the configuration is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origSite.Name) {
             $SQLQuery = "SELECT * FROM VUEMSites WHERE Name LIKE '$($Name)'"

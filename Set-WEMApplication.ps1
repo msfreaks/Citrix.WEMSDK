@@ -8,7 +8,7 @@
     .Link
     https://msfreaks.wordpress.com
 
-    .Parameter IdApplication
+    .Parameter IdAction
     ..
 
     .Parameter Name
@@ -78,7 +78,7 @@ function Set-WEMApp {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
-        [int]$IdApplication,
+        [int]$IdAction,
 
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Name,
@@ -127,11 +127,17 @@ function Set-WEMApp {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMApp -Connection $Connection -IdApplication $IdApplication
+        $origAction = Get-WEMAction -Connection $Connection -IdAction $IdAction
 
+        # only continue if the action was found
+        if (-not $origAction) { 
+            Write-Warning "No Application action found for Id $($IdAction)"
+            Break
+        }
+        
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite) AND Type = $($tableVUEMAppType[$Type])"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
@@ -156,7 +162,7 @@ function Set-WEMApp {
         $SQLQuery = "UPDATE VUEMApps SET "
         $updateFields = @()
         $updateAdvanced = $false
-        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdApplication" }
+        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
@@ -257,8 +263,11 @@ function Set-WEMApp {
         if($updateFields -or $updateAdvanced) { 
             if ($updateFields) { $SQLQuery += "{0}, " -f ($updateFields -join ", ") }
             if ($updateAdvanced) { $SQLQuery += "Reserved01 = '$($actionReserved.OuterXml)', " }
-            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdApplication = $($IdApplication)"
+            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdApplication = $($IdAction)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+            # Updating the ChangeLog
+            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }

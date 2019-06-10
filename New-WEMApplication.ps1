@@ -75,10 +75,6 @@
     Version: 0.9.0
 #>
 function New-WEMApp {
-
-    #required:
-    # name
-    # application type
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -105,7 +101,7 @@ function New-WEMApp {
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Normal","Minimized","Maximized")]
         [string]$WindowStyle = "Normal",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$HotKey = "",
+        [string]$HotKey = "None",
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [string]$IconLocation,
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -133,7 +129,7 @@ function New-WEMApp {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite) AND Type = $($tableVUEMAppType[$Type])"
+        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
         if ($result.Tables.Rows.Action) {
             # name must be unique
@@ -154,9 +150,18 @@ function New-WEMApp {
 
         # build optional values
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'displayname')) { $DisplayName = $Name }
+        if ($Type -like "URL") { $WorkingDirectory = "Url" }
+        if ($Type -like "File / Folder") { $WorkingDirectory = "File" }
 
         # build the query to update the action
         $SQLQuery = "INSERT INTO VUEMApps (IdSite,Name,Description,State,AppType,ActionType,DisplayName,StartMenuTarget,TargetPath,Parameters,WorkingDirectory,WindowStyle,IconLocation,IconIndex,Hotkey,IconStream,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMAppType[$Type]),0,'$($DisplayName)','$($StartMenuTarget)','$($TargetPath)','$($Parameters)','$($WorkingDirectory)','$($WindowStyle)','$($IconLocation)',$($IconIndex),'$($HotKey)','$($IconStream)',1,$($actionReserved.OuterXml))"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # grab the new action
+        $SQLQuery = "SELECT IdApplication FROM VUEMApps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # Updating the ChangeLog
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Row.IdApplication -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }
