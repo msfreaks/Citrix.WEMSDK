@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Retrieves WEM Apps from WEM Database.
+    Returns one or more WEM Application Acrion objects from the WEM Database.
 
     .Description
-    Retrieves WEM Apps from WEM Database.
+    Returns one or more WEM Application Acrion objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -69,8 +69,8 @@ function Get-WEMApp {
                 'Name' = [string]$row.Name
                 'DisplayName' = [string]$row.DisplayName
                 'Description' = [string]$row.Description
-                'State' = [int]$row.State
-                'Type' = [int]$row.AppType
+                'State' = $tableVUEMState[[int]$row.State]
+                'Type' = $tableVUEMAppType[[int]$row.AppType]
                 'Action' = [int]$row.ActionType
                 'StartMenuTarget' = [string]$row.StartMenuTarget
                 'TargetPath' = [string]$row.TargetPath
@@ -81,12 +81,12 @@ function Get-WEMApp {
                 'IconLocation' = [string]$row.IconLocation
                 'IconIndex' = [int]$row.IconIndex
                 'IconStream' = [string]$row.IconStream
-                'SelfHealingEnabled' = [int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
-                'EnforceIconLocation' = [int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value
+                'SelfHealingEnabled' = [bool][int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+                'EnforceIconLocation' = [bool][int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value
                 'EnforceIconXLocation' = [int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconXLocation"}).Value
                 'EnforceIconYLocation' = [int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconYLocation"}).Value
-                'DoNotShowInSelfService' = [int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value
-                'CreateShortcutInUserFavoritesFolder' = [int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value
+                'DoNotShowInSelfService' = [bool][int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value
+                'CreateShortcutInUserFavoritesFolder' = [bool][int]($vuemAppXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value
                 'Version' = [int]$row.RevisionId
             }
         }

@@ -39,15 +39,32 @@ function Set-WEMConfiguration {
         [System.Data.SqlClient.SqlConnection]$Connection
     )
     begin {
+    }
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
         # either parameter Name or Description should be present
         if (-not [bool]($MyInvocation.BoundParameters.Keys -match 'name') -and -not [bool]($MyInvocation.BoundParameters.Keys -match 'description')) {
             Write-Error "Provide a value for parameter Name and/or parameter Description"
             Break
         }
 
-        Write-Verbose "Working with database version $($script:databaseVersion)"
-    }
-    process {
+        # grab original site
+        $origSite = Get-WEMConfiguration -Connection $Connection -IdSite $IdSite
+
+        # if a new name for the configuration is entered, check if it's unique
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origSite.Name) {
+            $SQLQuery = "SELECT * FROM VUEMSites WHERE Name LIKE '$($Name)'"
+            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+            if ($result.Tables.Rows) {
+                # name must be unique
+                Write-Error "There's already an application named '$($Name)'"
+                Break
+            }
+    
+            Write-Verbose "Name is unique: Continue"
+        }
+        
         $SQLQuery = "UPDATE VUEMSites SET "
         if ($Name) { 
             $SQLQuery += "Name = '$($Name)'"

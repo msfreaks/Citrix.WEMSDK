@@ -31,8 +31,8 @@ $apps | Select-Object IdSite, IdApplication, Name, Description
 Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32
 
 # Set-WEMApp
-Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder 0
-Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder 0
+Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $true
+Get-WEMApp -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $false
 
 $dbconn.Close()
 $dbconn.Dispose()

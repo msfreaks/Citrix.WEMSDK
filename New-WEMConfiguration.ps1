@@ -40,12 +40,11 @@ function New-WEMConfiguration {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # check if there's already a configuration with that name
-        $SQLQuery = "SELECT * FROM VUEMSites WHERE Name LIKE '$($Name)'"
+        $SQLQuery = "SELECT COUNT(*) AS Site FROM VUEMSites WHERE Name LIKE '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows) {
+        if ($result.Tables.Rows.Site) {
             # name must be unique
             Write-Error "There's already a configuration named '$($Name)'"
-            $result.Tables.Rows.Count
             Break
         }
 
