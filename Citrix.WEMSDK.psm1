@@ -628,6 +628,98 @@ Function New-VUEMFileSystemOpObject() {
     }
 }
 
+<#
+    .Synopsis
+    Coverts SQL Data to a User DSN Action object
+
+    .Description
+    Coverts SQL Data to a User DSN Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMUserDSNObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found User DSN action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdUserDSN
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"User DSN"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMPortActionType[[int]$DataRow.ActionType]
+        'TargetName' = [string]$DataRow.TargetName
+        'TargetDriverName' = [string]$DataRow.TargetDriverName
+        'TargetServerName' = [string]$DataRow.TargetServerName
+        'TargetDatabaseName' = [string]$DataRow.TargetDatabaseName
+        'UseExternalCredentials' = [bool]$DataRow.UseExtCredentials
+        'ExternalUsername' = [string]$DataRow.ExtUsername
+        'ExternalPassword' = [string]$DataRow.ExtPassword
+        'RunOnce' = [bool]$DataRow.RunOnce
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
+<#
+    .Synopsis
+    Coverts SQL Data to a File Association Action object
+
+    .Description
+    Coverts SQL Data to a File Association Action object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMFileAssocObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found File Association action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    Return [pscustomobject] @{
+        'IdAction' = [int]$DataRow.IdFileAssoc
+        'IdSite' = [int]$DataRow.IdSite
+        'Category' = [string]"File Association"
+        'Name' = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State' = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType' = [string]$tableVUEMPortActionType[[int]$DataRow.ActionType]
+        'FileExtension' = [string]$DataRow.FileExt
+        'ProgramId' = [string]$DataRow.ProgramId
+        'Action' = [string]$DataRow.Action
+        'IsDefault' = [bool]$DataRow.isDefault
+        'TargetPath' = [string]$DataRow.TargetPath
+        'TargetCommand' = [string]$DataRow.TargetCommand
+        'TargetOverwrite' = [bool]$DataRow.TargetOverwrite
+        'RunOnce' = [bool]$DataRow.RunOnce
+        'Version' = [int]$DataRow.RevisionId
+    }
+}
+
 #endregion
 
 #region Module Global variables

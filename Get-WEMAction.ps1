@@ -100,8 +100,8 @@ function Get-ActionsByCategory {
     if ($Category -like "ini file")              { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMIniFileOpObject -DataRow $row } }
     if ($Category -like "external task")         { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMExtTaskObject -DataRow $row } }
     if ($Category -like "file system operation") { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMFileSystemOpObject -DataRow $row } }
-    #if ($Category -like "user dsn")              { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMUserDSNObject -DataRow $row } }
-    #if ($Category -like "file association")      { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMFileAssocObject -DataRow $row } }
+    if ($Category -like "user dsn")              { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMUserDSNObject -DataRow $row } }
+    if ($Category -like "file association")      { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMFileAssocObject -DataRow $row } }
 
     return $vuemActions
 }
