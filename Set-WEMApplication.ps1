@@ -74,7 +74,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMApp {
+function Set-WEMApplication {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -273,3 +273,4 @@ function Set-WEMApp {
         }
     }
 }
+New-Alias -Name Set-WEMApp -Value Set-WEMApplication

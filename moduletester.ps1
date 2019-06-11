@@ -2,8 +2,6 @@ $name = "POSH Test 14"
 $database = "CitrixWEM-CTA"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
-
-# New-WEMDatabaseConnection
 $dbconn = New-WEMDatabaseConnection -Server "ca002511" -Database "$($database)" -Verbose
 
 # New-WEMConfiguration

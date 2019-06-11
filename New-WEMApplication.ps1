@@ -74,41 +74,41 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function New-WEMApp {
+function New-WEMApplication {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
 
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$Description = "",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled","Maintenance mode")]
         [string]$State = "Enabled",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Installed application","File / Folder","URL")]
         [string]$Type = "Installed application",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$StartMenuTarget = "Start Menu\Programs",
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$Parameters = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$WorkingDirectory = "",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Normal","Minimized","Maximized")]
         [string]$WindowStyle = "Normal",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$HotKey = "None",
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$IconLocation,
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
-        [int]$IconIndex = 1,
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
-        [string]$IconStream,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [int]$IconIndex = 0,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [string]$IconStream,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [bool]$SelfHealingEnabled = $false,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [bool]$EnforceIconLocation = $false,
@@ -149,19 +149,23 @@ function New-WEMApp {
         ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value  = [string][int]$CreateShortcutInUserFavoritesFolder
 
         # build optional values
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'displayname')) { $DisplayName = $Name }
+        if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'displayname')) { $DisplayName = $Name }
+        if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'iconlocation')) { $IconLocation = $TargetPath }
         if ($Type -like "URL") { $WorkingDirectory = "Url" }
         if ($Type -like "File / Folder") { $WorkingDirectory = "File" }
 
         # build the query to update the action
-        $SQLQuery = "INSERT INTO VUEMApps (IdSite,Name,Description,State,AppType,ActionType,DisplayName,StartMenuTarget,TargetPath,Parameters,WorkingDirectory,WindowStyle,IconLocation,IconIndex,Hotkey,IconStream,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMAppType[$Type]),0,'$($DisplayName)','$($StartMenuTarget)','$($TargetPath)','$($Parameters)','$($WorkingDirectory)','$($WindowStyle)','$($IconLocation)',$($IconIndex),'$($HotKey)','$($IconStream)',1,$($actionReserved.OuterXml))"
+        $SQLQuery = "INSERT INTO VUEMApps (IdSite,Name,Description,State,AppType,ActionType,DisplayName,StartMenuTarget,TargetPath,Parameters,WorkingDirectory,WindowStyle,IconLocation,IconIndex,Hotkey,IconStream,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMAppType[$Type]),0,'$($DisplayName)','$($StartMenuTarget)','$($TargetPath)','$($Parameters)','$($WorkingDirectory)','$($WindowStyle)','$($IconLocation)',$($IconIndex),'$($HotKey)','$($IconStream)',1,'$($actionReserved.OuterXml)')"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdApplication FROM VUEMApps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT IdApplication AS IdAction FROM VUEMApps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Row.IdApplication -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+
+        # Return the new object
+        Get-WEMAction -Connection $Connection -IdAction $result.Tables.Rows.IdAction -Category "Application"
     }
 }

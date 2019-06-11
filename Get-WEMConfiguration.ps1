@@ -45,7 +45,11 @@ function Get-WEMConfiguration {
         
         # execute query
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        #return $result.Tables.Rows
 
-        return $result.Tables.Rows
+        $vuemSites = @()
+        foreach ($row in $result.Tables.Rows) { $vuemSites += New-VUEMSiteObject -DataRow $row }
+
+        return $vuemSites
     }
 }

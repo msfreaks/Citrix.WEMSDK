@@ -108,10 +108,18 @@ function New-WEMConfiguration {
         }
         
         # VUEMItems
-        $SQLQuery = ("INSERT INTO VUEMItems (IdSite, Name, DistinguishedName, Description, State, Type, Priority, RevisionId) VALUES {0}" -f ($defaultVUEMItems -join ", ")) -f $IdSite
+        if ($script:databaseVersion -like "1903.*") {
+            $SQLQuery = ("INSERT INTO VUEMItems (IdSite, Name, DistinguishedName, Description, State, Type, Priority, RevisionId) VALUES {0}" -f ($defaultVUEMItems -join ", ")) -f $IdSite
+        } else {
+            $SQLQuery = ("INSERT INTO VUEMItems (IdSite, Name, Description, State, Type, Priority, RevisionId) VALUES {0}" -f ($defaultVUEMItemsLegacy -join ", ")) -f $IdSite
+        }
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
         New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdSite -ChangeType "Create" -ObjectName $Name -ObjectType "Global\Site" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+
+        # Return the new object
+        Get-WEMConfiguration -Connection $Connection -IdSite $IdSite
+
     }
 }

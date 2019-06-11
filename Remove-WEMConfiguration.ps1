@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Configuration object recursively from WEM Database.
+    Removes a WEM Configuration object from WEM Database recursively.
 
     .Description
-    Removes a WEM Configuration object recursively from the WEM Database.
+    Removes a WEM Configuration object from WEM Database recursively.
 
     .Link
     https://msfreaks.wordpress.com
