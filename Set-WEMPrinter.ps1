@@ -137,70 +137,32 @@ function Set-WEMPrinter {
                     $updateFields += "State = $($tableVUEMState["$State"])"
                     continue
                 }
-                "StartMenuTarget" {
-                    $updateFields += "StartMenuTarget = '$($StartMenuTarget)'"
+                "ActionType" {
+                    $updateFields += "ActionType = '$($tableVUEMPrinterActionType[$ActionType])'"
                     continue
                 }
                 "TargetPath" {
                     $updateFields += "TargetPath = '$($TargetPath)'"
                     continue
                 }
-                "Parameters" {
-                    $updateFields += "Parameters = '$($Parameters)'"
+                "UseExternalCredentials" {
+                    $updateFields += "UseExtCredentials = '$($[int]$UseExternalCredentials)'"
                     continue
                 }
-                "WorkingDirectory" {
-                    $updateFields += "WorkingDirectory = '$($WorkingDirectory)'"
+                "ExternalUsername" {
+                    $updateFields += "ExtLogin = '$($ExternalUsername)'"
                     continue
                 }
-                "WindowStyle" {
-                    $updateFields += "WindowStyle = '$($WindowStyle)'"
-                    continue
-                }
-                "HotKey" {
-                    $updateFields += "HotKey = '$($HotKey)'"
-                    continue
-                }
-                "IconLocation" {
-                    $updateFields += "IconLocation = '$($IconLocation)'"
-                    continue
-                }
-                "IconIndex" {
-                    $updateFields += "IconIndex = $($IconIndex)"
-                    continue
-                }
-                "IconStream" {
-                    $updateFields += "IconStream = '$($IconStream)'"
+                "ExternalPassword" {
+                    ### TO-DO
+                    ### $ExternalPassword Base64 encoding type before storing in database
+
+                    $updateFields += "ExtPassword = '$($ExternalPassword)'"
                     continue
                 }
                 "SelfHealingEnabled" {
                     $updateAdvanced = $True
                     $actionSelfHealingEnabled = [string][int]$SelfHealingEnabled
-                    continue
-                }
-                "EnforceIconLocation" {
-                    $updateAdvanced = $True
-                    $actionEnforceIconLocation = [string][int]$EnforceIconLocation
-                    continue
-                }
-                "EnforcedIconXValue" {
-                    $updateAdvanced = $True
-                    $actionEnforceIconXValue = [string]$EnforceIconXValue
-                    continue
-                }
-                "EnforcedIconYValue" {
-                    $updateAdvanced = $True
-                    $actionEnforceIconYValue = [string]$EnforceIconYValue
-                    continue
-                }
-                "DoNotShowInSelfService" {
-                    $updateAdvanced = $True
-                    $actionDoNotShowInSelfService = [string][int]$DoNotShowInSelfService
-                    continue
-                }
-                "CreateShortcutInUserFavoritesFolder" {
-                    $updateAdvanced = $True
-                    $actionCreateShortcutInUserFavoritesFolder = [string][int]$CreateShortcutInUserFavoritesFolder
                     continue
                 }
                 Default {}
@@ -209,24 +171,18 @@ function Set-WEMPrinter {
 
         # apply actual Advanced Option values
         ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value                   = $actionSelfHealingEnabled
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value                  = $actionEnforceIconLocation
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforcedIconXValue"}).Value                   = $actionEnforceIconXValue
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforcedIconYValue"}).Value                   = $actionEnforceIconYValue
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value               = $actionDoNotShowInSelfService
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value  = $actionCreateShortcutInUserFavoritesFolder
 
         # if anything needs to be updated, update the action
         if($updateFields -or $updateAdvanced) { 
             if ($updateFields) { $SQLQuery += "{0}, " -f ($updateFields -join ", ") }
             if ($updateAdvanced) { $SQLQuery += "Reserved01 = '$($actionReserved.OuterXml)', " }
-            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdApplication = $($IdAction)"
+            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdPrinter = $($IdAction)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Printer" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }
     }
 }
-New-Alias -Name Set-WEMApp -Value Set-WEMApplication
