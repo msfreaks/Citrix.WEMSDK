@@ -172,3 +172,4 @@ function New-WEMApplication {
         Get-WEMAction -Connection $Connection -IdAction $result.Tables.Rows.IdAction -Category "Application"
     }
 }
+New-Alias -Name New-WEMApp -Value New-WEMApplication
