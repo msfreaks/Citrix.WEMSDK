@@ -146,7 +146,7 @@ function Set-WEMPrinter {
                     continue
                 }
                 "UseExternalCredentials" {
-                    $updateFields += "UseExtCredentials = '$($[int]$UseExternalCredentials)'"
+                    $updateFields += "UseExtCredentials = '$([int]$UseExternalCredentials)'"
                     continue
                 }
                 "ExternalUsername" {
