@@ -165,10 +165,10 @@ function New-ChangesLogEntry {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Site object
+    Converts SQL Data to a Site object
 
     .Description
-    Coverts SQL Data to a Site object
+    Converts SQL Data to a Site object
 
     .Link
     https://msfreaks.wordpress.com
@@ -204,10 +204,10 @@ Function New-VUEMSiteObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Application Action object
+    Converts SQL Data to an Application Action object
 
     .Description
-    Coverts SQL Data to an Application Action object
+    Converts SQL Data to an Application Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -262,10 +262,10 @@ Function New-VUEMApplicationObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Printer Action object
+    Converts SQL Data to a Printer Action object
 
     .Description
-    Coverts SQL Data to a Printer Action object
+    Converts SQL Data to a Printer Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -312,10 +312,10 @@ Function New-VUEMPrinterObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Network Drive Action object
+    Converts SQL Data to a Network Drive Action object
 
     .Description
-    Coverts SQL Data to a Network Drive Action object
+    Converts SQL Data to a Network Drive Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -360,10 +360,10 @@ Function New-VUEMNetDriveObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Virtual Drive Action object
+    Converts SQL Data to a Virtual Drive Action object
 
     .Description
-    Coverts SQL Data to a Virtual Drive Action object
+    Converts SQL Data to a Virtual Drive Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -403,10 +403,10 @@ Function New-VUEMVirtualDriveObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Registry Value Action object
+    Converts SQL Data to a Registry Value Action object
 
     .Description
-    Coverts SQL Data to a Registry Value Action object
+    Converts SQL Data to a Registry Value Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -446,10 +446,10 @@ Function New-VUEMRegValueObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Evironment Variable Action object
+    Converts SQL Data to an Evironment Variable Action object
 
     .Description
-    Coverts SQL Data to an Environment Variable Action object
+    Converts SQL Data to an Environment Variable Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -492,10 +492,10 @@ Function New-VUEMEnvVariableObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Port Action object
+    Converts SQL Data to a Port Action object
 
     .Description
-    Coverts SQL Data to a Port Action object
+    Converts SQL Data to a Port Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -532,10 +532,10 @@ Function New-VUEMPortObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Ini File Action object
+    Converts SQL Data to an Ini File Action object
 
     .Description
-    Coverts SQL Data to an Ini File Action object
+    Converts SQL Data to an Ini File Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -574,10 +574,10 @@ Function New-VUEMIniFileOpObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an External Task Action object
+    Converts SQL Data to an External Task Action object
 
     .Description
-    Coverts SQL Data to an External Task Action object
+    Converts SQL Data to an External Task Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -622,10 +622,10 @@ Function New-VUEMExtTaskObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Evironment Variable Action object
+    Converts SQL Data to an Evironment Variable Action object
 
     .Description
-    Coverts SQL Data to an Environment Variable Action object
+    Converts SQL Data to an Environment Variable Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -669,10 +669,10 @@ Function New-VUEMFileSystemOpObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a User DSN Action object
+    Converts SQL Data to a User DSN Action object
 
     .Description
-    Coverts SQL Data to a User DSN Action object
+    Converts SQL Data to a User DSN Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -715,10 +715,10 @@ Function New-VUEMUserDSNObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a File Association Action object
+    Converts SQL Data to a File Association Action object
 
     .Description
-    Coverts SQL Data to a File Association Action object
+    Converts SQL Data to a File Association Action object
 
     .Link
     https://msfreaks.wordpress.com
