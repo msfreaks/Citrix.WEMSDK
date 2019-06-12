@@ -32,7 +32,7 @@ Get-WEMAction -Connection $dbconn -Verbose | Where-Object {$_.Category -like "ne
 Get-WEMAction -Connection $dbconn -Category "Network Drive" -Verbose | Where-Object {$_.SetAsHomeDriveEnabled}
 
 
-# Set-WEMApp
+# Set-WEMApplication
 Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $true
 Get-WEMAction -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $false
 
