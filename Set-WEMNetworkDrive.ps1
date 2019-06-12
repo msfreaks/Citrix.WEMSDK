@@ -111,7 +111,7 @@ function Set-WEMNetworkDrive {
         }
 
         # grab default action xml (advanced options) and set individual advanced option variables
-        [xml]$actionReserved = $defaultVUEMAppReserved
+        [xml]$actionReserved = $defaultVUEMNetDriveReserved
         $actionSelfHealingEnabled                  = [string][int]$origAction.SelfHealingEnabled
         $actionSetAsHomeDriveEnabled               = [string][int]$origAction.SetAsHomeDriveEnabled
 
