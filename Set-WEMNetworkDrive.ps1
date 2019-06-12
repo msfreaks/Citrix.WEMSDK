@@ -88,21 +88,21 @@ function Set-WEMNetworkDrive {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMPrinter -Connection $Connection -IdAction $IdAction
+        $origAction = Get-WEMNetworkDrive -Connection $Connection -IdAction $IdAction
 
         # only continue if the action was found
         if (-not $origAction) { 
-            Write-Warning "No Printer action found for Id $($IdAction)"
+            Write-Warning "No Network Drive action found for Id $($IdAction)"
             Break
         }
         
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPrinters WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMNetDrives WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Printer action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Network Drive action named '$($Name)' in the Configuration"
                 Break
             }
 
@@ -113,9 +113,10 @@ function Set-WEMNetworkDrive {
         # grab default action xml (advanced options) and set individual advanced option variables
         [xml]$actionReserved = $defaultVUEMAppReserved
         $actionSelfHealingEnabled                  = [string][int]$origAction.SelfHealingEnabled
+        $actionSetAsHomeDriveEnabled               = [string][int]$origAction.SetAsHomeDriveEnabled
 
         # build the query to update the action
-        $SQLQuery = "UPDATE VUEMPrinters SET "
+        $SQLQuery = "UPDATE VUEMNetDrives SET "
         $updateFields = @()
         $updateAdvanced = $false
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
@@ -135,10 +136,6 @@ function Set-WEMNetworkDrive {
                 }
                 "State" {
                     $updateFields += "State = $($tableVUEMState["$State"])"
-                    continue
-                }
-                "ActionType" {
-                    $updateFields += "ActionType = '$($tableVUEMPrinterActionType[$ActionType])'"
                     continue
                 }
                 "TargetPath" {
@@ -165,24 +162,31 @@ function Set-WEMNetworkDrive {
                     $actionSelfHealingEnabled = [string][int]$SelfHealingEnabled
                     continue
                 }
+                "SetAsHomeDriveEnabled" {
+                    $updateAdvanced = $True
+                    $actionSelfHealingEnabled = [string][int]$SetAsHomeDriveEnabled
+                    continue
+                }
                 Default {}
             }
         }
 
         # apply actual Advanced Option values
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value                   = $actionSelfHealingEnabled
+        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value    = $actionSelfHealingEnabled
+        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value = $actionSetAsHomeDriveEnabled
 
         # if anything needs to be updated, update the action
         if($updateFields -or $updateAdvanced) { 
             if ($updateFields) { $SQLQuery += "{0}, " -f ($updateFields -join ", ") }
             if ($updateAdvanced) { $SQLQuery += "Reserved01 = '$($actionReserved.OuterXml)', " }
-            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdPrinter = $($IdAction)"
+            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdNetDrive = $($IdAction)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Printer" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Network Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }
     }
 }
+New-Alias -Name Set-WEMNetDrive -Value Set-WEMNetworkDrive

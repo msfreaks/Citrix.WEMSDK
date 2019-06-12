@@ -232,31 +232,31 @@ Function New-VUEMApplicationObject() {
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
     Return [pscustomobject] @{
-        'IdAction' = [int]$DataRow.IdApplication
-        'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"Application"
-        'Name' = [string]$DataRow.Name
-        'DisplayName' = [string]$DataRow.DisplayName
-        'Description' = [string]$DataRow.Description
-        'State' = [string]$tableVUEMState[[int]$DataRow.State]
-        'Type' = [string]$tableVUEMAppType[[int]$DataRow.AppType]
-        'ActionType' = [string]$tableVUEMAppActionType[[int]$DataRow.ActionType]
-        'StartMenuTarget' = [string]$DataRow.StartMenuTarget
-        'TargetPath' = [string]$DataRow.TargetPath
-        'Parameters' = [string]$DataRow.Parameters
-        'WorkingDirectory' = [string]$DataRow.WorkingDirectory
-        'WindowStyle' = [string]$DataRow.WindowStyle
-        'HotKey' = [string]$DataRow.Hotkey
-        'IconLocation' = [string]$DataRow.IconLocation
-        'IconIndex' = [int]$DataRow.IconIndex
-        'IconStream' = [string]$DataRow.IconStream
-        'SelfHealingEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
-        'EnforceIconLocation' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value
-        'EnforceIconXLocation' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconXLocation"}).Value
-        'EnforceIconYLocation' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconYLocation"}).Value
-        'DoNotShowInSelfService' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value
+        'IdAction'                            = [int]$DataRow.IdApplication
+        'IdSite'                              = [int]$DataRow.IdSite
+        'Category'                            = [string]"Application"
+        'Name'                                = [string]$DataRow.Name
+        'DisplayName'                         = [string]$DataRow.DisplayName
+        'Description'                         = [string]$DataRow.Description
+        'State'                               = [string]$tableVUEMState[[int]$DataRow.State]
+        'Type'                                = [string]$tableVUEMAppType[[int]$DataRow.AppType]
+        'ActionType'                          = [string]$tableVUEMAppActionType[[int]$DataRow.ActionType]
+        'StartMenuTarget'                     = [string]$DataRow.StartMenuTarget
+        'TargetPath'                          = [string]$DataRow.TargetPath
+        'Parameters'                          = [string]$DataRow.Parameters
+        'WorkingDirectory'                    = [string]$DataRow.WorkingDirectory
+        'WindowStyle'                         = [string]$DataRow.WindowStyle
+        'HotKey'                              = [string]$DataRow.Hotkey
+        'IconLocation'                        = [string]$DataRow.IconLocation
+        'IconIndex'                           = [int]$DataRow.IconIndex
+        'IconStream'                          = [string]$DataRow.IconStream
+        'SelfHealingEnabled'                  = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+        'EnforceIconLocation'                 = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value
+        'EnforceIconXLocation'                = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconXLocation"}).Value
+        'EnforceIconYLocation'                = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconYLocation"}).Value
+        'DoNotShowInSelfService'              = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value
         'CreateShortcutInUserFavoritesFolder' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value
-        'Version' = [int]$DataRow.RevisionId
+        'Version'                             = [int]$DataRow.RevisionId
     }
 }
 
@@ -293,20 +293,20 @@ Function New-VUEMPrinterObject() {
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
     Return [pscustomobject] @{
-        'IdAction' = [int]$DataRow.IdPrinter
-        'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"Printer"
-        'Name' = [string]$DataRow.Name
-        'DisplayName' = [string]$DataRow.DisplayName
-        'Description' = [string]$DataRow.Description
-        'State' = [string]$tableVUEMState[[int]$DataRow.State]
-        'ActionType' = [string]$tableVUEMPrinterActionType[[int]$DataRow.ActionType]
-        'TargetPath' = [string]$DataRow.TargetPath
+        'IdAction'               = [int]$DataRow.IdPrinter
+        'IdSite'                 = [int]$DataRow.IdSite
+        'Category'               = [string]"Printer"
+        'Name'                   = [string]$DataRow.Name
+        'DisplayName'            = [string]$DataRow.DisplayName
+        'Description'            = [string]$DataRow.Description
+        'State'                  = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType'             = [string]$tableVUEMPrinterActionType[[int]$DataRow.ActionType]
+        'TargetPath'             = [string]$DataRow.TargetPath
         'UseExternalCredentials' = [bool]$DataRow.UseExtCredentials
-        'ExternalUsername' = [string]$DataRow.ExtUsername
-        'ExternalPassword' = [string]$DataRow.ExtPassword
-        'SelfHealingEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
-        'Version' = [int]$DataRow.RevisionId
+        'ExternalUsername'       = [string]$DataRow.ExtUsername
+        'ExternalPassword'       = [string]$DataRow.ExtPassword
+        'SelfHealingEnabled'     = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+        'Version'                = [int]$DataRow.RevisionId
     }
 }
 
@@ -340,21 +340,21 @@ Function New-VUEMNetDriveObject() {
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
     Return [pscustomobject] @{
-        'IdAction' = [int]$DataRow.IdNetDrive
-        'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"Network Drive"
-        'Name' = [string]$DataRow.Name
-        'DisplayName' = [string]$DataRow.DisplayName
-        'Description' = [string]$DataRow.Description
-        'State' = [string]$tableVUEMState[[int]$DataRow.State]
-        'ActionType' = [string]$tableVUEMNetDriveActionType[[int]$DataRow.ActionType]
-        'TargetPath' = [string]$DataRow.TargetPath
+        'IdAction'               = [int]$DataRow.IdNetDrive
+        'IdSite'                 = [int]$DataRow.IdSite
+        'Category'               = [string]"Network Drive"
+        'Name'                   = [string]$DataRow.Name
+        'DisplayName'            = [string]$DataRow.DisplayName
+        'Description'            = [string]$DataRow.Description
+        'State'                  = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType'             = [string]$tableVUEMNetDriveActionType[[int]$DataRow.ActionType]
+        'TargetPath'             = [string]$DataRow.TargetPath
         'UseExternalCredentials' = [bool]$DataRow.UseExtCredentials
-        'ExternalUsername' = [string]$DataRow.ExtUsername
-        'ExternalPassword' = [string]$DataRow.ExtPassword
-        'SelfHealingEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
-        'SetAsHomeDriveEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
-        'Version' = [int]$DataRow.RevisionId
+        'ExternalUsername'       = [string]$DataRow.ExtUsername
+        'ExternalPassword'       = [string]$DataRow.ExtPassword
+        'SelfHealingEnabled'     = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
+        'SetAsHomeDriveEnabled'  = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
+        'Version'                = [int]$DataRow.RevisionId
     }
 }
 
