@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Application Action object in the WEM Database.
+    Updates a WEM Printer Action object in the WEM Database.
 
     .Description
-    Updates a WEM Application Action object in the WEM Database.
+    Updates a WEM Printer Action object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -23,49 +23,22 @@
     .Parameter State
     ..
 
-    .Parameter StartMenuTarget
+    .Parameter ActionType
     ..
 
     .Parameter TargetPath
     ..
 
-    .Parameter Parameters
+    .Parameter UseExternalCredentials
     ..
 
-    .Parameter WorkingDirectory
+    .Parameter ExternalUsername
     ..
 
-    .Parameter WindowStyle
-    ..
-
-    .Parameter HotKey
-    ..
-
-    .Parameter IconLocation
-    ..
-
-    .Parameter IconIndex
-    ..
-
-    .Parameter IconStream
+    .Parameter ExternalPassword
     ..
 
     .Parameter SelfHealingEnabled
-    ..
-
-    .Parameter EnforceIconLocation
-    ..
-
-    .Parameter EnforceIconXLocation
-    ..
-
-    .Parameter EnforceIconYLocation
-    ..
-
-    .Parameter DoNotShowInSelfService
-    ..
-
-    .Parameter CreateShortcutInUserFavoritesFolder
     ..
 
     .Parameter Connection
@@ -77,7 +50,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMApplication {
+function Set-WEMPrinter {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -85,66 +58,51 @@ function Set-WEMApplication {
 
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$Description,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled","Maintenance mode")]
-        [string]$State,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$StartMenuTarget,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [string]$Description = "",
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled")]
+        [string]$State = "Enabled",
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Map Network Printer","Use Device Mapping Printers File")]
+        [string]$ActionType = "Map Network Printer",
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$Parameters,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$WorkingDirectory,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Normal","Minimized","Maximized")]
-        [string]$WindowStyle,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$HotKey,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$IconLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [int]$IconIndex,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [string]$IconStream,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [bool]$SelfHealingEnabled,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [bool]$EnforceIconLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [int]$EnforceIconXLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [int]$EnforceIconYLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [bool]$DoNotShowInSelfService,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
-        [bool]$CreateShortcutInUserFavoritesFolder,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [bool]$UseExternalCredentials = $False,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [string]$ExternalUsername = $null,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [string]$ExternalPassword = $null,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [bool]$SelfHealingEnabled = $false,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
     )
 
     process {
+        ### TO-DO
+        ### $ExternalPassword Base64 encoding type before storing in database
+
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMApplicication -Connection $Connection -IdAction $IdAction
+        $origAction = Get-WEMPrinter -Connection $Connection -IdAction $IdAction
 
         # only continue if the action was found
         if (-not $origAction) { 
-            Write-Warning "No Application action found for Id $($IdAction)"
+            Write-Warning "No Printer action found for Id $($IdAction)"
             Break
         }
         
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.$IdSite)"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPrinters WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.$IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already an Application action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Printer action named '$($Name)' in the Configuration"
                 Break
             }
 
@@ -155,14 +113,9 @@ function Set-WEMApplication {
         # grab default action xml (advanced options) and set individual advanced option variables
         [xml]$actionReserved = $defaultVUEMAppReserved
         $actionSelfHealingEnabled                  = [string][int]$origAction.SelfHealingEnabled
-        $actionEnforceIconLocation                 = [string][int]$origAction.EnforceIconLocation
-        $actionEnforceIconXValue                   = [string]$origAction.EnforceIconXValue
-        $actionEnforceIconYValue                   = [string]$origAction.EnforceIconYValue
-        $actionDoNotShowInSelfService              = [string][int]$origAction.DoNotShowInSelfService
-        $actionCreateShortcutInUserFavoritesFolder = [string][int]$origAction.CreateShortcutInUserFavoritesFolder
 
         # build the query to update the action
-        $SQLQuery = "UPDATE VUEMApps SET "
+        $SQLQuery = "UPDATE VUEMPrinters SET "
         $updateFields = @()
         $updateAdvanced = $false
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }

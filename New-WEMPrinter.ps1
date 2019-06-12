@@ -23,51 +23,27 @@
     .Parameter State
     ..
 
-    .Parameter StartMenuTarget
+    .Parameter ActionType
     ..
 
     .Parameter TargetPath
     ..
 
-    .Parameter Parameters
+    .Parameter UseExternalCredentials
     ..
 
-    .Parameter WorkingDirectory
+    .Parameter ExternalUsername
     ..
 
-    .Parameter WindowStyle
-    ..
-
-    .Parameter HotKey
-    ..
-
-    .Parameter IconLocation
-    ..
-
-    .Parameter IconIndex
-    ..
-
-    .Parameter IconStream
+    .Parameter ExternalPassword
     ..
 
     .Parameter SelfHealingEnabled
     ..
 
-    .Parameter EnforceIconLocation
+    .Parameter Connection
     ..
-
-    .Parameter EnforceIconXLocation
-    ..
-
-    .Parameter EnforceIconYLocation
-    ..
-
-    .Parameter DoNotShowInSelfService
-    ..
-
-    .Parameter CreateShortcutInUserFavoritesFolder
-    ..
-
+    
     .Example
 
     .Notes

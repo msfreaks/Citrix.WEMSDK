@@ -68,6 +68,9 @@
     .Parameter CreateShortcutInUserFavoritesFolder
     ..
 
+    .Parameter Connection
+    ..
+    
     .Example
 
     .Notes
