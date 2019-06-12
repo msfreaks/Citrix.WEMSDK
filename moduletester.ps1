@@ -36,5 +36,8 @@ Get-WEMAction -Connection $dbconn -Category "Network Drive" -Verbose | Where-Obj
 Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $true
 Get-WEMAction -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $false
 
+# New-WEMNetworkDrive
+$conf | New-WEMNetworkDrive -Connection $dbconn -Name "POSH Drive 1" -TargetPath "server\poshshare"
+
 $dbconn.Close()
 $dbconn.Dispose()

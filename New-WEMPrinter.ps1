@@ -113,6 +113,6 @@ function New-WEMPrinter {
         New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Printer" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMAction -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        Get-WEMPrinter -Connection $Connection -IdAction $result.Tables.Rows.IdAction
     }
 }

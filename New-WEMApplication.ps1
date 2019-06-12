@@ -169,7 +169,7 @@ function New-WEMApplication {
         New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMAction -Connection $Connection -IdAction $result.Tables.Rows.IdAction -Category "Application"
+        Get-WEMApplication -Connection $Connection -IdAction $result.Tables.Rows.IdAction
     }
 }
 New-Alias -Name New-WEMApp -Value New-WEMApplication
