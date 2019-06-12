@@ -180,7 +180,7 @@ function Set-WEMPrinter {
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Printer" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Printer" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }

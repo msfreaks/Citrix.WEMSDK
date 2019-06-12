@@ -99,7 +99,7 @@ function New-WEMPrinter {
 
         # apply Advanced Option values
         [xml]$actionReserved = $defaultVUEMPrinterReserved
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value                   = [string][int]$SelfHealingEnabled
+        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value = [string][int]$SelfHealingEnabled
 
         # build the query to update the action
         $SQLQuery = "INSERT INTO VUEMPrinters (IdSite,Name,Description,DisplayName,State,ActionType,TargetPath,UseExtCredentials,ExtLogin,ExtPassword,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)','$($DisplayName)',$($tableVUEMState[$State]),$($tableVUEMPrinterActionType[$ActionType]),'$($TargetPath)',$([int]$UseExternalCredentials),'$($ExternalUsername)','$($ExternalPassword)',1,'$($actionReserved.OuterXml)')"

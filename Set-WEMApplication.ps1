@@ -140,7 +140,7 @@ function Set-WEMApplication {
         
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.$IdSite)"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
@@ -270,7 +270,7 @@ function Set-WEMApplication {
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }
