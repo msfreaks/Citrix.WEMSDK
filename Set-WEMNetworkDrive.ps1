@@ -56,7 +56,7 @@ function Set-WEMNetworkDrive {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAction,
 
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Name,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$DisplayName,
@@ -64,7 +64,7 @@ function Set-WEMNetworkDrive {
         [string]$Description = "",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [bool]$UseExternalCredentials = $False,

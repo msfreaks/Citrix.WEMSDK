@@ -56,7 +56,7 @@ function Set-WEMPrinter {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAction,
 
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Name,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$DisplayName,
@@ -66,7 +66,7 @@ function Set-WEMPrinter {
         [string]$State = "Enabled",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Map Network Printer","Use Device Mapping Printers File")]
         [string]$ActionType = "Map Network Printer",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [bool]$UseExternalCredentials = $False,

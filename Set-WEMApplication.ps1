@@ -91,9 +91,9 @@ function Set-WEMApplication {
         [string]$Description,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled","Maintenance mode")]
         [string]$State,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$StartMenuTarget,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Parameters,
@@ -103,9 +103,9 @@ function Set-WEMApplication {
         [string]$WindowStyle,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$HotKey,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$IconLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [int]$IconIndex,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$IconStream,
