@@ -56,25 +56,25 @@ function Set-WEMPrinter {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAction,
 
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Description = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Map Network Printer","Use Device Mapping Printers File")]
-        [string]$ActionType = "Map Network Printer",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
+        [string]$State,
+        [Parameter(Mandatory=$False)][ValidateSet("Map Network Printer","Use Device Mapping Printers File")]
+        [string]$ActionType,
+        [Parameter(Mandatory=$False)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$UseExternalCredentials = $False,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$ExternalUsername = $null,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$ExternalPassword = $null,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$SelfHealingEnabled = $false,
 
         [Parameter(Mandatory=$True)]
@@ -111,8 +111,8 @@ function Set-WEMPrinter {
         }
 
         # grab default action xml (advanced options) and set individual advanced option variables
-        [xml]$actionReserved = $defaultVUEMAppReserved
-        $actionSelfHealingEnabled                  = [string][int]$origAction.SelfHealingEnabled
+        [xml]$actionReserved = $defaultVUEMPrinterReserved
+        $actionSelfHealingEnabled = [string][int]$origAction.SelfHealingEnabled
 
         # build the query to update the action
         $SQLQuery = "UPDATE VUEMPrinters SET "
@@ -170,7 +170,7 @@ function Set-WEMPrinter {
         }
 
         # apply actual Advanced Option values
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value                   = $actionSelfHealingEnabled
+        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value = $actionSelfHealingEnabled
 
         # if anything needs to be updated, update the action
         if($updateFields -or $updateAdvanced) { 

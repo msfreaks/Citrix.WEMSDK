@@ -56,25 +56,25 @@ function New-WEMPrinter {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
 
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Description = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled")]
+        [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Map Network Printer","Use Device Mapping Printers File")]
+        [Parameter(Mandatory=$False)][ValidateSet("Map Network Printer","Use Device Mapping Printers File")]
         [string]$ActionType = "Map Network Printer",
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$UseExternalCredentials = $False,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$ExternalUsername = $null,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$ExternalPassword = $null,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$SelfHealingEnabled = $false,
 
         [Parameter(Mandatory=$True)]

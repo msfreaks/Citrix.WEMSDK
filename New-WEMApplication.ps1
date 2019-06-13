@@ -83,45 +83,45 @@ function New-WEMApplication {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
 
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Description = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled","Maintenance mode")]
+        [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled","Maintenance mode")]
         [string]$State = "Enabled",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Installed application","File / Folder","URL")]
+        [Parameter(Mandatory=$False)][ValidateSet("Installed application","File / Folder","URL")]
         [string]$Type = "Installed application",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$StartMenuTarget,
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Parameters = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$WorkingDirectory = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Normal","Minimized","Maximized")]
+        [Parameter(Mandatory=$False)][ValidateSet("Normal","Minimized","Maximized")]
         [string]$WindowStyle = "Normal",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$HotKey = "None",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$IconLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [int]$IconIndex = 0,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$IconStream,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$SelfHealingEnabled = $false,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$EnforceIconLocation = $false,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [int]$EnforceIconXLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [int]$EnforceIconYLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$DoNotShowInSelfService = $false,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$CreateShortcutInUserFavoritesFolder = $false,
 
         [Parameter(Mandatory=$True)]

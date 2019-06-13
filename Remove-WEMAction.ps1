@@ -26,9 +26,9 @@
 function Remove-WEMAction {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAction,
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [string]$Category,
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
@@ -51,6 +51,6 @@ function Remove-WEMAction {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Delete" -ObjectName $Name -ObjectType "Actions\$($origAction.Category)" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Delete" -ObjectName $origAction.Name -ObjectType "Actions\$($origAction.Category)" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }
