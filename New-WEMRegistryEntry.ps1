@@ -65,9 +65,9 @@ function New-WEMRegistryEntry {
         [string]$TargetName,
         [Parameter(Mandatory=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$True)][ValidateSet("REG_DWORD", "REG_QDWORD", "REG_SZ", "REG_EXPAND_SZ")]
+        [Parameter(Mandatory=$False)][ValidateSet("REG_DWORD", "REG_QDWORD", "REG_SZ", "REG_EXPAND_SZ")]
         [string]$TargetType,
-        [Parameter(Mandatory=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$TargetValue,
         [Parameter(Mandatory=$False)]
         [bool]$RunOnce = $True,

@@ -135,7 +135,7 @@ $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 $conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry Entry 1" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_SZ test" -TargetType "REG_SZ" -TargetValue "This is a string value"
 $conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry Entry 2" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_DWORD test" -TargetType "REG_DWORD" -TargetValue "49152"
 $conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry Entry 3" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_QWORD test" -TargetType "REG_QDWORD" -TargetValue "00,00,0d,00,00,00,00,00"
-$conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "Citrix.WEMSDK\POSH\Test" -TargetName "Test" -TargetType "REG_SZ" -TargetValue "TEST"
+$conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "Citrix.WEMSDK\POSH\Test" -TargetName "Test" -TargetType "REG_SZ" -TargetValue ""
 
 # Get-WEMRegistryEntry
 $conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Registry Entry" | Format-Table
@@ -145,12 +145,12 @@ $registryEntryTest = $conf | Get-WEMRegistryEntry -Connection $dbconn -Verbose -
 $allRegistryEntries | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMRegistryEntry
-$allDrives | ForEach-Object { Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMVirtualDrive" }
-Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##.vhdx"
-Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
+$allRegistryEntries | ForEach-Object { Set-WEMRegistryEntry -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMRegistryEntry" }
+Set-WEMRegistryEntry -Connection $dbconn -Verbose -IdAction $registryEntryTest.IdAction -TargetName "Test updated" -TargetType "REG_EXPAND_SZ" -TargetValue "Test value" -RunOnce $false
+Set-WEMRegistryEntry -Connection $dbconn -Verbose -IdAction $registryEntryTest.IdAction -State "Disabled"
 
-# Remove-WEMAction (Virtual Drive)
-Get-WEMVirtualDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Virtual Drive"
+# Remove-WEMAction (Registry Entry)
+Get-WEMRegistryEntry -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Registry Entry"
 
 #endregion
 
