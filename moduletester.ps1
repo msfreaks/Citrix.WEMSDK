@@ -132,5 +132,5 @@ $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
 #$allActions | Remove-WEMAction -Connection $dbconn
-$dbconn.Close()
+
 $dbconn.Dispose()
