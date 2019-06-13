@@ -47,6 +47,8 @@ Set-WEMApplication -Connection $dbconn -Verbose -IdAction $appLog.IdAction -Star
 
 # Remove-WEMAction (Application)
 Get-WEMApplication -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Application"
+$conf | New-WEMApplication -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "C:\Windows\explorer.exe"
+Remove-WEMApplication -Connection $dbconn -Verbose -IdAction (Get-WEMAction -Connection $dbconn -Verbose -Name "POSH Test").IdAction
 
 #endregion
 
