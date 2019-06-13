@@ -165,10 +165,10 @@ function New-ChangesLogEntry {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Site object
+    Converts SQL Data to a Site object
 
     .Description
-    Coverts SQL Data to a Site object
+    Converts SQL Data to a Site object
 
     .Link
     https://msfreaks.wordpress.com
@@ -190,11 +190,11 @@ Function New-VUEMSiteObject() {
     Write-Verbose "Found Site object '$($DataRow.Name)'"
 
     $vuemSiteObject = [pscustomobject] @{
-        'IdSite' = [int]$DataRow.IdSite
-        'Name' = [string]$DataRow.Name
+        'IdSite'      = [int]$DataRow.IdSite
+        'Name'        = [string]$DataRow.Name
         'Description' = [string]$DataRow.Description
-        'State' = [string]$tableVUEMState[$DataRow.State]
-        'Version' = [int]$DataRow.RevisionId
+        'State'       = [string]$tableVUEMState[$DataRow.State]
+        'Version'     = [int]$DataRow.RevisionId
     } 
     # override the default ToScript() method
     $vuemSiteObject | Add-Member scriptmethod ToString { } -force
@@ -204,10 +204,10 @@ Function New-VUEMSiteObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Application Action object
+    Converts SQL Data to an Application Action object
 
     .Description
-    Coverts SQL Data to an Application Action object
+    Converts SQL Data to an Application Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -262,10 +262,10 @@ Function New-VUEMApplicationObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Printer Action object
+    Converts SQL Data to a Printer Action object
 
     .Description
-    Coverts SQL Data to a Printer Action object
+    Converts SQL Data to a Printer Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -312,10 +312,10 @@ Function New-VUEMPrinterObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Network Drive Action object
+    Converts SQL Data to a Network Drive Action object
 
     .Description
-    Coverts SQL Data to a Network Drive Action object
+    Converts SQL Data to a Network Drive Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -360,10 +360,10 @@ Function New-VUEMNetDriveObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Virtual Drive Action object
+    Converts SQL Data to a Virtual Drive Action object
 
     .Description
-    Coverts SQL Data to a Virtual Drive Action object
+    Converts SQL Data to a Virtual Drive Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -388,25 +388,25 @@ Function New-VUEMVirtualDriveObject() {
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
     Return [pscustomobject] @{
-        'IdAction' = [int]$DataRow.IdVirtualDrive
-        'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"Virtual Drive"
-        'Name' = [string]$DataRow.Name
-        'DisplayName' = [string]$DataRow.DisplayName
-        'State' = [string]$tableVUEMState[[int]$DataRow.State]
-        'ActionType' = [string]$tableVUEMVirtualDriveActionType[[int]$DataRow.ActionType]
-        'TargetPath' = [string]$DataRow.TargetPath
+        'IdAction'              = [int]$DataRow.IdVirtualDrive
+        'IdSite'                = [int]$DataRow.IdSite
+        'Category'              = [string]"Virtual Drive"
+        'Name'                  = [string]$DataRow.Name
+        'DisplayName'           = [string]$DataRow.DisplayName
+        'State'                 = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType'            = [string]$tableVUEMVirtualDriveActionType[[int]$DataRow.ActionType]
+        'TargetPath'            = [string]$DataRow.TargetPath
         'SetAsHomeDriveEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
-        'Version' = [int]$DataRow.RevisionId
+        'Version'               = [int]$DataRow.RevisionId
     }
 }
 
 <#
     .Synopsis
-    Coverts SQL Data to a Registry Value Action object
+    Converts SQL Data to a Registry Value Action object
 
     .Description
-    Coverts SQL Data to a Registry Value Action object
+    Converts SQL Data to a Registry Value Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -446,10 +446,10 @@ Function New-VUEMRegValueObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Evironment Variable Action object
+    Converts SQL Data to an Evironment Variable Action object
 
     .Description
-    Coverts SQL Data to an Environment Variable Action object
+    Converts SQL Data to an Environment Variable Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -492,10 +492,10 @@ Function New-VUEMEnvVariableObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a Port Action object
+    Converts SQL Data to a Port Action object
 
     .Description
-    Coverts SQL Data to a Port Action object
+    Converts SQL Data to a Port Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -532,10 +532,10 @@ Function New-VUEMPortObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Ini File Action object
+    Converts SQL Data to an Ini File Action object
 
     .Description
-    Coverts SQL Data to an Ini File Action object
+    Converts SQL Data to an Ini File Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -574,10 +574,10 @@ Function New-VUEMIniFileOpObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an External Task Action object
+    Converts SQL Data to an External Task Action object
 
     .Description
-    Coverts SQL Data to an External Task Action object
+    Converts SQL Data to an External Task Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -622,10 +622,10 @@ Function New-VUEMExtTaskObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to an Evironment Variable Action object
+    Converts SQL Data to an Evironment Variable Action object
 
     .Description
-    Coverts SQL Data to an Environment Variable Action object
+    Converts SQL Data to an Environment Variable Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -669,10 +669,10 @@ Function New-VUEMFileSystemOpObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a User DSN Action object
+    Converts SQL Data to a User DSN Action object
 
     .Description
-    Coverts SQL Data to a User DSN Action object
+    Converts SQL Data to a User DSN Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -715,10 +715,10 @@ Function New-VUEMUserDSNObject() {
 
 <#
     .Synopsis
-    Coverts SQL Data to a File Association Action object
+    Converts SQL Data to a File Association Action object
 
     .Description
-    Coverts SQL Data to a File Association Action object
+    Converts SQL Data to a File Association Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -778,13 +778,14 @@ $defaultVUEMUtilities                = @("({0},'EnableFastLogoff',0,'0',1,1)", "
 $defaultVUEMAppReserved          = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMPrinterReserved      = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMNetworkDriveReserved = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
+$defaultVUEMVirtualDriveReserved = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 
 $tableVUEMState = @{
     0 = "Disabled"
     1 = "Enabled"
     2 = "Maintenance Mode"
-    "Disabled" = 0
-    "Enabled" = 1
+    "Disabled"         = 0
+    "Enabled"          = 1
     "Maintenance Mode" = 2
 }
 $tableVUEMAppType = @{
@@ -792,8 +793,8 @@ $tableVUEMAppType = @{
     4 = "URL"
     5 = "File / Folder"
     "Installed application" = 0
-    "URL" = 4
-    "File / Folder" = 5
+    "URL"                   = 4
+    "File / Folder"         = 5
 }
 $tableVUEMAppActionType = @{
     0 = "Create Application Shortcut"
@@ -802,7 +803,7 @@ $tableVUEMAppActionType = @{
 $tableVUEMPrinterActionType = @{
     0 = "Map Network Printer"
     1 = "Use Device Mapping Printers File"
-    "Map Network Printer" = 0
+    "Map Network Printer"              = 0
     "Use Device Mapping Printers File" = 1
 }
 $tableVUEMNetDriveActionType = @{
@@ -817,7 +818,7 @@ $tableVUEMRegValueActionType = @{
     0 = "Create / Set Registry Value"
     1 = "Delete Registry Value"
     "Create / Set Registry Value" = 0
-    "Delete Registry Value" = 1
+    "Delete Registry Value"       = 1
 }
 $tableVUEMEnvVariableActionType = @{
     0 = "Create / Set Environment Variable"
@@ -845,15 +846,15 @@ $tableVUEMFileSystemOpActionType = @{
     6 = "Copy Directory Content"
     7 = "Delete Directory Content"
     8 = "Move Directory Content"
-    "Copy Files / Folders" = 0
-    "Delete Files / Folders" = 1
-    "Rename Files / Folders" = 2
+    "Copy Files / Folders"           = 0
+    "Delete Files / Folders"         = 1
+    "Rename Files / Folders"         = 2
     "Create Directory Symbolic Link" = 3
-    "Create File Symbolic Link" = 4
-    "Create Directory" = 5
-    "Copy Directory Content" = 6
-    "Delete Directory Content" = 7
-    "Move Directory Content" = 8
+    "Create File Symbolic Link"      = 4
+    "Create Directory"               = 5
+    "Copy Directory Content"         = 6
+    "Delete Directory Content"       = 7
+    "Move Directory Content"         = 8
 }
 $tableVUEMUserDSNActionType = @{
     0 = "Create / Edit User DSN"
@@ -865,36 +866,36 @@ $tableVUEMFileAssocActionType = @{
 }
 
 $tableVUEMActionCategory = @{
-    "Application" = "Apps"
-    "Printer" = "Printers"
-    "Network Drive" = "NetDrives"
-    "Virtual Drive" = "VirtualDrives"
-    "Registry Entry" = "RegValues"
-    "Environment Variable" = "EnvVariables"
-    "Port" = "Ports"
-    "Ini File Operation" = "IniFilesOps"
-    "External Task" = "ExtTasks"
+    "Application"           = "Apps"
+    "Printer"               = "Printers"
+    "Network Drive"         = "NetDrives"
+    "Virtual Drive"         = "VirtualDrives"
+    "Registry Entry"        = "RegValues"
+    "Environment Variable"  = "EnvVariables"
+    "Port"                  = "Ports"
+    "Ini File Operation"    = "IniFilesOps"
+    "External Task"         = "ExtTasks"
     "File System Operation" = "FileSystemOps"
-    "User DSN" = "UserDSNs"
-    "File Association" = "FileAssocs"
+    "User DSN"              = "UserDSNs"
+    "File Association"      = "FileAssocs"
 }
 $tableVUEMActionCategoryId = @{
-    "Application" = "IdApplication"
-    "Printer" = "IdPrinter"
-    "Network Drive" = "IdNetDrive"
-    "Virtual Drive" = "IdVirtualDrive"
-    "Registry Entry" = "IdRegValue"
-    "Environment Variable" = "IdEnvVariable"
-    "Port" = "IdPort"
-    "Ini File" = "IdIniFileOp"
-    "External Task" = "IdExtTask"
+    "Application"           = "IdApplication"
+    "Printer"               = "IdPrinter"
+    "Network Drive"         = "IdNetDrive"
+    "Virtual Drive"         = "IdVirtualDrive"
+    "Registry Entry"        = "IdRegValue"
+    "Environment Variable"  = "IdEnvVariable"
+    "Port"                  = "IdPort"
+    "Ini File"              = "IdIniFileOp"
+    "External Task"         = "IdExtTask"
     "File System Operation" = "IdFileSystemOp"
-    "User DSN" = "IdUserDSN"
-    "File Association" = "IdFileAssoc"
+    "User DSN"              = "IdUserDSN"
+    "File Association"      = "IdFileAssoc"
 }
 
 $cleanupTables = @{ 
-    "4.4.0.0" = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","VUEMSites")
+    "4.4.0.0"    = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","VUEMSites")
     "1903.0.1.1" = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMStorefrontSettings","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","GroupPolicyObjects","GroupPolicyGlobalSettings","VUEMSites")
 }
 
