@@ -39,7 +39,7 @@ $conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Application" | For
 $allApps = $conf | Get-WEMApplication -Connection $dbconn -Verbose
 $appLog = $conf | Get-WEMApp -Connection $dbconn -Verbose -Name "*log"
 
-$allApps | Select-Object IdSite, IdApplication, Name, Description
+$allApps | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMApplication
 $allApps | ForEach-Object { Set-WEMApplication -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMApplication" -SelfHealingEnabled $true }
@@ -63,7 +63,7 @@ $conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Printer" | Format-
 $allPrinters = $conf | Get-WEMPrinter -Connection $dbconn -Verbose
 $printerTest = $conf | Get-WEMPrinter -Connection $dbconn -Verbose -Name "*test"
 
-$allPrinters | Select-Object IdSite, IdApplication, Name, Description
+$allPrinters | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMPrinters
 $allPrinters | ForEach-Object { Set-WEMPrinter -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMPrinter" -SelfHealingEnabled $true }
@@ -89,7 +89,7 @@ $allDrives = $conf | Get-WEMNetworkDrive -Connection $dbconn -Verbose
 $homeDrive = $conf | Get-WEMNetDrive -Connection $dbconn -Verbose | Where-Object { $_.SetAsHomeDriveEnabled }
 $driveTest = $conf | Get-WEMNetworkDrive -Connection $dbconn -Verbose -Name "*test"
 
-$allDrives | Select-Object IdSite, IdApplication, Name, Description
+$allDrives | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMNetworkDrive
 $allDrives | ForEach-Object { Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMNetworkDrive" -SelfHealingEnabled $true }
@@ -116,9 +116,35 @@ $allDrives = $conf | Get-WEMVirtualDrive -Connection $dbconn -Verbose
 $homeDrive = $conf | Get-WEMVirtualDrive -Connection $dbconn -Verbose | Where-Object { $_.SetAsHomeDriveEnabled }
 $driveTest = $conf | Get-WEMVirtualDrive -Connection $dbconn -Verbose -Name "*test"
 
-$allDrives | Select-Object IdSite, IdApplication, Name, Description
+$allDrives | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMVirtualDrive
+$allDrives | ForEach-Object { Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMVirtualDrive" }
+Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##.vhdx"
+Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (Virtual Drive)
+Get-WEMVirtualDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Virtual Drive"
+
+#endregion
+
+#region WEMRegistryEntry
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMRegistryEntry
+$conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry Entry 1" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_SZ test" -TargetType "REG_SZ" -TargetValue "This is a string value"
+$conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry Entry 2" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_DWORD test" -TargetType "REG_DWORD" -TargetValue "49152"
+$conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry Entry 3" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_QWORD test" -TargetType "REG_QDWORD" -TargetValue "00,00,0d,00,00,00,00,00"
+$conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "Citrix.WEMSDK\POSH\Test" -TargetName "Test" -TargetType "REG_SZ" -TargetValue "TEST"
+
+# Get-WEMRegistryEntry
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Registry Entry" | Format-Table
+$allRegistryEntries = $conf | Get-WEMRegistryEntry -Connection $dbconn -Verbose
+$registryEntryTest = $conf | Get-WEMRegistryEntry -Connection $dbconn -Verbose -Name "*test"
+
+$allRegistryEntries | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMRegistryEntry
 $allDrives | ForEach-Object { Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMVirtualDrive" }
 Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##.vhdx"
 Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
@@ -131,6 +157,8 @@ Get-WEMVirtualDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "pos
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
+# Cleanup
+# $conf | Remove-WEMConfiguration -Connection $dbconn
 #$allActions | Remove-WEMAction -Connection $dbconn
 
 $dbconn.Dispose()
