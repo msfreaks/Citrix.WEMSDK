@@ -47,17 +47,17 @@ function New-WEMVirtualDrive {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
 
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Description = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled")]
+        [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Map Virtual Drive")]
+        [Parameter(Mandatory=$False)][ValidateSet("Map Virtual Drive")]
         [string]$ActionType = "Map Virtual Drive",
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$SetAsHomeDriveEnabled = $false,
 
         [Parameter(Mandatory=$True)]

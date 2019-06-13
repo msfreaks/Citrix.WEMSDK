@@ -69,7 +69,7 @@ $allPrinters | Select-Object IdSite, IdApplication, Name, Description
 $allPrinters | ForEach-Object { Set-WEMPrinter -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMPrinter" -SelfHealingEnabled $true }
 Set-WEMPrinter -Connection $dbconn -Verbose -IdAction $printerTest.IdAction -State "Disabled"
 
-# Remove-WEMAction (Application)
+# Remove-WEMAction (Printer)
 Get-WEMPrinter -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Printer"
 
 #endregion
@@ -96,15 +96,40 @@ $allDrives | ForEach-Object { Set-WEMNetworkDrive -Connection $dbconn -Verbose -
 Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##"
 Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
 
-# Remove-WEMAction (Application)
+# Remove-WEMAction (Network Drive)
 Get-WEMNetworkDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Network Drive"
 
 #endregion
 
+#region WEMVirtualDrive
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 
+# New-WEMVirtualDrive
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Drive 1" -TargetPath "\\server\vdisks\posh1.vhdx"
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Drive 2" -TargetPath "\\server\vdisks\posh2.vhdx"
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Home Drive" -TargetPath "\\server\vdisks\##username##" -SetAsHomeDriveEnabled $true
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "\\server\vdisks\test.vhdx"
+
+# Get-WEMVirtualDrive
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Virtual Drive" | Format-Table
+$allDrives = $conf | Get-WEMVirtualDrive -Connection $dbconn -Verbose
+$homeDrive = $conf | Get-WEMVirtualDrive -Connection $dbconn -Verbose | Where-Object { $_.SetAsHomeDriveEnabled }
+$driveTest = $conf | Get-WEMVirtualDrive -Connection $dbconn -Verbose -Name "*test"
+
+$allDrives | Select-Object IdSite, IdApplication, Name, Description
+
+# Set-WEMVirtualDrive
+$allDrives | ForEach-Object { Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMVirtualDrive" }
+Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##.vhdx"
+Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (Virtual Drive)
+Get-WEMVirtualDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Virtual Drive"
+
+#endregion
 
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
-$allActions | Format-Table
+$allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
 #$allActions | Remove-WEMAction -Connection $dbconn
 $dbconn.Close()
