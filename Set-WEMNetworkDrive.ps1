@@ -56,25 +56,25 @@ function Set-WEMNetworkDrive {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAction,
 
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$Description = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled")]
+        [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$UseExternalCredentials = $False,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$ExternalUsername = $null,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [string]$ExternalPassword = $null,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$SelfHealingEnabled = $false,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False)]
         [bool]$SetAsHomeDriveEnabled = $false,
 
         [Parameter(Mandatory=$True)]
@@ -111,7 +111,7 @@ function Set-WEMNetworkDrive {
         }
 
         # grab default action xml (advanced options) and set individual advanced option variables
-        [xml]$actionReserved = $defaultVUEMNetDriveReserved
+        [xml]$actionReserved = $defaultVUEMNetworkDriveReserved
         $actionSelfHealingEnabled                  = [string][int]$origAction.SelfHealingEnabled
         $actionSetAsHomeDriveEnabled               = [string][int]$origAction.SetAsHomeDriveEnabled
 
@@ -183,7 +183,10 @@ function Set-WEMNetworkDrive {
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Network Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            $objectName = $origAction.Name
+            if ($Name) { $objectName = $Name }
+
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Network Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }

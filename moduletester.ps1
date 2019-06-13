@@ -74,6 +74,35 @@ Get-WEMPrinter -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh tes
 
 #endregion
 
+#region WEMNetworkDrive
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMNetworkDrive
+$conf | New-WEMNetworkDrive -Connection $dbconn -Verbose -Name "POSH Network Drive 1" -TargetPath "\\server\share1"
+$conf | New-WEMNetworkDrive -Connection $dbconn -Verbose -Name "POSH Network Drive 2" -TargetPath "\\server\share3"
+$conf | New-WEMNetworkDrive -Connection $dbconn -Verbose -Name "POSH Home Drive" -TargetPath "\\server\home" -SetAsHomeDriveEnabled $true
+$conf | New-WEMNetworkDrive -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "\\server\test"
+
+# Get-WEMNetworkDrive
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Network Drive" | Format-Table
+$allDrives = $conf | Get-WEMNetworkDrive -Connection $dbconn -Verbose
+$homeDrive = $conf | Get-WEMNetDrive -Connection $dbconn -Verbose | Where-Object { $_.SetAsHomeDriveEnabled }
+$driveTest = $conf | Get-WEMNetworkDrive -Connection $dbconn -Verbose -Name "*test"
+
+$allDrives | Select-Object IdSite, IdApplication, Name, Description
+
+# Set-WEMNetworkDrive
+$allDrives | ForEach-Object { Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMNetworkDrive" -SelfHealingEnabled $true }
+Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##"
+Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (Application)
+Get-WEMNetworkDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Network Drive"
+
+#endregion
+
+
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Format-Table
 

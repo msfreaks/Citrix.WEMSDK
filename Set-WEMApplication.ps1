@@ -270,7 +270,10 @@ function Set-WEMApplication {
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            $objectName = $origAction.Name
+            if ($Name) { $objectName = $Name }
+            
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }

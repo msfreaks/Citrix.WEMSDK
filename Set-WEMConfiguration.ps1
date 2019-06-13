@@ -31,9 +31,9 @@ function Set-WEMConfiguration {
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdSite,
-        [Parameter(Mandatory=$False)][ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory=$False)]
         [string]$Name,
-        [Parameter(Mandatory=$False)][AllowEmptyString()]
+        [Parameter(Mandatory=$False)]
         [string]$Description,
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
