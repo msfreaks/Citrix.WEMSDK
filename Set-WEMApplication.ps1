@@ -83,7 +83,7 @@ function Set-WEMApplication {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAction,
 
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateNotNullOrEmpty]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Name,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$DisplayName,
@@ -130,7 +130,7 @@ function Set-WEMApplication {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMApplicication -Connection $Connection -IdAction $IdAction
+        $origAction = Get-WEMApplication -Connection $Connection -IdAction $IdAction
 
         # only continue if the action was found
         if (-not $origAction) { 

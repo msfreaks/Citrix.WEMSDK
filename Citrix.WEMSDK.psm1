@@ -70,6 +70,9 @@ function Invoke-SQL {
             }
         }
 
+        $Command.Dispose()
+        $Adapter.Dispose()
+
         $Connection.Close()
     }
     catch {
@@ -428,19 +431,19 @@ Function New-VUEMRegValueObject() {
     Write-Verbose "Found Registry Value action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
     Return [pscustomobject] @{
-        'IdAction' = [int]$DataRow.IdRegValue
-        'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"Registry Entry"
-        'Name' = [string]$DataRow.Name
+        'IdAction'    = [int]$DataRow.IdRegValue
+        'IdSite'      = [int]$DataRow.IdSite
+        'Category'    = [string]"Registry Entry"
+        'Name'        = [string]$DataRow.Name
         'Description' = [string]$DataRow.Description
-        'State' = [string]$tableVUEMState[[int]$DataRow.State]
-        'ActionType' = [string]$tableVUEMRegValueActionType[[int]$DataRow.ActionType]
-        'TargetPath' = [string]$DataRow.TargetPath
-        'TargetName' = [string]$DataRow.TargetName
-        'TargetType' = [string]$DataRow.TargetType
+        'State'       = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType'  = [string]$tableVUEMRegValueActionType[[int]$DataRow.ActionType]
+        'TargetPath'  = [string]$DataRow.TargetPath
+        'TargetName'  = [string]$DataRow.TargetName
+        'TargetType'  = [string]$DataRow.TargetType
         'TargetValue' = [string]$DataRow.TargetValue
-        'RunOnce' = [bool]$DataRow.RunOnce
-        'Version' = [int]$DataRow.RevisionId
+        'RunOnce'     = [bool]$DataRow.RunOnce
+        'Version'     = [int]$DataRow.RevisionId
     }
 }
 

@@ -83,35 +83,35 @@ function New-WEMApplication {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
 
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$DisplayName,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Description = "",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Enabled","Disabled","Maintenance mode")]
         [string]$State = "Enabled",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Installed application","File / Folder","URL")]
         [string]$Type = "Installed application",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
-        [string]$StartMenuTarget = "Start Menu\Programs",
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+        [string]$StartMenuTarget,
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [string]$TargetPath,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$Parameters = "",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$WorkingDirectory = "",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Normal","Minimized","Maximized")]
         [string]$WindowStyle = "Normal",
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$HotKey = "None",
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$IconLocation,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [int]$IconIndex = 0,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [string]$IconStream,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [bool]$SelfHealingEnabled = $false,
         [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
         [bool]$EnforceIconLocation = $false,
@@ -129,6 +129,8 @@ function New-WEMApplication {
     )
 
     process {
+        write-verbose "$($StartMenuTarget)"
+    
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # name is unique if it's not yet used in the same Action Type in the site 
@@ -154,6 +156,7 @@ function New-WEMApplication {
         # build optional values
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'displayname')) { $DisplayName = $Name }
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'iconlocation')) { $IconLocation = $TargetPath }
+        if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'startmenutarget')) { $StartMenuTarget = "Start Menu\Programs" }
         if ($Type -like "URL") { $WorkingDirectory = "Url" }
         if ($Type -like "File / Folder") { $WorkingDirectory = "File" }
 

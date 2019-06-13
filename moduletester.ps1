@@ -1,45 +1,54 @@
-$name = "POSH Test 14"
-$database = "CitrixWEM-CTA"
+$name       = "POSH 1903"
+$database   = "CitrixWEM1903"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
 $dbconn = New-WEMDatabaseConnection -Server "ca002511" -Database "$($database)" -Verbose
 
+#region WEMConfiguration
 # New-WEMConfiguration
-New-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+$conf = New-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+New-WEMConfiguration -Connection $dbconn -Verbose -Name "Garbage Test"
 
 # Get-WEMConfiguration
 Get-WEMConfiguration -Connection $dbconn -Verbose | Format-Table
 $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 $conf | Format-Table
-Get-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite | Format-Table
 
 # Set-WEMConfiguration
-Get-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite | Set-WEMConfiguration -Verbose -Description "New description" -Connection $dbconn
-Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)" | Set-WEMConfiguration -Verbose -Name "New Name" -Description "New description 2" -Connection $dbconn
-Get-WEMConfiguration -Connection $dbconn -Verbose -Name "New Name" | Set-WEMConfiguration -Verbose -Name "$($name)" -Description $null -Connection $dbconn
+Get-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite | Set-WEMConfiguration -Connection $dbconn -Verbose -Description "Test Description"
+Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)" | Set-WEMConfiguration -Connection $dbconn -Verbose -Name "New Name" -Description "Set-WEMConfiguration"
+Set-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "$($Name)" -Description "Set-WEMConfiguration"
 
 # Remove-WEMConfiguration
-Remove-WEMConfiguration -Connection $dbconn -Verbose -IdSite $conf.IdSite
+Get-WEMConfiguration -Connection $dbconn -Verbose -Name "Garbage Test" | Remove-WEMConfiguration -Connection $dbconn -Verbose
 
-# Get-WEMApp
-$apps = Get-WEMAction -Connection $dbconn -Verbose -IdSite 12 -Name "*2016*" -Category Application
-$apps | Select-Object IdSite, IdApplication, Name, Description
-$apps = Get-WEMAction -Connection $dbconn -Verbose -Name "*2016*"
-$apps | Select-Object IdSite, IdApplication, Name, Description
-$apps = Get-WEMAction -Connection $dbconn -Verbose -IdSite 8
-Get-WEMAction -Verbose -Connection $dbconn -IdAction 32
-Get-WEMAction -Connection $dbconn -Verbose | Where-Object {$_.Category -like "network drive" -and $_.SetAsHomeDriveEnabled}
-Get-WEMAction -Connection $dbconn -Category "Network Drive" -Verbose | Where-Object {$_.SetAsHomeDriveEnabled}
+#endregion
 
+#region WEMApplication
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMApplication
+$conf | New-WEMApplication -Connection $dbconn -Verbose -Name "POSH Notepad" -TargetPath "C:\Windows\notepad.exe"
+$conf | New-WEMApplication -Connection $dbconn -Verbose -Name "POSH Regedit" -TargetPath "C:\Windows\regedit.exe"
+$conf | New-WEMApplication -Connection $dbconn -Verbose -Name "POSH Google" -TargetPath "https://www.google.com" -Type "URL"
+$conf | New-WEMApplication -Connection $dbconn -Verbose -Name "POSH Update Log" -TargetPath "C:\Windows\WindowsUpdate.log" -Type "File / Folder"
+$conf | New-WEMApplication -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "C:\Windows\explorer.exe"
+
+# Get-WEMApplication
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category Application | Format-Table
+$allApps = $conf | Get-WEMApplication -Connection $dbconn -Verbose
+$appLog = $conf | Get-WEMApp -Connection $dbconn -Verbose -Name "*log"
+
+$allApps | Select-Object IdSite, IdApplication, Name, Description
 
 # Set-WEMApplication
-Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $true
-Get-WEMAction -Verbose -Connection $dbconn -IdApplication 32 | Set-WEMApp -Verbose -Connection $dbconn -IdApplication 32 -Name "Test" -Description "Test DESC" -CreateShortcutInUserFavoritesFolder $false
+$allApps | Set-WEMApplication -Connection $dbconn -Verbose -Description "Set-WEMApplication"
+$appLog | Set-WEMApplication -Connection $dbconn -Verbose -StartMenuTarget "Start Menu\Programs\Logs" -SelfHealingEnabled $true
 
-# New-WEMNetworkDrive
-$conf | New-WEMNetworkDrive -Connection $dbconn -Name "POSH Drive 3" -TargetPath "server\poshshare"
+# Remove-WEMAction (Application)
+Get-WEMApplication -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Application"
 
-# Set-WEMNetworkDrive
-Get-WEMNetworkDrive -Connection $dbconn -Name "POSH Drive 1" -Verbose | Set-WEMNetworkDrive -Connection $dbconn -TargetPath "\\server\poshshare" -Verbose
+#endregion
+
 $dbconn.Close()
 $dbconn.Dispose()
