@@ -94,7 +94,7 @@ $driveTest = $conf | Get-WEMNetworkDrive -Connection $dbconn -Verbose -Name "*te
 $allDrives | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMNetworkDrive
-$allDrives | ForEach-Object { Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMNetworkDrive" -SelfHealingEnabled $true }
+$allDrives | ForEach-Object { Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMNetworkDrive" -DisplayName $_.Name -SelfHealingEnabled $true }
 Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##"
 Set-WEMNetworkDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
 
@@ -153,6 +153,32 @@ Set-WEMRegistryEntry -Connection $dbconn -Verbose -IdAction $registryEntryTest.I
 
 # Remove-WEMAction (Registry Entry)
 Get-WEMRegistryEntry -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Registry Entry"
+
+#endregion
+
+#region WEMEnvironmentVariable
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMEnvironmentVariable
+$conf | New-WEMEnvironmentVariable -Connection $dbconn -Verbose -Name "POSH Environment Variable 1" -VariableName "POSHModule" -VariableValue "Citrix.WEMSDK"
+$conf | New-WEMEnvironmentVariable -Connection $dbconn -Verbose -Name "POSH Test" -VariableName "POSHTest"
+$conf | New-WEMEnvironmentVariable -Connection $dbconn -Verbose -Name "POSH Test 2" -VariableName "POSHTest 2"
+
+# Get-WEMEnvironmentVariable
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Environment Variable" | Format-Table
+$allEnvironmentVariables = $conf | Get-WEMEnvironmentVariable -Connection $dbconn -Verbose
+$environmentVariableTest = $conf | Get-WEMEnvironmentVariable -Connection $dbconn -Verbose -Name "*test"
+
+$allEnvironmentVariables | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMEnvironmentVariable
+$i=1 ; $allEnvironmentVariables | ForEach-Object { Set-WEMEnvironmentVariable -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMEnvironmentVariable" -ExecutionOrder $i; $i++ }
+Set-WEMEnvironmentVariable -Connection $dbconn -Verbose -IdAction $environmentVariableTest.IdAction -VariableName "POSHTested" -VariableValue "Updated"
+Set-WEMEnvironmentVariable -Connection $dbconn -Verbose -IdAction $environmentVariableTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (Environment Variable)
+Get-WEMEnvironmentVariable -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Environment Variable"
+Get-WEMEnvironmentVariable -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 2" | Remove-WEMEnvironmentVariable -Connection $dbconn -Verbose
 
 #endregion
 
