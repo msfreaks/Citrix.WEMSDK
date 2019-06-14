@@ -69,12 +69,12 @@ function Set-WEMVirtualDrive {
         }
         
         # if a new name for the action is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMVirtualDrives WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origAction.Name ) {
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMVirtualDrives WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Virtual Drive action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Virtual Drive action named '$($Name.Replace("'", "''"))' in the Configuration"
                 Break
             }
 
@@ -94,11 +94,11 @@ function Set-WEMVirtualDrive {
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
-                    $updateFields += "Name = '$($Name)'"
+                    $updateFields += "Name = '$($Name.Replace("'", "''"))'"
                     continue
                 }
                 "Description" {
-                    $updateFields += "Description = '$($Description)'"
+                    $updateFields += "Description = '$($Description.Replace("'", "''"))'"
                     continue
                 }
                 "State" {
@@ -106,7 +106,7 @@ function Set-WEMVirtualDrive {
                     continue
                 }
                 "TargetPath" {
-                    $updateFields += "TargetPath = '$($TargetPath)'"
+                    $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
                     continue
                 }
                 "SetAsHomeDriveEnabled" {
@@ -130,7 +130,7 @@ function Set-WEMVirtualDrive {
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
-            if ($Name) { $objectName = $Name }
+            if ($Name) { $objectName = $Name.Replace("'", "''") }
 
             New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Virtual Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {

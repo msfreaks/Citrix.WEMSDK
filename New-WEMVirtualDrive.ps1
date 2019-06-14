@@ -77,6 +77,11 @@ function New-WEMVirtualDrive {
 
         Write-Verbose "Name is unique: Continue"
 
+        # escape possible query breakers
+        $Name = ConvertTo-StringEscaped $Name
+        $Description = ConvertTo-StringEscaped $Description
+        $TargetPath = ConvertTo-StringEscaped $TargetPath
+
         # apply Advanced Option values
         [xml]$actionReserved = $defaultVUEMVirtualDriveReserved
         ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value = [string][int]$SetAsHomeDriveEnabled

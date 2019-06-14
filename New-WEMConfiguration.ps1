@@ -39,6 +39,10 @@ function New-WEMConfiguration {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # escape possible query breakers
+        $Name = ConvertTo-StringEscaped $Name
+        $Description = ConvertTo-StringEscaped $Description
+
         # check if there's already a configuration with that name
         $SQLQuery = "SELECT COUNT(*) AS Site FROM VUEMSites WHERE Name LIKE '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery

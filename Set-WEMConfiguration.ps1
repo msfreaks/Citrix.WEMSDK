@@ -59,12 +59,12 @@ function Set-WEMConfiguration {
         }
         
         # if a new name for the configuration is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origSite.Name) {
-            $SQLQuery = "SELECT * FROM VUEMSites WHERE Name LIKE '$($Name)'"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origSite.Name) {
+            $SQLQuery = "SELECT * FROM VUEMSites WHERE Name LIKE '$($Name.Replace("'", "''"))'"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows) {
                 # name must be unique
-                Write-Error "There's already an application named '$($Name)'"
+                Write-Error "There's already an application named '$($Name.Replace("'", "''"))'"
                 Break
             }
     
@@ -73,11 +73,11 @@ function Set-WEMConfiguration {
         
         $SQLQuery = "UPDATE VUEMSites SET "
         if ($Name) { 
-            $SQLQuery += "Name = '$($Name)'"
+            $SQLQuery += "Name = '$($Name.Replace("'", "''"))'"
             if ([bool]($MyInvocation.BoundParameters.Keys -match 'description')) { $SQLQuery += ", " }
         }
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'description')) {
-            $SQLQuery += "Description = '$($Description)'"
+            $SQLQuery += "Description = '$($Description.Replace("'", "''"))'"
         }
         $SQLQuery += " WHERE IdSite = $($IdSite)"
 
@@ -90,7 +90,7 @@ function Set-WEMConfiguration {
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
     
             # Updating the ChangeLog
-            New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdSite -ChangeType "Update" -ObjectName $result.Tables.Rows.Name -ObjectType "Global\Site" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null 
+            New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdSite -ChangeType "Update" -ObjectName $result.Tables.Rows.Name.Replace("'", "''") -ObjectType "Global\Site" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null 
 
         } else {
             Write-Error "You cannot modify the default site"

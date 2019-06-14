@@ -97,12 +97,12 @@ function Set-WEMNetworkDrive {
         }
         
         # if a new name for the action is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMNetDrives WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origAction.Name ) {
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMNetDrives WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Network Drive action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Network Drive action named '$($Name.Replace("'", "''"))' in the Configuration"
                 Break
             }
 
@@ -123,15 +123,15 @@ function Set-WEMNetworkDrive {
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
-                    $updateFields += "Name = '$($Name)'"
+                    $updateFields += "Name = '$($Name.Replace("'", "''"))'"
                     continue
                 }
                 "DisplayName" {
-                    $updateFields += "DisplayName = '$($DisplayName)'"
+                    $updateFields += "DisplayName = '$($DisplayName.Replace("'", "''"))'"
                     continue
                 }
                 "Description" {
-                    $updateFields += "Description = '$($Description)'"
+                    $updateFields += "Description = '$($Description.Replace("'", "''"))'"
                     continue
                 }
                 "State" {
@@ -139,15 +139,15 @@ function Set-WEMNetworkDrive {
                     continue
                 }
                 "TargetPath" {
-                    $updateFields += "TargetPath = '$($TargetPath)'"
+                    $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
                     continue
                 }
                 "UseExternalCredentials" {
-                    $updateFields += "UseExtCredentials = '$([int]$UseExternalCredentials)'"
+                    $updateFields += "UseExtCredentials = $([int]$UseExternalCredentials)"
                     continue
                 }
                 "ExternalUsername" {
-                    $updateFields += "ExtLogin = '$($ExternalUsername)'"
+                    $updateFields += "ExtLogin = '$($ExternalUsername.Replace("'", "''"))'"
                     continue
                 }
                 "ExternalPassword" {
@@ -184,7 +184,7 @@ function Set-WEMNetworkDrive {
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
-            if ($Name) { $objectName = $Name }
+            if ($Name) { $objectName = $Name.Replace("'", "''") }
 
             New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Network Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {

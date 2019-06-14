@@ -129,9 +129,18 @@ function New-WEMApplication {
     )
 
     process {
-        write-verbose "$($StartMenuTarget)"
-    
         Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        # escape possible query breakers
+        $Name = ConvertTo-StringEscaped $Name
+        $DisplayName = ConvertTo-StringEscaped $DisplayName
+        $Description = ConvertTo-StringEscaped $Description
+        $StartMenuTarget = ConvertTo-StringEscaped $StartMenuTarget
+        $TargetPath = ConvertTo-StringEscaped $TargetPath
+        $Parameters =  ConvertTo-StringEscaped $Parameters
+        $WorkingDirectory =  ConvertTo-StringEscaped $WorkingDirectory
+        $HotKey =  ConvertTo-StringEscaped $HotKey
+        $IconLocation =  ConvertTo-StringEscaped $IconLocation
 
         # name is unique if it's not yet used in the same Action Type in the site 
         $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"

@@ -69,12 +69,12 @@ function Set-WEMPort {
         }
         
         # if a new name for the action is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPorts WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origAction.Name ) {
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPorts WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Port action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Port action named '$($Name.Replace("'", "''"))' in the Configuration"
                 Break
             }
 
@@ -89,11 +89,11 @@ function Set-WEMPort {
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
-                    $updateFields += "Name = '$($Name)'"
+                    $updateFields += "Name = '$($Name.Replace("'", "''"))'"
                     continue
                 }
                 "Description" {
-                    $updateFields += "Description = '$($Description)'"
+                    $updateFields += "Description = '$($Description.Replace("'", "''"))'"
                     continue
                 }
                 "State" {
@@ -101,11 +101,11 @@ function Set-WEMPort {
                     continue
                 }
                 "PortName" {
-                    $updateFields += "PortName = '$($PortName)'"
+                    $updateFields += "PortName = '$($PortName.Replace("'", "''"))'"
                     continue
                 }
                 "TargetPath" {
-                    $updateFields += "TargetPath = '$($TargetPath)'"
+                    $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
                     continue
                 }
                 Default {}
@@ -120,7 +120,7 @@ function Set-WEMPort {
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
-            if ($Name) { $objectName = $Name }
+            if ($Name) { $objectName = $Name.Replace("'", "''") }
 
             New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Port" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {

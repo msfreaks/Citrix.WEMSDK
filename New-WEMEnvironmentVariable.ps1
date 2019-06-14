@@ -68,6 +68,12 @@ function New-WEMEnvironmentVariable {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # escape possible query breakers
+        $Name = ConvertTo-StringEscaped $Name
+        $Description = ConvertTo-StringEscaped $Description
+        $VariableName = ConvertTo-StringEscaped $VariableName
+        $VariableValue =  ConvertTo-StringEscaped $VariableValue
+        
         # name is unique if it's not yet used in the same Action Type in the site 
         $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMEnvVariables WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery

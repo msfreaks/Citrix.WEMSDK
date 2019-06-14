@@ -63,6 +63,12 @@ function New-WEMPort {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # escape possible query breakers
+        $Name = ConvertTo-StringEscaped $Name
+        $Description = ConvertTo-StringEscaped $Description
+        $PortName =  ConvertTo-StringEscaped $PortName
+        $TargetPath = ConvertTo-StringEscaped $TargetPath
+
         # name is unique if it's not yet used in the same Action Type in the site 
         $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPorts WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery

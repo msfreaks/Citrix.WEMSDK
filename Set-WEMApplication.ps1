@@ -139,12 +139,12 @@ function Set-WEMApplication {
         }
         
         # if a new name for the action is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origAction.Name ) {
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already an Application action named '$($Name)' in the Configuration"
+                Write-Error "There's already an Application action named '$($Name.Replace("'", "''"))' in the Configuration"
                 Break
             }
 
@@ -169,15 +169,15 @@ function Set-WEMApplication {
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
-                    $updateFields += "Name = '$($Name)'"
+                    $updateFields += "Name = '$($Name.Replace("'", "''"))'"
                     continue
                 }
                 "DisplayName" {
-                    $updateFields += "DisplayName = '$($DisplayName)'"
+                    $updateFields += "DisplayName = '$($DisplayName.Replace("'", "''"))'"
                     continue
                 }
                 "Description" {
-                    $updateFields += "Description = '$($Description)'"
+                    $updateFields += "Description = '$($Description.Replace("'", "''"))'"
                     continue
                 }
                 "State" {
@@ -185,31 +185,31 @@ function Set-WEMApplication {
                     continue
                 }
                 "StartMenuTarget" {
-                    $updateFields += "StartMenuTarget = '$($StartMenuTarget)'"
+                    $updateFields += "StartMenuTarget = '$($StartMenuTarget.Replace("'", "''"))'"
                     continue
                 }
                 "TargetPath" {
-                    $updateFields += "TargetPath = '$($TargetPath)'"
+                    $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
                     continue
                 }
                 "Parameters" {
-                    $updateFields += "Parameters = '$($Parameters)'"
+                    $updateFields += "Parameters = '$($Parameters.Replace("'", "''"))'"
                     continue
                 }
                 "WorkingDirectory" {
-                    $updateFields += "WorkingDirectory = '$($WorkingDirectory)'"
+                    $updateFields += "WorkingDirectory = '$($WorkingDirectory.Replace("'", "''"))'"
                     continue
                 }
                 "WindowStyle" {
-                    $updateFields += "WindowStyle = '$($WindowStyle)'"
+                    $updateFields += "WindowStyle = '$($WindowStyle.Replace("'", "''"))'"
                     continue
                 }
                 "HotKey" {
-                    $updateFields += "HotKey = '$($HotKey)'"
+                    $updateFields += "HotKey = '$($HotKey.Replace("'", "''"))'"
                     continue
                 }
                 "IconLocation" {
-                    $updateFields += "IconLocation = '$($IconLocation)'"
+                    $updateFields += "IconLocation = '$($IconLocation.Replace("'", "''"))'"
                     continue
                 }
                 "IconIndex" {
@@ -271,7 +271,7 @@ function Set-WEMApplication {
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
-            if ($Name) { $objectName = $Name }
+            if ($Name) { $objectName = $Name.Replace("'", "''") }
             
             New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {

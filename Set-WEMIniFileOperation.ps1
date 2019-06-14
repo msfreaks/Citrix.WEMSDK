@@ -84,12 +84,12 @@ function Set-WEMIniFileOperation {
         }
         
         # if a new name for the action is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMIniFilesOps WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origAction.Name ) {
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMIniFilesOps WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Ini File Operation action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Ini File Operation action named '$($Name.Replace("'", "''"))' in the Configuration"
                 Break
             }
 
@@ -104,11 +104,11 @@ function Set-WEMIniFileOperation {
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
-                    $updateFields += "Name = '$($Name)'"
+                    $updateFields += "Name = '$($Name.Replace("'", "''"))'"
                     continue
                 }
                 "Description" {
-                    $updateFields += "Description = '$($Description)'"
+                    $updateFields += "Description = '$($Description.Replace("'", "''"))'"
                     continue
                 }
                 "State" {
@@ -116,23 +116,19 @@ function Set-WEMIniFileOperation {
                     continue
                 }
                 "TargetPath" {
-                    $updateFields += "TargetPath = '$($TargetPath)'"
+                    $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
                     continue
                 }
                 "TargetSectionName" {
-                    $updateFields += "TargetSectionName = '$($TargetSectionName)'"
+                    $updateFields += "TargetSectionName = '$($TargetSectionName.Replace("'", "''"))'"
                     continue
                 }
                 "TargetValueName" {
-                    $updateFields += "TargetValueName = '$($TargetValueName)'"
+                    $updateFields += "TargetValueName = '$($TargetValueName.Replace("'", "''"))'"
                     continue
                 }
                 "TargetValue" {
-                    $updateFields += "TargetValue = '$($TargetValue)'"
-                    continue
-                }
-                "TargetPath" {
-                    $updateFields += "TargetPath = '$($TargetPath)'"
+                    $updateFields += "TargetValue = '$($TargetValue.Replace("'", "''"))'"
                     continue
                 }
                 "RunOnce" {
@@ -151,7 +147,7 @@ function Set-WEMIniFileOperation {
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
-            if ($Name) { $objectName = $Name }
+            if ($Name) { $objectName = $Name.Replace("'", "''") }
 
             New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Ini File Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {

@@ -236,6 +236,33 @@ Get-WEMIniFilesOp -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh 
 
 #endregion
 
+#region WEMExternalTask
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMExternalTask
+$conf | New-WEMExternalTask -Connection $dbconn -Verbose -Name "POSH External Task 1" -TargetPath "C:\Windows\SetScreensaver.exe" -TargetArguments "-Seconds 600" -RunHidden $true
+$conf | New-WEMExternalTask -Connection $dbconn -Verbose -Name "POSH External Task 2" -TargetPath "C:\Windows\Notepad.exe" -TargetArguments "'c:\temp\new file[]%.txt'" -WaitForFinish $false -TimeOut 120 -ExecuteOnlyAtLogon $true
+$conf | New-WEMExternalTask -Connection $dbconn -Verbose -Name "POSH Test 1" -TargetPath "C:\Windows\System32\explorer.exe" -TargetArguments "C:"
+$conf | New-WEMExternalTask -Connection $dbconn -Verbose -Name "POSH Test 2" -TargetPath "reg.exe"
+
+# Get-WEMExternalTask
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "External Task" | Format-Table
+$allExternalTasks = $conf | Get-WEMExternalTask -Connection $dbconn -Verbose
+$externalTaskTest = $conf | Get-WEMExternalTask -Connection $dbconn -Verbose -Name "*test 1"
+
+$allExternalTasks | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMExternalTask
+$allExternalTasks | ForEach-Object { Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMExternalTask" }
+Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdAction -Name "POSH Test 1 - Update" -TargetPath "dir"
+Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdAction -State "Disabled" -RunOnce $false -ExecuteOnlyAtLogon $true -ExecutionOrder 54
+
+# Remove-WEMAction (External Task)
+Get-WEMExtTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "External Task"
+Get-WEMExternalTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*task 2" | Remove-WEMExternalTask -Connection $dbconn -Verbose
+
+#endregion
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 

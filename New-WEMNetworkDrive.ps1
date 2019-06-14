@@ -91,6 +91,13 @@ function New-WEMNetworkDrive {
 
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # escape possible query breakers
+        $Name = ConvertTo-StringEscaped $Name
+        $DisplayName = ConvertTo-StringEscaped $DisplayName
+        $Description = ConvertTo-StringEscaped $Description
+        $TargetPath = ConvertTo-StringEscaped $TargetPath
+        $ExternalUsername =  ConvertTo-StringEscaped $ExternalUsername
+
         # name is unique if it's not yet used in the same Action Type in the site 
         $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMNetDrives WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
