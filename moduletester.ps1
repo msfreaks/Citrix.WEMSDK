@@ -263,6 +263,33 @@ Get-WEMExternalTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*ta
 
 #endregion
 
+#region WEMFileSystemOperation
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMFileSystemOperation
+$conf | New-WEMFileSystemOperation -Connection $dbconn -Verbose -Name "POSH File System Operation 1" -SourcePath "\\server\share\file.ini" -TargetPath "C:\Windows\file.ini"
+$conf | New-WEMFileSystemOperation -Connection $dbconn -Verbose -Name "POSH File System Operation 2" -SourcePath "C:\Temp" -ActionType "Create Directory"
+$conf | New-WEMFileSystemOperation -Connection $dbconn -Verbose -Name "POSH Test 1" -SourcePath "\\server\share\malware.exe" -TargetPath "C:\Windows\System32\explorer.exe" -RunOnce $false -ExecutionOrder 69
+$conf | New-WEMFileSystemOperation -Connection $dbconn -Verbose -Name "POSH Test 2" -SourcePath "\\server\share\malware.exe" -TargetPath "C:\Windows\System32\notepad.exe" -TargetOverwrite $false
+
+# Get-WEMFileSystemOperation
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "File System Operation" | Format-Table
+$allFileSystemOps = $conf | Get-WEMFileSystemOperation -Connection $dbconn -Verbose
+$fileSystemOpsTest = $conf | Get-WEMFileSystemOp -Connection $dbconn -Verbose -Name "*test 1"
+
+$allExternalTasks | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMFileSystemOperation
+$allExternalTasks | ForEach-Object { Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMExternalTask" }
+Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdAction -Name "POSH Test 1 - Update" -TargetPath "dir"
+Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdAction -State "Disabled" -RunOnce $false -ExecuteOnlyAtLogon $true -ExecutionOrder 54
+
+# Remove-WEMAction (File System Operation)
+Get-WEMExtTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "External Task"
+Get-WEMExternalTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*task 2" | Remove-WEMExternalTask -Connection $dbconn -Verbose
+
+#endregion
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 

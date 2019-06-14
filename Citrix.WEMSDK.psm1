@@ -670,7 +670,7 @@ Function New-VUEMFileSystemOpObject() {
     Return [pscustomobject] @{
         'IdAction' = [int]$DataRow.IdFileSystemOp
         'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"FileSystem Operation"
+        'Category' = [string]"File System Operation"
         'Name' = [string]$DataRow.Name
         'Description' = [string]$DataRow.Description
         'State' = [string]$tableVUEMState[[int]$DataRow.State]
