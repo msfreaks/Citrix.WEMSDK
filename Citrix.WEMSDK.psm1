@@ -101,6 +101,7 @@ function ConvertTo-StringEscaped {
 
     return $UnEscapedString
 }
+
 <#
     .Synopsis
     Creates an entry in the VUEMChangesLog table.
@@ -797,6 +798,7 @@ $defaultVUEMNetworkDriveReserved         = '<?xml version="1.0" encoding="utf-8"
 $defaultVUEMVirtualDriveReserved         = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMEnvironmentVariableReserved  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMExternalTaskReserved         = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
+$defaultVUEMFileSystemOperationReserved  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 
 $tableVUEMState = @{
     0 = "Disabled"
