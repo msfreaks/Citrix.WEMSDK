@@ -44,7 +44,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMNetworkDrive {
+function Set-WEMFileSystemOperation {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -55,7 +55,7 @@ function Set-WEMNetworkDrive {
         [Parameter(Mandatory=$False)]
         [string]$Description,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
+        [string]$State,
         [Parameter(Mandatory=$False)]
         [string]$SourcePath,
         [Parameter(Mandatory=$False)]
@@ -72,41 +72,36 @@ function Set-WEMNetworkDrive {
     )
 
     process {
-        ### TO-DO
-        ### $ExternalPassword Base64 encoding type before storing in database
-
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMNetworkDrive -Connection $Connection -IdAction $IdAction
+        $origAction = Get-WEMFileSystemOperation -Connection $Connection -IdAction $IdAction
 
         # only continue if the action was found
         if (-not $origAction) { 
-            Write-Warning "No Network Drive action found for Id $($IdAction)"
+            Write-Warning "No File System Operation action found for Id $($IdAction)"
             Break
         }
         
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMNetDrives WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMFileSystemOps WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Network Drive action named '$($Name.Replace("'", "''"))' in the Configuration"
+                Write-Error "There's already a File System Operation action named '$($Name.Replace("'", "''"))' in the Configuration"
                 Break
             }
 
             Write-Verbose "Name is unique: Continue"
-
         }
 
         # grab default action xml (advanced options) and set individual advanced option variables
-        [xml]$actionReserved = $defaultVUEMNetworkDriveReserved
-        $actionSelfHealingEnabled                  = [string][int]$origAction.SelfHealingEnabled
-        $actionSetAsHomeDriveEnabled               = [string][int]$origAction.SetAsHomeDriveEnabled
+        [xml]$actionReserved = $defaultVUEMFileSystemOperationReserved
+        $actionExecutionOrder = [string][int]$origAction.ExecutionOrder
 
         # build the query to update the action
-        $SQLQuery = "UPDATE VUEMNetDrives SET "
+        $SQLQuery = "UPDATE VUEMFileSystemOps SET "
         $updateFields = @()
         $updateAdvanced = $false
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
@@ -114,10 +109,6 @@ function Set-WEMNetworkDrive {
             switch ($key) {
                 "Name" {
                     $updateFields += "Name = '$($Name.Replace("'", "''"))'"
-                    continue
-                }
-                "DisplayName" {
-                    $updateFields += "DisplayName = '$($DisplayName.Replace("'", "''"))'"
                     continue
                 }
                 "Description" {
@@ -128,33 +119,25 @@ function Set-WEMNetworkDrive {
                     $updateFields += "State = $($tableVUEMState["$State"])"
                     continue
                 }
+                "SourcePath" {
+                    $updateFields += "SourcePath = '$($SourcePath.Replace("'", "''"))'"
+                    continue
+                }
                 "TargetPath" {
                     $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
                     continue
                 }
-                "UseExternalCredentials" {
-                    $updateFields += "UseExtCredentials = $([int]$UseExternalCredentials)"
+                "TargetOverwrite" {
+                    $updateFields += "TargetOverwrite = $([int]$TargetOverwrite)"
                     continue
                 }
-                "ExternalUsername" {
-                    $updateFields += "ExtLogin = '$($ExternalUsername.Replace("'", "''"))'"
-                    continue
-                }
-                "ExternalPassword" {
-                    ### TO-DO
-                    ### $ExternalPassword Base64 encoding type before storing in database
-
-                    $updateFields += "ExtPassword = '$($ExternalPassword)'"
-                    continue
-                }
-                "SelfHealingEnabled" {
+                "ExecutionOrder" {
                     $updateAdvanced = $True
-                    $actionSelfHealingEnabled = [string][int]$SelfHealingEnabled
+                    $actionExecutionOrder = [string][int]$ExecutionOrder
                     continue
                 }
-                "SetAsHomeDriveEnabled" {
-                    $updateAdvanced = $True
-                    $actionSelfHealingEnabled = [string][int]$SetAsHomeDriveEnabled
+                "RunOnce" {
+                    $updateFields += "RunOnce = $([int]$RunOnce)"
                     continue
                 }
                 Default {}
@@ -162,24 +145,23 @@ function Set-WEMNetworkDrive {
         }
 
         # apply actual Advanced Option values
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value    = $actionSelfHealingEnabled
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value = $actionSetAsHomeDriveEnabled
+        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecOrder"}).Value    = $actionExecutionOrder
 
         # if anything needs to be updated, update the action
         if($updateFields -or $updateAdvanced) { 
             if ($updateFields) { $SQLQuery += "{0}, " -f ($updateFields -join ", ") }
             if ($updateAdvanced) { $SQLQuery += "Reserved01 = '$($actionReserved.OuterXml)', " }
-            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdNetDrive = $($IdAction)"
+            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdFileSystemOp = $($IdAction)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
             if ($Name) { $objectName = $Name.Replace("'", "''") }
 
-            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Network Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\File System Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }
     }
 }
-New-Alias -Name Set-WEMNetDrive -Value Set-WEMNetworkDrive
+New-Alias -Name Set-WEMFileSystemOp -Value Set-WEMFileSystemOperation

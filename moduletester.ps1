@@ -259,7 +259,7 @@ Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdA
 
 # Remove-WEMAction (External Task)
 Get-WEMExtTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "External Task"
-Get-WEMExternalTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*task 2" | Remove-WEMExternalTask -Connection $dbconn -Verbose
+Get-WEMExternalTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*test 2" | Remove-WEMExternalTask -Connection $dbconn -Verbose
 
 #endregion
 
@@ -277,7 +277,7 @@ $conf | Get-WEMAction -Connection $dbconn -Verbose -Category "File System Operat
 $allFileSystemOps = $conf | Get-WEMFileSystemOperation -Connection $dbconn -Verbose
 $fileSystemOpsTest = $conf | Get-WEMFileSystemOp -Connection $dbconn -Verbose -Name "*test 1"
 
-$allExternalTasks | Select-Object IdSite, IdAction, Name, Description
+$allFileSystemOps | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMFileSystemOperation
 $allFileSystemOps | ForEach-Object { Set-WEMFileSystemOperation -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMFileSystemOperation" }
@@ -286,7 +286,7 @@ Set-WEMFileSystemOperation -Connection $dbconn -Verbose -IdAction $fileSystemOps
 
 # Remove-WEMAction (File System Operation)
 Get-WEMFileSystemOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "File System Operation"
-Get-WEMFileSystemOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*task 2" | Remove-WEMFileSystemOperation -Connection $dbconn -Verbose
+Get-WEMFileSystemOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*test 2" | Remove-WEMFileSystemOperation -Connection $dbconn -Verbose
 
 #endregion
 
