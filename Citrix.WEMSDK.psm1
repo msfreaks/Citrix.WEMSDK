@@ -560,18 +560,18 @@ Function New-VUEMIniFileOpObject() {
     Write-Verbose "Found Ini File action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
     Return [pscustomobject] @{
-        'IdAction' = [int]$DataRow.IdIniFileOp
-        'IdSite' = [int]$DataRow.IdSite
-        'Category' = [string]"Ini File"
-        'Name' = [string]$DataRow.Name
+        'IdAction'    = [int]$DataRow.IdIniFileOp
+        'IdSite'      = [int]$DataRow.IdSite
+        'Category'    = [string]"Ini File Operation"
+        'Name'        = [string]$DataRow.Name
         'Description' = [string]$DataRow.Description
-        'State' = [string]$tableVUEMState[[int]$DataRow.State]
-        'ActionType' = [string]$tableVUEMIniFileOpActionType[[int]$DataRow.ActionType]
-        'TargetPath' = [string]$DataRow.TargetPath
-        'TargetName' = [string]$DataRow.TargetName
+        'State'       = [string]$tableVUEMState[[int]$DataRow.State]
+        'ActionType'  = [string]$tableVUEMIniFileOpActionType[[int]$DataRow.ActionType]
+        'TargetPath'  = [string]$DataRow.TargetPath
+        'TargetName'  = [string]$DataRow.TargetName
         'TargetValue' = [string]$DataRow.TargetValue
-        'RunOnce' = [bool]$DataRow.RunOnce
-        'Version' = [int]$DataRow.RevisionId
+        'RunOnce'     = [bool]$DataRow.RunOnce
+        'Version'     = [int]$DataRow.RevisionId
     }
 }
 
@@ -625,10 +625,10 @@ Function New-VUEMExtTaskObject() {
 
 <#
     .Synopsis
-    Converts SQL Data to an Evironment Variable Action object
+    Converts SQL Data to an File System Operation Action object
 
     .Description
-    Converts SQL Data to an Environment Variable Action object
+    Converts SQL Data to an File System Operation Action object
 
     .Link
     https://msfreaks.wordpress.com
@@ -891,7 +891,7 @@ $tableVUEMActionCategoryId = @{
     "Registry Entry"        = "IdRegValue"
     "Environment Variable"  = "IdEnvVariable"
     "Port"                  = "IdPort"
-    "Ini File"              = "IdIniFileOp"
+    "Ini File Operation"    = "IdIniFileOp"
     "External Task"         = "IdExtTask"
     "File System Operation" = "IdFileSystemOp"
     "User DSN"              = "IdUserDSN"

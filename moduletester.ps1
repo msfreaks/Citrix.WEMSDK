@@ -209,6 +209,33 @@ Get-WEMPort -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 2
 
 #endregion
 
+#region WEMIniFileOperation
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMIniFileOperation
+$conf | New-WEMIniFileOperation -Connection $dbconn -Verbose -Name "POSH Ini File Op 1" -TargetPath "C:\Windows\system.ini" -TargetSectionName "startup" -TargetValueName "init" -TargetValue "None"
+$conf | New-WEMIniFileOperation -Connection $dbconn -Verbose -Name "POSH Ini File Op 2" -TargetPath "C:\Windows\system.ini" -TargetSectionName "startup" -TargetValueName "deinit"
+$conf | New-WEMIniFileOperation -Connection $dbconn -Verbose -Name "POSH Test 1" -TargetPath "C:\Windows\system.ini" -TargetSectionName "Test" -TargetValueName "1" -TargetValue "A"
+$conf | New-WEMIniFileOperation -Connection $dbconn -Verbose -Name "POSH Test 2" -TargetPath "C:\Windows\system.ini" -TargetSectionName "Test" -TargetValueName "2" -TargetValue "B"
+
+# Get-WEMIniFileOperation
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Ini File Operation" | Format-Table
+$allIniFileOps = $conf | Get-WEMIniFileOperation -Connection $dbconn -Verbose
+$iniFileOpTest = $conf | Get-WEMIniFileOperation -Connection $dbconn -Verbose -Name "*test 1"
+
+$allIniFileOps | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMIniFileOperation
+$allIniFileOps | ForEach-Object { Set-WEMIniFileOperation -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMIniFileOperation" }
+Set-WEMIniFileOperation -Connection $dbconn -Verbose -IdAction $iniFileOpTest.IdAction -Name "POSH Test 1 - Update" -TargetValue "Updated"
+Set-WEMIniFileOperation -Connection $dbconn -Verbose -IdAction $iniFileOpTest.IdAction -State "Disabled" -RunOnce $false
+
+# Remove-WEMAction (Ini File Operation)
+Get-WEMIniFileOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Ini File Operation"
+Get-WEMIniFilesOp -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 2" | Remove-WEMIniFileOperation -Connection $dbconn -Verbose
+
+#endregion
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 

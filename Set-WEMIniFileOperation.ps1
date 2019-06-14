@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Registry Entry Action object in the WEM Database.
+    Updates a WEM Ini File Operation Action object in the WEM Database.
 
     .Description
-    Updates a WEM Registry Entry Action object in the WEM Database.
+    Updates a WEM Ini File Operation Action object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,13 +20,13 @@
     .Parameter State
     ..
 
-    .Parameter TargetName
-    ..
-
     .Parameter TargetPath
     ..
 
-    .Parameter TargetType
+    .Parameter TargetSectionName
+    ..
+
+    .Parameter TargetValueName
     ..
 
     .Parameter TargetValue
@@ -44,7 +44,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMRegistryEntry {
+function Set-WEMIniFileOperation {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -57,11 +57,11 @@ function Set-WEMRegistryEntry {
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
         [Parameter(Mandatory=$False)]
-        [string]$TargetName,
-        [Parameter(Mandatory=$False)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False)]
-        [string]$TargetType,
+        [string]$TargetSectionName,
+        [Parameter(Mandatory=$False)]
+        [string]$TargetValueName,
         [Parameter(Mandatory=$False)]
         [string]$TargetValue,
         [Parameter(Mandatory=$False)]
@@ -75,21 +75,21 @@ function Set-WEMRegistryEntry {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMRegistryEntry -Connection $Connection -IdAction $IdAction
+        $origAction = Get-WEMIniFileOperation -Connection $Connection -IdAction $IdAction
 
         # only continue if the action was found
         if (-not $origAction) { 
-            Write-Warning "No Registry Entry action found for Id $($IdAction)"
+            Write-Warning "No Ini File Operation action found for Id $($IdAction)"
             Break
         }
         
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMRegValues WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMIniFilesOps WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already a Registry Entry action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Ini File Operation action named '$($Name)' in the Configuration"
                 Break
             }
 
@@ -98,7 +98,7 @@ function Set-WEMRegistryEntry {
         }
 
         # build the query to update the action
-        $SQLQuery = "UPDATE VUEMRegValues SET "
+        $SQLQuery = "UPDATE VUEMIniFilesOps SET "
         $updateFields = @()
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
         foreach ($key in $keys) {
@@ -115,20 +115,24 @@ function Set-WEMRegistryEntry {
                     $updateFields += "State = $($tableVUEMState["$State"])"
                     continue
                 }
-                "TargetName" {
-                    $updateFields += "TargetName = '$($TargetName)'"
-                    continue
-                }
                 "TargetPath" {
                     $updateFields += "TargetPath = '$($TargetPath)'"
                     continue
                 }
-                "TargetType" {
-                    $updateFields += "TargetType = '$($TargetType)'"
+                "TargetSectionName" {
+                    $updateFields += "TargetSectionName = '$($TargetSectionName)'"
+                    continue
+                }
+                "TargetValueName" {
+                    $updateFields += "TargetValueName = '$($TargetValueName)'"
                     continue
                 }
                 "TargetValue" {
                     $updateFields += "TargetValue = '$($TargetValue)'"
+                    continue
+                }
+                "TargetPath" {
+                    $updateFields += "TargetPath = '$($TargetPath)'"
                     continue
                 }
                 "RunOnce" {
@@ -142,17 +146,17 @@ function Set-WEMRegistryEntry {
         # if anything needs to be updated, update the action
         if($updateFields) { 
             if ($updateFields) { $SQLQuery += "{0}, " -f ($updateFields -join ", ") }
-            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdRegValue = $($IdAction)"
+            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdIniFileOp = $($IdAction)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
             if ($Name) { $objectName = $Name }
 
-            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Registry Value" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Ini File Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }
     }
 }
-New-Alias -Name Set-WEMRegValue -Value Set-WEMRegistryEntry
+New-Alias -Name Set-WEMIniFilesOp -Value Set-WEMIniFileOperation
