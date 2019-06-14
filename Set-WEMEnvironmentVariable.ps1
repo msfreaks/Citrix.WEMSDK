@@ -47,9 +47,9 @@ function Set-WEMEnvironmentVariable {
         [Parameter(Mandatory=$False)]
         [string]$Name,
         [Parameter(Mandatory=$False)]
-        [string]$Description = "",
+        [string]$Description,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
+        [string]$State,
         [Parameter(Mandatory=$False)]
         [string]$VariableName,
         [Parameter(Mandatory=$False)]

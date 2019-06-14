@@ -280,13 +280,13 @@ $fileSystemOpsTest = $conf | Get-WEMFileSystemOp -Connection $dbconn -Verbose -N
 $allExternalTasks | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMFileSystemOperation
-$allExternalTasks | ForEach-Object { Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMExternalTask" }
-Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdAction -Name "POSH Test 1 - Update" -TargetPath "dir"
-Set-WEMExternalTask -Connection $dbconn -Verbose -IdAction $externalTaskTest.IdAction -State "Disabled" -RunOnce $false -ExecuteOnlyAtLogon $true -ExecutionOrder 54
+$allFileSystemOps | ForEach-Object { Set-WEMFileSystemOperation -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMFileSystemOperation" }
+Set-WEMFileSystemOperation -Connection $dbconn -Verbose -IdAction $fileSystemOpsTest.IdAction -Name "POSH Test 1 - Update" -TargetPath "C:\Windows\screensaver.exe"
+Set-WEMFileSystemOperation -Connection $dbconn -Verbose -IdAction $fileSystemOpsTest.IdAction -State "Disabled" -RunOnce $True -ExecutionOrder 666
 
 # Remove-WEMAction (File System Operation)
-Get-WEMExtTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "External Task"
-Get-WEMExternalTask -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*task 2" | Remove-WEMExternalTask -Connection $dbconn -Verbose
+Get-WEMFileSystemOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "File System Operation"
+Get-WEMFileSystemOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "*task 2" | Remove-WEMFileSystemOperation -Connection $dbconn -Verbose
 
 #endregion
 

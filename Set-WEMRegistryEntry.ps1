@@ -53,9 +53,9 @@ function Set-WEMRegistryEntry {
         [Parameter(Mandatory=$False)]
         [string]$Name,
         [Parameter(Mandatory=$False)]
-        [string]$Description = "",
+        [string]$Description,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
+        [string]$State,
         [Parameter(Mandatory=$False)]
         [string]$TargetName,
         [Parameter(Mandatory=$False)]
@@ -65,7 +65,7 @@ function Set-WEMRegistryEntry {
         [Parameter(Mandatory=$False)]
         [string]$TargetValue,
         [Parameter(Mandatory=$False)]
-        [bool]$RunOnce = $False,
+        [bool]$RunOnce,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection

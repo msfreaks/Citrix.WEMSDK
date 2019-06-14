@@ -53,9 +53,9 @@ function Set-WEMIniFileOperation {
         [Parameter(Mandatory=$False)]
         [string]$Name,
         [Parameter(Mandatory=$False)]
-        [string]$Description = "",
+        [string]$Description,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
+        [string]$State,
         [Parameter(Mandatory=$False)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False)]

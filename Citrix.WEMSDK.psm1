@@ -661,7 +661,7 @@ Function New-VUEMFileSystemOpObject() {
         [System.Data.DataRow]$DataRow
     )
 
-    Write-Verbose "Found FileSystem Operations action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+    Write-Verbose "Found File System Operations action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
     $vuemActionReserved = [string]$DataRow.Reserved01
 

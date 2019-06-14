@@ -62,9 +62,9 @@ function Set-WEMExternalTask {
         [Parameter(Mandatory=$False)]
         [string]$Name,
         [Parameter(Mandatory=$False)]
-        [string]$Description = "",
+        [string]$Description,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
+        [string]$State,
         [Parameter(Mandatory=$False)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False)]
@@ -74,13 +74,13 @@ function Set-WEMExternalTask {
         [Parameter(Mandatory=$False)]
         [bool]$WaitForFinish = $True,
         [Parameter(Mandatory=$False)]
-        [int]$TimeOut = 30,
+        [int]$TimeOut,
         [Parameter(Mandatory=$False)]
-        [int]$ExecutionOrder = 0,
+        [int]$ExecutionOrder,
         [Parameter(Mandatory=$False)]
-        [bool]$RunOnce = $True,
+        [bool]$RunOnce,
         [Parameter(Mandatory=$False)]
-        [bool]$ExecuteOnlyAtLogon = $False,
+        [bool]$ExecuteOnlyAtLogon,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection

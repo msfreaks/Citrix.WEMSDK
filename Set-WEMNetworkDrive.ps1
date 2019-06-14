@@ -61,21 +61,21 @@ function Set-WEMNetworkDrive {
         [Parameter(Mandatory=$False)]
         [string]$DisplayName,
         [Parameter(Mandatory=$False)]
-        [string]$Description = "",
+        [string]$Description,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
+        [string]$State,
         [Parameter(Mandatory=$False)]
         [string]$TargetPath,
         [Parameter(Mandatory=$False)]
-        [bool]$UseExternalCredentials = $False,
+        [bool]$UseExternalCredentials,
         [Parameter(Mandatory=$False)]
-        [string]$ExternalUsername = $null,
+        [string]$ExternalUsername,
         [Parameter(Mandatory=$False)]
-        [string]$ExternalPassword = $null,
+        [string]$ExternalPassword,
         [Parameter(Mandatory=$False)]
-        [bool]$SelfHealingEnabled = $false,
+        [bool]$SelfHealingEnabled,
         [Parameter(Mandatory=$False)]
-        [bool]$SetAsHomeDriveEnabled = $false,
+        [bool]$SetAsHomeDriveEnabled,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
