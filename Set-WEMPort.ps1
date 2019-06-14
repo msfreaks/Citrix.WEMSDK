@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Environment Variable Action object in the WEM Database.
+    Updates a WEM Port Action object in the WEM Database.
 
     .Description
-    Updates a WEM Environment Variable Action object in the WEM Database.
+    Updates a WEM Port Action object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,13 +20,10 @@
     .Parameter State
     ..
 
-    .Parameter VariableName
+    .Parameter PortName
     ..
 
-    .Parameter VariableValue
-    ..
-
-    .Parameter ExecutionOrder
+    .Parameter TargetPath
     ..
 
     .Parameter Connection
@@ -38,7 +35,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMEnvironmentVariable {
+function Set-WEMPort {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -51,11 +48,9 @@ function Set-WEMEnvironmentVariable {
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
         [Parameter(Mandatory=$False)]
-        [string]$VariableName,
+        [string]$PortName,
         [Parameter(Mandatory=$False)]
-        [string]$VariableValue,
-        [Parameter(Mandatory=$False)]
-        [int]$ExecutionOrder,
+        [string]$TargetPath,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
@@ -65,21 +60,21 @@ function Set-WEMEnvironmentVariable {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original action
-        $origAction = Get-WEMEnvironmentVariable -Connection $Connection -IdAction $IdAction
+        $origAction = Get-WEMPort -Connection $Connection -IdAction $IdAction
 
         # only continue if the action was found
         if (-not $origAction) { 
-            Write-Warning "No Environment Variable action found for Id $($IdAction)"
+            Write-Warning "No Port action found for Id $($IdAction)"
             Break
         }
         
         # if a new name for the action is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name -notlike $origAction.Name ) {
-            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMEnvVariables WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
+            $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPorts WHERE Name LIKE '$($Name)' AND IdSite = $($origAction.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.Action) {
                 # name must be unique
-                Write-Error "There's already an Environment Variable action named '$($Name)' in the Configuration"
+                Write-Error "There's already a Port action named '$($Name)' in the Configuration"
                 Break
             }
 
@@ -87,14 +82,9 @@ function Set-WEMEnvironmentVariable {
 
         }
 
-        # grab default action xml (advanced options) and set individual advanced option variables
-        [xml]$actionReserved = $defaultVUEMEnvironmentVariableReserved
-        $actionExecutionOrder = [string][int]$origAction.ExecutionOrder
-
         # build the query to update the action
-        $SQLQuery = "UPDATE VUEMEnvVariables SET "
+        $SQLQuery = "UPDATE VUEMPorts SET "
         $updateFields = @()
-        $updateAdvanced = $false
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
         foreach ($key in $keys) {
             switch ($key) {
@@ -110,41 +100,31 @@ function Set-WEMEnvironmentVariable {
                     $updateFields += "State = $($tableVUEMState["$State"])"
                     continue
                 }
-                "VariableName" {
-                    $updateFields += "VariableName = '$($VariableName)'"
+                "PortName" {
+                    $updateFields += "PortName = '$($PortName)'"
                     continue
                 }
-                "VariableValue" {
-                    $updateFields += "VariableValue = '$($VariableValue)'"
-                    continue
-                }
-                "ExecutionOrder" {
-                    $updateAdvanced = $True
-                    $actionExecutionOrder = [string][int]$ExecutionOrder
+                "TargetPath" {
+                    $updateFields += "TargetPath = '$($TargetPath)'"
                     continue
                 }
                 Default {}
             }
         }
 
-        # apply actual Advanced Option values
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecOrder"}).Value    = $actionExecutionOrder
-
         # if anything needs to be updated, update the action
-        if($updateFields -or $updateAdvanced) { 
+        if($updateFields) { 
             if ($updateFields) { $SQLQuery += "{0}, " -f ($updateFields -join ", ") }
-            if ($updateAdvanced) { $SQLQuery += "Reserved01 = '$($actionReserved.OuterXml)', " }
-            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdEnvVariable = $($IdAction)"
+            $SQLQuery += "RevisionId = $($origAction.Version + 1) WHERE IdPort = $($IdAction)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
             $objectName = $origAction.Name
             if ($Name) { $objectName = $Name }
 
-            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Environment Variable" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdAction -ChangeType "Update" -ObjectName $objectName -ObjectType "Actions\Port" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }
     }
 }
-New-Alias -Name Set-WEMEnvVariable -Value Set-WEMEnvironmentVariable

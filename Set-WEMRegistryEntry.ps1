@@ -100,7 +100,6 @@ function Set-WEMRegistryEntry {
         # build the query to update the action
         $SQLQuery = "UPDATE VUEMRegValues SET "
         $updateFields = @()
-        $updateAdvanced = $false
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
         foreach ($key in $keys) {
             switch ($key) {

@@ -182,6 +182,33 @@ Get-WEMEnvironmentVariable -Connection $dbconn -Verbose -IdSite $conf.IdSite -Na
 
 #endregion
 
+#region WEMPort
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMPort
+$conf | New-WEMPort -Connection $dbconn -Verbose -Name "POSH Port COM1:" -PortName "COM1:" -TargetPath "Unknown COM port"
+$conf | New-WEMPort -Connection $dbconn -Verbose -Name "POSH Port LPT4:" -PortName "LPT4:" -TargetPath "Unknown LPT port"
+$conf | New-WEMPort -Connection $dbconn -Verbose -Name "POSH Test 1" -PortName "COM9:" -TargetPath "\\.\COM9"
+$conf | New-WEMPort -Connection $dbconn -Verbose -Name "POSH Test 2" -PortName "LPT9:" -TargetPath "Unknown"
+
+# Get-WEMPort
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Port" | Format-Table
+$allPorts = $conf | Get-WEMPort -Connection $dbconn -Verbose
+$portTest = $conf | Get-WEMPort -Connection $dbconn -Verbose -Name "*test 1"
+
+$allPorts | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMPort
+$allPorts | ForEach-Object { Set-WEMPort -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMPort" }
+Set-WEMPort -Connection $dbconn -Verbose -IdAction $portTest.IdAction -Name "POSH Test 1 - Update" -TargetPath "Updated"
+Set-WEMPort -Connection $dbconn -Verbose -IdAction $portTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (Environment Variable)
+Get-WEMPort -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Port"
+Get-WEMPort -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 2" | Remove-WEMPort -Connection $dbconn -Verbose
+
+#endregion
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
