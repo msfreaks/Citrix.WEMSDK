@@ -290,6 +290,33 @@ Get-WEMFileSystemOperation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Na
 
 #endregion
 
+#region WEMUserDSN
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMUserDSN
+$conf | New-WEMUserDSN -Connection $dbconn -Verbose -Name "POSH User DSN 1" -TargetName "POSH DSN 1" -TargetDriverName "SQL Server" -TargetServer "ITWSQL" -TargetDatabaseName "CitrixWEM" -RunOnce $false
+$conf | New-WEMUserDSN -Connection $dbconn -Verbose -Name "POSH User DSN 2" -TargetName "POSH DSN 2" -TargetDriverName "SQL Server" -TargetServer "ITWSQL" -TargetDatabaseName "ADFS" -RunOnce $true
+$conf | New-WEMUserDSN -Connection $dbconn -Verbose -Name "POSH Test 1" -TargetName "POSH Test" -TargetDriverName "SQL Server" -TargetServer "ITWTEMP" -TargetDatabaseName "TEMPDB" -RunOnce $true
+$conf | New-WEMUserDSN -Connection $dbconn -Verbose -Name "POSH Test 2" -TargetName "POSH Test 2" -TargetDriverName "SQL Server" -TargetServer "ITWTEMP" -TargetDatabaseName "TEMPDB" -RunOnce $true
+
+# Get-WEMUserDSN
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "User DSN" | Format-Table
+$allUserDSNs = $conf | Get-WEMUserDSN -Connection $dbconn -Verbose
+$userDSNTest = $conf | Get-WEMUserDSN -Connection $dbconn -Verbose -Name "*test 1"
+
+$allUserDSNs | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMUserDSN
+$allUserDSNs | ForEach-Object { Set-WEMUserDSN -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMUserDSN" }
+Set-WEMUserDSN -Connection $dbconn -Verbose -IdAction $userDSNTest.IdAction -Name "POSH Test 1 - Update" -TargetServer "ITWSQL" -TargetDatabaseName "TheDB" -RunOnce $false
+Set-WEMUserDSN -Connection $dbconn -Verbose -IdAction $userDSNTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (User DSN)
+Get-WEMUserDSN -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "User DSN"
+Get-WEMUserDSN -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 2" | Remove-WEMUserDSN -Connection $dbconn -Verbose
+
+#endregion
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
