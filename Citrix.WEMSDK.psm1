@@ -763,9 +763,9 @@ Function New-VUEMFileAssocObject() {
         'Name'              = [string]$DataRow.Name
         'Description'       = [string]$DataRow.Description
         'State'             = [string]$tableVUEMState[[int]$DataRow.State]
-        'ActionType'        = [string]$tableVUEMPortActionType[[int]$DataRow.ActionType]
+        'ActionType'        = [string]$tableVUEMFileAssocActionType[[int]$DataRow.ActionType]
         'FileExtension'     = [string]$DataRow.FileExt
-        'ProgramId'         = [string]$DataRow.ProgramId
+        'ProgramId'         = [string]$DataRow.ProgId
         'Action'            = [string]$DataRow.Action
         'IsDefault'         = [bool]$DataRow.isDefault
         'TargetPath'        = [string]$DataRow.TargetPath

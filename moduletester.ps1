@@ -317,6 +317,33 @@ Get-WEMUserDSN -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh tes
 
 #endregion
 
+#region WEMFileAssociation
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMFileAssociation
+$conf | New-WEMFileAssociation -Connection $dbconn -Verbose -Name "POSH File Association 1" -FileExtension "txt" -ProgramId "666" -Action "open" -IsDefault $true -TargetPath "c:\notepad++\notepad++.exe" -TargetCommand "%1"
+$conf | New-WEMFileAssociation -Connection $dbconn -Verbose -Name "POSH File Association 2" -FileExtension "log" -ProgramId "789" -Action "edit" -IsDefault $false -TargetPath "c:\notepad++\notepad++.exe" -TargetCommand "%1"
+$conf | New-WEMFileAssociation -Connection $dbconn -Verbose -Name "POSH Test 1" -FileExtension "nfo" -ProgramId "123" -Action "print" -TargetPath "c:\notepad++\notepad++.exe" -TargetCommand "%1"
+$conf | New-WEMFileAssociation -Connection $dbconn -Verbose -Name "POSH Test 2" -FileExtension "csv" -ProgramId "450" -Action "open" -TargetPath "c:\notepad++\notepad++.exe" -TargetCommand "%1"
+
+# Get-WEMFileAssociation
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "File Association" | Format-Table
+$allFileAssocs = $conf | Get-WEMFileAssociation -Connection $dbconn -Verbose
+$fileAssocTest = $conf | Get-WEMFileAssoc -Connection $dbconn -Verbose -Name "*test 1"
+
+$allFileAssocs | Select-Object IdSite, IdAction, Name, Description
+
+# Set-WEMFileAssociation
+$allFileAssocs | ForEach-Object { Set-WEMFileAssociation -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMFileAssociation" }
+Set-WEMFileAssociation -Connection $dbconn -Verbose -IdAction $fileAssocTest.IdAction -Name "POSH Test 1 - Update" -Action "open" -IsDefault $true -TargetOverwrite $true -RunOnce $true 
+Set-WEMFileAssoc -Connection $dbconn -Verbose -IdAction $fileAssocTest.IdAction -State "Disabled"
+
+# Remove-WEMAction (File Association)
+Get-WEMFileAssociation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 1*" | Remove-WEMAction -Connection $dbconn -Verbose -Category "File Association"
+Get-WEMFileAssociation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test 2" | Remove-WEMFileAssociation -Connection $dbconn -Verbose
+
+#endregion
+
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
