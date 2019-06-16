@@ -347,6 +347,23 @@ Get-WEMFileAssociation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
+#region WEMADObject
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMADObject
+# NOTE: This test requires the ActiveDirectory module to be present!
+$conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADUser "amensc").SID
+$conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADUser "adm_amensc").SID
+$conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Domain Users").SID
+
+# Get-WEMADObject
+$conf | Get-WEMADObject -Connection $dbconn -Verbose | Format-Table
+$allADObjects = $conf | Get-WEMADObject -Connection $dbconn -Verbose
+
+$allADObjects | Select-Object IdSite, IdADObject, Name, Type
+
+#endregion
+
 # Cleanup
 # $conf | Remove-WEMConfiguration -Connection $dbconn
 #$allActions | Remove-WEMAction -Connection $dbconn

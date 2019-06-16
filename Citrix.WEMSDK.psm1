@@ -776,6 +776,67 @@ Function New-VUEMFileAssocObject() {
     }
 }
 
+function Get-ActiveDirectoryName {
+    param(
+        [string]$SID
+    )
+
+    $account = $null
+    $account = (New-Object DirectoryServices.DirectorySearcher "(objectsid=$($SID))").FindOne()
+
+    if($account) {
+        $type = "Group"
+        if ($account.Properties["objectclass"] -match "user") { $type = "user" } 
+        return [pscustomobject] @{
+                'DistinguishedName' = $account.Properties["distinguishedname"]
+                'Type' = $type
+        }
+    } else {
+        return $null
+    }
+}
+<#
+    .Synopsis
+    Converts SQL Data to an Active Directory object
+
+    .Description
+    Converts SQL Data to an Active Directory object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMADObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Active Directory object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $Type = [int]$DataRow.Type
+    if ($DataRow.Name -like "S-1-1-0" -or $DataRow.Name -like "S-1-5-32-544") { $Type = 3 }
+
+    Return [pscustomobject] @{
+        'IdADObject'        = [int]$DataRow.IdItem
+        'IdSite'            = [int]$DataRow.IdSite
+        'Name'              = [string]$DataRow.Name
+        'DistinguishedName' = [string]$DataRow.DistinguishedName
+        'Description'       = [string]$DataRow.Description
+        'State'             = [string]$tableVUEMState[[int]$DataRow.State]
+        'Type'              = [string]$tableVUEMADObjectType[$Type]
+        'Priority'          = [int]$DataRow.Priority
+        'Version'           = [int]$DataRow.RevisionId
+    }
+}
+
 #endregion
 
 #region Module Global variables
@@ -807,6 +868,14 @@ $tableVUEMState = @{
     "Disabled"         = 0
     "Enabled"          = 1
     "Maintenance Mode" = 2
+}
+$tableVUEMADObjectType = @{
+    1 = "User"
+    2 = "Group"
+    3 = "BUILTIN"
+    "User" = 1
+    "Group" = 2
+    "BUILTIN" = 3
 }
 $tableVUEMAppType = @{
     0 = "Installed application"
