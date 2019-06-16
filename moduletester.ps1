@@ -355,12 +355,18 @@ $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 $conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADUser "amensc").SID
 $conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADUser "adm_amensc").SID
 $conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Domain Users").SID
+$conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Domain Admins").SID
 
 # Get-WEMADObject
 $conf | Get-WEMADObject -Connection $dbconn -Verbose | Format-Table
 $allADObjects = $conf | Get-WEMADObject -Connection $dbconn -Verbose
 
 $allADObjects | Select-Object IdSite, IdADObject, Name, Type
+
+# Set-WEMADObject
+
+# Remove-WEMADObject
+Remove-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Connection $dbconn -Verbose -Name "S-1-5-21-1644858761-3736240991-3467507639-512").IdADObject
 
 #endregion
 
