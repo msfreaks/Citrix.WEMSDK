@@ -53,6 +53,7 @@ function Remove-WEMADObject {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdADObject -ChangeType "Delete" -ObjectName $origADObject.Name -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $origADObject.Name).Account)"
+        New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdADObject -ChangeType "Delete" -ObjectName (Get-ActiveDirectoryName $origADObject.Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }

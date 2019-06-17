@@ -93,7 +93,8 @@ function New-WEMADObject {
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdADObject -ChangeType "Create" -ObjectName $Name -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $Name).Account)"
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdADObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
         Get-WEMADObject -Connection $Connection -IdADObject $result.Tables.Rows.IdADObject

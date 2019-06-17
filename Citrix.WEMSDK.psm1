@@ -776,25 +776,33 @@ Function New-VUEMFileAssocObject() {
     }
 }
 
+<#
+    Helper function to turn SID into an object with Name and Type
+#>
 function Get-ActiveDirectoryName {
     param(
         [string]$SID
     )
 
     $account = $null
-    $account = (New-Object DirectoryServices.DirectorySearcher "(objectsid=$($SID))").FindOne()
-
-    if($account) {
+    $account = [adsi]"LDAP://<SID=$($SID)>"
+    try {
         $type = "Group"
-        if ($account.Properties["objectclass"] -match "user") { $type = "user" } 
+        if ($account.objectClass -match "user") { $type = "User" } 
+
+        $domain = ((($account.distinguishedName.ToLower().Split(",")) | Where-Object { $_ -match "dc="}).Replace("dc=","") -join ".")
+
         return [pscustomobject] @{
-                'DistinguishedName' = $account.Properties["distinguishedname"]
+                'DistinguishedName' = $account.distinguishedName.ToString()
                 'Type' = $type
+                'Account' = "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
         }
-    } else {
+    }
+    catch {
         return $null
     }
 }
+
 <#
     .Synopsis
     Converts SQL Data to an Active Directory object
