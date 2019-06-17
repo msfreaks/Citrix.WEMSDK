@@ -344,9 +344,6 @@ Get-WEMFileAssociation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "
 
 #endregion
 
-$allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
-$allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
-
 #region WEMADObject
 $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 
@@ -371,6 +368,12 @@ Set-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Conne
 Remove-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Enterprise Admins").SID).IdADObject
 
 #endregion
+
+$allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
+$allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
+
+$allADObjects = $conf | Get-WEMADObject -Connection $dbconn -Verbose
+$allADObjects | Where-Object { $_.Type -notlike "BUILTIN" } | Select-Object IdADObject, IdSite, Name, Description, State, Type, Priority | Format-Table
 
 # Cleanup
 # $conf | Remove-WEMConfiguration -Connection $dbconn
