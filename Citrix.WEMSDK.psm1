@@ -845,6 +845,45 @@ Function New-VUEMADObject() {
     }
 }
 
+<#
+    .Synopsis
+    Converts SQL Data to an Active Directory object
+
+    .Description
+    Converts SQL Data to an Active Directory object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMCondition() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Condition object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    Return [pscustomobject] @{
+        'IdCondition' = [int]$DataRow.IdFilterCondition
+        'IdSite'      = [int]$DataRow.IdSite
+        'Name'        = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State'       = [string]$tableVUEMState[[int]$DataRow.State]
+        'Type'        = [string]$tableVUEMFiltersConditionType[[int]$DataRow.Type].Name
+        'TestValue'   = [string]$DataRow.TestValue
+        'TestResult'  = [string]$DataRow.TestResult
+        'Version'     = [int]$DataRow.RevisionId
+    }
+}
+
 #endregion
 
 #region Module Global variables
@@ -961,7 +1000,130 @@ $tableVUEMFileAssocActionType = @{
     0 = "Create / Set File Association"
     "Create / Set File Association" = 0
 }
-
+$tableVUEMFiltersConditionType = @{
+    1 = @{ 'Name' = "Always True";'TestedValue' = "True";'TestedResult' = "True" }
+    2 = @{ 'Name' = "ComputerName Match";'UseName' = $true }
+    3 = @{ 'Name' = "ClientName Match";'UseName' = $true }
+    4 = @{ 'Name' = "IP Address Match";'UseName' = $true }
+    5 = @{ 'Name' = "Client IP Address Match";'UseName' = $true }
+    6 = @{ 'Name' = "Active Directory Site Match";;'UseName' = $true }
+    7 = @{ 'Name' = "Scheduling";'UseName' = $true }
+    8 = @{ 'Name' = "Environment Variable Match" }
+    9 = @{ 'Name' = "Registry Value Match" }
+    10 = @{ 'Name' = "WMI Query result Match";'UseName' = $true }
+    11 = @{ 'Name' = "User Country Match";'UseName' = $true }
+    12 = @{ 'Name' = "User UI Language Match";'UseName' = $true }
+    13 = @{ 'Name' = "User SBC Resource Type";'UseName' = $true;'TestedResult' = @("Desktop","Published Application") }
+    14 = @{ 'Name' = "OS Platform Type";'UseName' = $true;'TestedResult' = @("x86","x64") }
+    15 = @{ 'Name' = "Connection State";'UseName' = $true;'TestedResult' = @("Online","Offline") }
+    16 = @{ 'Name' = "XenApp Version Match";'UseName' = $true }
+    17 = @{ 'Name' = "XenApp Farm Name Match";'UseName' = $true }
+    18 = @{ 'Name' = "XenApp Zone Name Match";'UseName' = $true }
+    19 = @{ 'Name' = "XenDesktop Farm Name Match";'UseName' = $true }
+    20 = @{ 'Name' = "XenDesktop Desktop Group Name Match";'UseName' = $true }
+    21 = @{ 'Name' = "Provisioning Services Image Mode";'UseName' = $true;'TestedResult' = @("Shared","Private") }
+    22 = @{ 'Name' = "Client OS";'UseName' = $true;'TestedResult' = @("Windows XP","Windows Vista","Windows 7","Windows 8","Windows 8.1","Windows 2003","Windows 2008","Windows 2008 R2","Windows 2012","Windows 2012 R2","Windows 10","Windows 2016") }
+    23 = @{ 'Name' = "Active Directory Path Match";'UseName' = $true }
+    24 = @{ 'Name' = "Active Directory Attribute Match" }
+    25 = @{ 'Name' = "Name or Value is in List" }
+    26 = @{ 'Name' = "No ComputerName Match";'UseName' = $true }
+    27 = @{ 'Name' = "No ClientName Match";'UseName' = $true }
+    28 = @{ 'Name' = "No IP Address Match";'UseName' = $true }
+    29 = @{ 'Name' = "No Client IP Address Match";'UseName' = $true }
+    30 = @{ 'Name' = "No Active Directory Site Match";'UseName' = $true }
+    31 = @{ 'Name' = "No Environment Variable Match";'UseName' = $true }
+    32 = @{ 'Name' = "No Registry Value Match";'UseName' = $true }
+    33 = @{ 'Name' = "No WMI Query result Match";'UseName' = $true }
+    34 = @{ 'Name' = "No User Country Match";'UseName' = $true }
+    35 = @{ 'Name' = "No User UI Language Match";'UseName' = $true }
+    36 = @{ 'Name' = "No XenApp Version Match";'UseName' = $true }
+    37 = @{ 'Name' = "No XenApp Farm Name Match";'UseName' = $true }
+    38 = @{ 'Name' = "No XenApp Zone Name Match";'UseName' = $true }
+    39 = @{ 'Name' = "No XenDesktop Farm Name Match";'UseName' = $true }
+    40 = @{ 'Name' = "No XenDesktop Desktop Group Name Match";'UseName' = $true }
+    41 = @{ 'Name' = "No Active Directory Path Match";'UseName' = $true }
+    42 = @{ 'Name' = "No Active Directory Attribute Match" }
+    43 = @{ 'Name' = "Name or Value is not in List" }
+    44 = @{ 'Name' = "Client Remote OS Match";'UseName' = $true;'TestedResult' = @("Unknown","Windows","Epoc","Os2","Dos32","Linux","Mac","Ios","Android","Blackberry","PlayBook","WindowsMobile","Html5","Java","WinCehp","WinCeWyse","ThinOsWyse") }
+    45 = @{ 'Name' = "No Client Remote OS Match";'UseName' = $true;'TestedResult' = @("Unknown","Windows","Epoc","Os2","Dos32","Linux","Mac","Ios","Android","Blackberry","PlayBook","WindowsMobile","Html5","Java","WinCehp","WinCeWyse","ThinOsWyse") }
+    46 = @{ 'Name' = "Dynamic Value Match" }
+    47 = @{ 'Name' = "No Dynamic Value Match" }
+    48 = @{ 'Name' = "Transformer Mode State";'UseName' = $true;'TestedResult' = @("Disabled","Enabled") }
+    49 = @{ 'Name' = "No Client OS Match";'UseName' = $true;'TestedResult' = @("Windows XP","Windows Vista","Windows 7","Windows 8","Windows 8.1","Windows 2003","Windows 2008","Windows 2008 R2","Windows 2012","Windows 2012 R2","Windows 10","Windows 2016") }
+    50 = @{ 'Name' = "Active Directory Group Match";'UseName' = $true }
+    51 = @{ 'Name' = "No Active Directory Group Match";'UseName' = $true }
+    52 = @{ 'Name' = "File Version Match" }
+    53 = @{ 'Name' = "No File Version Match" }
+    54 = @{ 'Name' = "Network Connection State";'UseName' = $true;'TestedResult' = @("Available","Not Available") }
+    55 = @{ 'Name' = "Published Resource Name";'UseName' = $true }
+    56 = @{ 'Name' = "Name is in List" }
+    57 = @{ 'Name' = "Name is not in List" }
+    58 = @{ 'Name' = "File/Folder exists";'UseName' = $true }
+    59 = @{ 'Name' = "File/Folder does not exist";'UseName' = $true }
+    60 = @{ 'Name' = "DateTime Match";'UseName' = $true }
+    61 = @{ 'Name' = "No DateTime Match";'UseName' = $true }
+    "Always True" 								= 1
+    "ComputerName Match" 						= 2
+    "ClientName Match" 							= 3
+    "IP Address Match" 							= 4
+    "Client IP Address Match" 					= 5
+    "Active Directory Site Match" 				= 6
+    "Scheduling" 								= 7
+    "Environment Variable Match" 				= 8
+    "Registry Value Match" 						= 9
+    "WMI Query result Match" 					= 10
+    "User Country Match" 						= 11
+    "User UI Language Match" 					= 12
+    "User SBC Resource Type" 					= 13
+    "OS Platform Type" 							= 14
+    "Connection State" 							= 15
+    "XenApp Version Match" 						= 16
+    "XenApp Farm Name Match" 					= 17
+    "XenApp Zone Name Match" 					= 18
+    "XenDesktop Farm Name Match" 				= 19
+    "XenDesktop Desktop Group Name Match" 		= 20
+    "Provisioning Services Image Mode" 			= 21
+    "Client OS" 								= 22
+    "Active Directory Path Match" 				= 23
+    "Active Directory Attribute Match" 			= 24
+    "Name or Value is in List" 					= 25
+    "No ComputerName Match" 					= 26
+    "No ClientName Match" 						= 27
+    "No IP Address Match" 						= 28
+    "No Client IP Address Match" 				= 29
+    "No Active Directory Site Match" 			= 30
+    "No Environment Variable Match" 			= 31
+    "No Registry Value Match" 				 	= 32
+    "No WMI Query result Match" 			  	= 33
+    "No User Country Match" 				  	= 34
+    "No User UI Language Match" 			  	= 35
+    "No XenApp Version Match" 				  	= 36
+    "No XenApp Farm Name Match" 			  	= 37
+    "No XenApp Zone Name Match" 			  	= 38
+    "No XenDesktop Farm Name Match" 		  	= 39
+    "No XenDesktop Desktop Group Name Match" 	= 40
+    "No Active Directory Path Match" 			= 41
+    "No Active Directory Attribute Match" 		= 42
+    "Name or Value is not in List" 				= 43
+    "Client Remote OS Match" 					= 44
+    "No Client Remote OS Match" 				= 45
+    "Dynamic Value Match" 						= 46
+    "No Dynamic Value Match" 					= 47
+    "Transformer Mode State" 					= 48
+    "No Client OS Match" 						= 49
+    "Active Directory Group Match" 				= 50
+    "No Active Directory Group Match" 			= 51
+    "File Version Match" 						= 52
+    "No File Version Match" 					= 53
+    "Network Connection State" 					= 54
+    "Published Resource Name" 					= 55
+    "Name is in List" 							= 56
+    "Name is not in List" 						= 57
+    "File/Folder exists" 						= 58
+    "File/Folder does not exist" 				= 59
+    "DateTime Match" 							= 60
+    "No DateTime Match"							= 61
+}
 $tableVUEMActionCategory = @{
     "Application"           = "Apps"
     "Printer"               = "Printers"

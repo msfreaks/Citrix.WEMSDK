@@ -24,6 +24,8 @@ Get-WEMConfiguration -Connection $dbconn -Verbose -Name "Posh Test" | Remove-WEM
 
 #endregion
 
+#region WEMActions
+
 #region WEMApplication
 $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 
@@ -344,6 +346,8 @@ Get-WEMFileAssociation -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "
 
 #endregion
 
+#endregion
+
 #region WEMADObject
 $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 
@@ -359,6 +363,29 @@ $conf | New-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Domain 
 $conf | Get-WEMADObject -Connection $dbconn -Verbose | Format-Table
 $allADObjects = $conf | Get-WEMADObject -Connection $dbconn -Verbose
 $allADObjects | Select-Object IdSite, IdADObject, Name, Type
+
+# Set-WEMADObject
+$allADObjects | ForEach-Object { Set-WEMADObject -Connection $dbconn -Verbose -IdADObject $_.IdADObject -Description "Set-WEMADObject" }
+Set-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Domain Admins").SID).IdADObject -Name (Get-ADGroup "Enterprise Admins").SID -State "Disabled"
+
+# Remove-WEMADObject
+Remove-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Enterprise Admins").SID).IdADObject
+
+#endregion
+
+#region WEMCondition
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMCondition
+$conf | New-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition 1" -Type "Client OS" -TestResult "Windows 10"
+$conf | New-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition 2" -Type "Environment Variable Match" -TestValue "SystemRoot" -TestResult "C:\Windows"
+$conf | New-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1" -Type "Active Directory Attribute Match" -TestValue "mail" -TestResult "arjan.mensch@it-worxx.nl"
+$conf | New-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 2" -Type "No Active Directory Group Match" -TestResult "Domain Admins"
+
+# Get-WEMCondition
+$conf | Get-WEMCondition -Connection $dbconn -Verbose | Format-Table
+$allConditions = $conf | Get-WEMCondition -Connection $dbconn -Verbose
+$allConditions | Select-Object IdSite, IdCondition, Name, Type, TestValue, TestResult | Format-Table
 
 # Set-WEMADObject
 $allADObjects | ForEach-Object { Set-WEMADObject -Connection $dbconn -Verbose -IdADObject $_.IdADObject -Description "Set-WEMADObject" }
