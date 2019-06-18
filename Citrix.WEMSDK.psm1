@@ -103,6 +103,29 @@ function ConvertTo-StringEscaped {
 }
 
 <#
+    Helper function for grabbing IconStream data
+#>
+function Get-IconStream {
+    param (
+        [string]$IconLocation
+    )
+
+    # pre-load System.Drawing namespace
+    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+
+    try {
+        $stream = New-Object System.IO.MemoryStream
+        $bmp = [System.Drawing.Icon]::ExtractAssociatedIcon("$($IconLocation)").ToBitmap()
+        $bmp.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
+
+        return ([System.Convert]::ToBase64String($stream.ToArray()))
+    }
+    catch { 
+        return $script:defaultIconStream
+    }
+}
+
+<#
     .Synopsis
     Creates an entry in the VUEMChangesLog table.
 
@@ -979,6 +1002,8 @@ $defaultVUEMVirtualDriveReserved         = '<?xml version="1.0" encoding="utf-8"
 $defaultVUEMEnvironmentVariableReserved  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMExternalTaskReserved         = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMFileSystemOperationReserved  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
+
+$defaultIconStream = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEaSURBVFhH7ZTbCoJAEIaFCCKCCKJnLTpQVBdB14HQ00T0CqUP4AN41puJAVe92F3HRZegHfgQFvH7/1nQMmPmZ+Z8uYJOCm01vJe64PF8cZ+Ftho89DxPC8IAeZ73QpZlJWmattsAfsBavsk0yRsD3Ox7ST3A4uTC/OjC7ODCdO/AZOfAeOvAaPOB4foDg1UVwLZtIUmSqG2AIq9vgNcc5coBKHIWgNec0RhAdAUUOSJrjsRxrLYBihxBMa85QzkARY7ImjOkAURXQJEjKOY1Z0RRpLYBihyRNUe5cgCKHEEprzmjMYDoCqjImiNhGKptgApvA3V57wFkzbUGEMmDIGgfAKH84ShypQBdyn3fFwfQSaE1Y+bvx7K+efsbU5+Ow3MAAAAASUVORK5CYII="
 
 $tableVUEMState = @{
     0 = "Disabled"

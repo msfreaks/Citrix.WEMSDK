@@ -190,6 +190,9 @@ function Set-WEMApplication {
                 }
                 "TargetPath" {
                     $updateFields += "TargetPath = '$($TargetPath.Replace("'", "''"))'"
+                    if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'iconstream')) {
+                        $updateFields += "IconStream = '$(Get-IconStream -IconLocation $TargetPath)'"
+                    }
                     continue
                 }
                 "Parameters" {

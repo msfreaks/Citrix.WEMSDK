@@ -166,6 +166,7 @@ function New-WEMApplication {
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'displayname')) { $DisplayName = $Name }
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'iconlocation')) { $IconLocation = $TargetPath }
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'startmenutarget')) { $StartMenuTarget = "Start Menu\Programs" }
+        if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'iconstream')) { $IconStream = Get-IconStream -IconLocation $TargetPath }
         if ($Type -like "URL") { $WorkingDirectory = "Url" }
         if ($Type -like "File / Folder") { $WorkingDirectory = "File" }
 
