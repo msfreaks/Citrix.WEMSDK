@@ -387,12 +387,13 @@ $conf | Get-WEMCondition -Connection $dbconn -Verbose | Format-Table
 $allConditions = $conf | Get-WEMCondition -Connection $dbconn -Verbose
 $allConditions | Select-Object IdSite, IdCondition, Name, Type, TestValue, TestResult | Format-Table
 
-# Set-WEMADObject
-$allADObjects | ForEach-Object { Set-WEMADObject -Connection $dbconn -Verbose -IdADObject $_.IdADObject -Description "Set-WEMADObject" }
-Set-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Domain Admins").SID).IdADObject -Name (Get-ADGroup "Enterprise Admins").SID -State "Disabled"
+# Set-WEMCondition
+$allConditions | Where-Object { $_.IdCondition -gt 1 } | ForEach-Object { Set-WEMCondition -Connection $dbconn -Verbose -IdCondition $_.IdCondition -Description "Set-WEMCondition" }
+Set-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1").IdCondition -State "Disabled"
 
-# Remove-WEMADObject
-Remove-WEMADObject -Connection $dbconn -Verbose -IdADObject (Get-WEMADObject -Connection $dbconn -Verbose -Name (Get-ADGroup "Enterprise Admins").SID).IdADObject
+# Remove-WEMCondition
+Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1" -IdSite $conf.IdSite).IdCondition
+Get-WemCondition -Connection $dbconn -Verbose -Name "*test 2" -IdSite $conf.IdSite | Remove-WEMCondition -Connection $dbconn -Verbose
 
 #endregion
 
@@ -401,6 +402,9 @@ $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Descr
 
 $allADObjects = $conf | Get-WEMADObject -Connection $dbconn -Verbose
 $allADObjects | Where-Object { $_.Type -notlike "BUILTIN" } | Select-Object IdADObject, IdSite, Name, Description, State, Type, Priority | Format-Table
+
+$allConditions = $conf | Get-WEMCondition -Connection $dbconn -Verbose
+$allConditions | Select-Object IdSite, IdCondition, Name, Type, TestValue, TestResult | Format-Table
 
 # Cleanup
 # $conf | Remove-WEMConfiguration -Connection $dbconn

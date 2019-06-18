@@ -100,7 +100,7 @@ function Set-WEMADObject {
         # build the query to update the action
         $SQLQuery = "UPDATE VUEMItems SET "
         $updateFields = @()
-        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "IdAction" }
+        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "idadobject" }
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
