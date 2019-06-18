@@ -53,10 +53,22 @@ function Remove-WEMCondition {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # check if we need to remove it from Rules as well
-        $SQLQuery = "SELECT * FROM VUEMFilterRules WHERE IdSite = $($origCondition.IdSite) AND (Conditions LIKE '%;$($IdCondition);%' OR Conditions LIKE '%;$($IdCondition)' OR Conditions LIKE '$($IdCondition);%' OR Conditions = '$($IdCondition)')"
+        $SQLQuery = "SELECT * FROM VUEMFiltersRules WHERE IdSite = $($origCondition.IdSite) AND (Conditions LIKE '%;$($IdCondition);%' OR Conditions LIKE '%;$($IdCondition)' OR Conditions LIKE '$($IdCondition);%' OR Conditions = '$($IdCondition)')"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
         
+        # process results, if any
+        foreach($row in $result.Tables.Rows) {
+            if ($row.Conditions -eq $IdCondition) {
+                # delete the entire Rule (no conditions left), or just remove the condition from the list of conditions
+                Remove-WEMRule -Connection $Connection -IdRule $row.IdFilterRule
+            } else {
+                # update the rule with this condition removed
+                $SQLQuery = "UPDATE VUEMFiltersRules SET Conditions = '$(($row.Conditions -Split ";" | Where-Object { $_ -ne $IdCondition}) -Join ";")' WHERE IdFilterRule = $($row.IdFilterRule)"
+                $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+            }
+        }
+
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $origCondition.IdSite -IdElement $IdCondition -ChangeType "Delete" -ObjectName $origCondition.Name -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        New-ChangesLogEntry -Connection $Connection -IdSite $origCondition.IdSite -IdElement $IdCondition -ChangeType "Delete" -ObjectName $origCondition.Name -ObjectType "Filters\Filter Condition" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }

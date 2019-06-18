@@ -406,18 +406,28 @@ $conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 2" -Conditions
 $conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 3" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition *")
 $conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -IdCondition 1)
 
+$conf | New-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1" -Type "Active Directory Attribute Match" -TestValue "mail" -TestResult "arjan.mensch@it-worxx.nl"
+$conf | New-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 2" -Type "No Active Directory Group Match" -TestResult "Domain Admins"
+$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 2" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test *")
+
 # Get-WEMRule
 $conf | Get-WEMRule -Connection $dbconn -Verbose | Format-Table
 $allRules = $conf | Get-WEMRule -Connection $dbconn -Verbose
+$testRule = $cong | Get-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1"
 $allRules | Select-Object IdSite, IdRule, Name, @{Name="ConditionName";Expression={ $_.Conditions | Select-Object Name} } | Format-Table
 
-# Set-WEMCondition
-$allConditions | Where-Object { $_.IdCondition -gt 1 } | ForEach-Object { Set-WEMCondition -Connection $dbconn -Verbose -IdCondition $_.IdCondition -Description "Set-WEMCondition" }
-Set-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1").IdCondition -State "Disabled"
+# Set-WEMRule
+$allRules | Where-Object { $_.IdRule -gt 1 } | ForEach-Object { Set-WEMRule -Connection $dbconn -Verbose -IdRule $_.IdRule -Description "Set-WEMRule" }
+$conditionArray = $testRule.Conditions
+$conditionArray += Get-WEMCondition -Connection $dbconn -IdSite $conf.IdSite -Name "POSH Condition *" 
+Set-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule -State "Disabled" -Conditions $conditionArray
+$conditionArray = $conditionArray | Where-Object { $_.Name -notlike "POSH Condition 1" }
+Set-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule -Conditions $conditionArray
 
-# Remove-WEMCondition
-Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1" -IdSite $conf.IdSite).IdCondition
-Get-WemCondition -Connection $dbconn -Verbose -Name "*test 2" -IdSite $conf.IdSite | Remove-WEMCondition -Connection $dbconn -Verbose
+# Remove-WEMRule
+Remove-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule
+Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Name "POSH Test 1").IdCondition
+Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Name "POSH Test 2").IdCondition
 
 #endregion
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose

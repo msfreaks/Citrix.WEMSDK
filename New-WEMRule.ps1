@@ -82,7 +82,7 @@ function New-WEMRule {
         }
 
         # build the query to update the action
-        $SQLQuery = "INSERT INTO VUEMFiltersRules (IdSite,Name,Description,State,Conditions,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),'$($Conditions.IdCondition -join ";")',1,NULL)"
+        $SQLQuery = "INSERT INTO VUEMFiltersRules (IdSite,Name,Description,State,Conditions,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),'$($Conditions.IdCondition -Join ";")',1,NULL)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action

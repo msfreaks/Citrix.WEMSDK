@@ -26,6 +26,9 @@
     .Parameter TestResult
     ..
 
+    .Parameter Connection
+    ..
+
     .Example
 
     .Notes
