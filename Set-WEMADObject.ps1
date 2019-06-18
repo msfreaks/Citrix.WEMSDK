@@ -138,7 +138,7 @@ function Set-WEMADObject {
             $objectName = $origADObject.Name
             if ($Name) { $objectName = $Name.Replace("'", "''") }
             
-            New-ChangesLogEntry -Connection $Connection -IdSite $origADObject.IdSite -IdElement $IdADObject -ChangeType "Update" -ObjectName $objectName -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+            New-ChangesLogEntry -Connection $Connection -IdSite $origADObject.IdSite -IdElement $IdADObject -ChangeType "Update" -ObjectName (Get-ActiveDirectoryName $objectName).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
         } else {
             Write-Warning "No parameters to update were provided"
         }

@@ -65,58 +65,55 @@ function New-WEMConfiguration {
 
         # fill other tables with defaults after adding the Site record
         # VUEMParameters
-        $SQLQuery = ("INSERT INTO VUEMParameters (IdSite, Name, Value, State, RevisionId) VALUES {0}" -f ($defaultVUEMParameters -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMParameters ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].ParametersFields, ($configurationSettings[$script:databaseSchema].ParametersValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMAgentSettings
-        $SQLQuery = ("INSERT INTO VUEMAgentSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMAgentSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMAgentSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].AgentSettingsFields, ($configurationSettings[$script:databaseSchema].AgentSettingsValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMSystemUtilities
-        $SQLQuery = ("INSERT INTO VUEMSystemUtilities (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMUtilities -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMSystemUtilities ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].SystemUtilitiesFields, ($configurationSettings[$script:databaseSchema].SystemUtilitiesValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMEnvironmentalSettings
-        $SQLQuery = ("INSERT INTO VUEMEnvironmentalSettings (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMEnvironmentalSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMEnvironmentalSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].EnvironmentalFields, ($configurationSettings[$script:databaseSchema].EnvironmentalValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMUPMSettings
-        $SQLQuery = ("INSERT INTO VUEMUPMSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMUPMSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMUPMSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].UPMFields, ($configurationSettings[$script:databaseSchema].UPMValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMPersonaSettings
-        $SQLQuery = ("INSERT INTO VUEMPersonaSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMPersonaSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMPersonaSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].PersonaFields, ($configurationSettings[$script:databaseSchema].PersonaValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMUSVSettings
-        $SQLQuery = ("INSERT INTO VUEMUSVSettings (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMUSVSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMUSVSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].USVFields, ($configurationSettings[$script:databaseSchema].USVValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMKioskSettings
-        $SQLQuery = ("INSERT INTO VUEMKioskSettings (IdSite,Name,Type,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMKioskSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMKioskSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].KioskFields, ($configurationSettings[$script:databaseSchema].KioskValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # VUEMSystemMonitoringSettings
-        $SQLQuery = ("INSERT INTO VUEMSystemMonitoringSettings (IdSite,Name,Value,State,RevisionId) VALUES {0}" -f ($defaultVUEMSystemMonitoringSettings -join ", ")) -f $IdSite
+        $SQLQuery = ("INSERT INTO VUEMSystemMonitoringSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].SystemMonitoringFields, ($configurationSettings[$script:databaseSchema].SystemMonitoringValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # AppLockerSettings
-        $SQLQuery = ("INSERT INTO AppLockerSettings (IdSite, State, RevisionId, Value, Setting) VALUES {0}" -f ($defaultApplockerSettings -join ", ")) -f $IdSite
-        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        if ($configurationSettings[$script:databaseSchema].ApplockerFields) {
+            $SQLQuery = ("INSERT INTO AppLockerSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].ApplockerFields, ($configurationSettings[$script:databaseSchema].ApplockerValues -join ", ")) -f $IdSite
+            $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        }
 
-        # 1903 version!
         # GroupPolicyGlobalSettings
-        if ($script:databaseVersion -like "1903.*") {
-            $SQLQuery = "INSERT INTO GroupPolicyGlobalSettings (IdSite, Name, Value) VALUES ($($IdSite), 'EnableGroupPolicyEnforcement', '0')"
+        if ($configurationSettings[$script:databaseSchema].GroupPolicyGlobalSettingsFields) {
+            $SQLQuery = ("INSERT INTO GroupPolicyGlobalSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].GroupPolicyGlobalSettingsFields, ($configurationSettings[$script:databaseSchema].GroupPolicyGlobalSettingsValues -join ", ")) -f $IdSite
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
         }
         
         # VUEMItems
-        if ($script:databaseVersion -like "1903.*") {
-            $SQLQuery = ("INSERT INTO VUEMItems (IdSite, Name, DistinguishedName, Description, State, Type, Priority, RevisionId) VALUES {0}" -f ($defaultVUEMItems -join ", ")) -f $IdSite
-        } else {
-            $SQLQuery = ("INSERT INTO VUEMItems (IdSite, Name, Description, State, Type, Priority, RevisionId) VALUES {0}" -f ($defaultVUEMItemsLegacy -join ", ")) -f $IdSite
-        }
+        $SQLQuery = ("INSERT INTO VUEMItems ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].ItemsFields, ($configurationSettings[$script:databaseSchema].ItemsValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog

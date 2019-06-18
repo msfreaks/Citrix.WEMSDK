@@ -49,7 +49,7 @@ function Remove-WEMConfiguration {
 
         # delete all table data associated with this site
         $SQLQuery = ""
-        foreach ($table in $cleanupTables[$script:databaseVersion]) {
+        foreach ($table in $configurationSettings[$script:databaseSchema].CleanUpTables) {
             $SQLQuery += "DELETE FROM $($table) WHERE IdSite = $($IdSite);"
         }
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery

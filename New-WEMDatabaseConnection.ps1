@@ -48,10 +48,13 @@ function New-WEMDatabaseConnection {
     $SQLQuery = "SELECT value FROM VUEMParameters WHERE IdSite = 1 AND Name = 'VersionInfo'"
     $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
     $script:databaseVersion = $result.Tables.Rows.value
+    $script:databaseSchema = $script:databaseVersion.Substring(0, $script:databaseVersion.IndexOf("."))
+
     # 4.4.0.0
     # 1808.0.1.1
     # 1903.0.1.1
-    Write-Verbose "Database version $($script:databaseVersion) detected"
+    # 1906.0.1.1
+    Write-Verbose "Database version $($script:databaseVersion) detected (schema $($script:databaseSchema))"
     
     return $connection
 }

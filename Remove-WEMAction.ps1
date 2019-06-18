@@ -243,7 +243,7 @@ function Remove-WEMRegistryEntry {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
-        Remove-WEMAction -Connection $Connection -IdAction $IdAction -Category "Registry Entry"
+        Remove-WEMAction -Connection $Connection -IdAction $IdAction -Category "Registry Value"
     }
 }
 New-Alias -Name Remove-WEMRegValue -Value Remove-WEMRegistryEntry

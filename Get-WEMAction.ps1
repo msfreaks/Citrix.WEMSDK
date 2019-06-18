@@ -35,7 +35,7 @@ function Get-WEMAction {
         [int]$IdAction,
         [Parameter(Mandatory=$False, ValueFromPipeline=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Application","Printer","Network Drive","Virtual Drive","Registry Entry","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")]
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)][ValidateSet("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")]
         [string]$Category,
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
@@ -48,7 +48,7 @@ function Get-WEMAction {
             Write-Verbose "Limiting result to category '$($Category)'"
             $vuemActionCategories = @("$($Category)")
         } else {
-            $vuemActionCategories = @("Application","Printer","Network Drive","Virtual Drive","Registry Entry","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")
+            $vuemActionCategories = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")
         }
 
         # create empty Action array
@@ -124,7 +124,7 @@ function Get-WEMActionsByCategory {
     if ($Category -like "printer")               { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMPrinterObject -DataRow $row } }
     if ($Category -like "network drive")         { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMNetDriveObject -DataRow $row } }
     if ($Category -like "virtual drive")         { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMVirtualDriveObject -DataRow $row } }
-    if ($Category -like "registry entry")        { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMRegValueObject -DataRow $row } }
+    if ($Category -like "registry value")        { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMRegValueObject -DataRow $row } }
     if ($Category -like "environment variable")  { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMEnvVariableObject -DataRow $row } }
     if ($Category -like "port")                  { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMPortObject -DataRow $row } }
     if ($Category -like "ini file operation")    { foreach ($row in $result.Tables.Rows) { $vuemActions += New-VUEMIniFileOpObject -DataRow $row } }
@@ -370,7 +370,7 @@ function Get-WEMRegistryEntry {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
-        Get-WEMAction -Connection $Connection -IdSite $IdSite -IdAction $IdAction -Name $Name -Category "Registry Entry"
+        Get-WEMAction -Connection $Connection -IdSite $IdSite -IdAction $IdAction -Name $Name -Category "Registry Value"
     }    
 }
 New-Alias -Name Get-WEMRegValue -Value Get-WEMRegistryEntry

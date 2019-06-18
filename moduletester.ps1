@@ -1,5 +1,5 @@
-$name       = "POSH 1903"
-$database   = "CitrixWEM1903"
+$name       = "POSH 1906"
+$database   = "CitrixWEM1906"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
 $dbconn = New-WEMDatabaseConnection -Server "ca002511" -Database "$($database)" -Verbose
@@ -109,10 +109,10 @@ Get-WEMNetworkDrive -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "pos
 $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 
 # New-WEMVirtualDrive
-$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Drive 1" -TargetPath "\\server\vdisks\posh1.vhdx"
-$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Drive 2" -TargetPath "\\server\vdisks\posh2.vhdx"
-$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Home Drive" -TargetPath "\\server\vdisks\##username##" -SetAsHomeDriveEnabled $true
-$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "\\server\vdisks\test.vhdx"
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Drive 1" -TargetPath "D:\vdisks\posh1folder"
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Drive 2" -TargetPath "D:\vdisks\posh2folder"
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Virtual Home Drive" -TargetPath "D:\vdisks\##username##" -SetAsHomeDriveEnabled $true
+$conf | New-WEMVirtualDrive -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "D:\vdisks\test"
 
 # Get-WEMVirtualDrive
 $conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Virtual Drive" | Format-Table
@@ -124,7 +124,7 @@ $allDrives | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMVirtualDrive
 $allDrives | ForEach-Object { Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $_.IdAction -Description "Set-WEMVirtualDrive" }
-Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##.vhdx"
+Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $homeDrive.IdAction -TargetPath "D:\home\##username##"
 Set-WEMVirtualDrive -Connection $dbconn -Verbose -IdAction $driveTest.IdAction -State "Disabled"
 
 # Remove-WEMAction (Virtual Drive)
@@ -142,7 +142,7 @@ $conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Registry E
 $conf | New-WEMRegistryEntry -Connection $dbconn -Verbose -Name "POSH Test" -TargetPath "Citrix.WEMSDK\POSH\Test" -TargetName "Test" -TargetType "REG_SZ" -TargetValue ""
 
 # Get-WEMRegistryEntry
-$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Registry Entry" | Format-Table
+$conf | Get-WEMAction -Connection $dbconn -Verbose -Category "Registry Value" | Format-Table
 $allRegistryEntries = $conf | Get-WEMRegistryEntry -Connection $dbconn -Verbose
 $registryEntryTest = $conf | Get-WEMRegistryEntry -Connection $dbconn -Verbose -Name "*test"
 
@@ -154,7 +154,7 @@ Set-WEMRegistryEntry -Connection $dbconn -Verbose -IdAction $registryEntryTest.I
 Set-WEMRegistryEntry -Connection $dbconn -Verbose -IdAction $registryEntryTest.IdAction -State "Disabled"
 
 # Remove-WEMAction (Registry Entry)
-Get-WEMRegistryEntry -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Registry Entry"
+Get-WEMRegistryEntry -Connection $dbconn -Verbose -IdSite $conf.IdSite -Name "posh test" | Remove-WEMAction -Connection $dbconn -Verbose -Category "Registry Value"
 
 #endregion
 
