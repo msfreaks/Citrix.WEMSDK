@@ -52,6 +52,10 @@ function Remove-WEMCondition {
         $SQLQuery = "DELETE FROM VUEMFiltersConditions WHERE IdFilterCondition = $($IdCondition)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
+        # check if we need to remove it from Rules as well
+        $SQLQuery = "SELECT * FROM VUEMFilterRules WHERE IdSite = $($origCondition.IdSite) AND (Conditions LIKE '%;$($IdCondition);%' OR Conditions LIKE '%;$($IdCondition)' OR Conditions LIKE '$($IdCondition);%' OR Conditions = '$($IdCondition)')"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        
         # Updating the ChangeLog
         New-ChangesLogEntry -Connection $Connection -IdSite $origCondition.IdSite -IdElement $IdCondition -ChangeType "Delete" -ObjectName $origCondition.Name -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }

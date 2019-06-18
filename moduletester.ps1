@@ -397,6 +397,29 @@ Get-WemCondition -Connection $dbconn -Verbose -Name "*test 2" -IdSite $conf.IdSi
 
 #endregion
 
+#region WEMRule
+$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+
+# New-WEMRule
+$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 1" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition 1")
+$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 2" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition 2")
+$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 3" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition *")
+$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -IdCondition 1)
+
+# Get-WEMRule
+$conf | Get-WEMRule -Connection $dbconn -Verbose | Format-Table
+$allRules = $conf | Get-WEMRule -Connection $dbconn -Verbose
+$allRules | Select-Object IdSite, IdRule, Name, @{Name="ConditionName";Expression={ $_.Conditions | Select-Object Name} } | Format-Table
+
+# Set-WEMCondition
+$allConditions | Where-Object { $_.IdCondition -gt 1 } | ForEach-Object { Set-WEMCondition -Connection $dbconn -Verbose -IdCondition $_.IdCondition -Description "Set-WEMCondition" }
+Set-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1").IdCondition -State "Disabled"
+
+# Remove-WEMCondition
+Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Test 1" -IdSite $conf.IdSite).IdCondition
+Get-WemCondition -Connection $dbconn -Verbose -Name "*test 2" -IdSite $conf.IdSite | Remove-WEMCondition -Connection $dbconn -Verbose
+
+#endregion
 $allActions = $conf | Get-WEMAction -Connection $dbconn -Verbose
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 

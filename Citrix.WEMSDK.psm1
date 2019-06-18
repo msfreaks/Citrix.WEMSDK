@@ -907,6 +907,48 @@ Function New-VUEMCondition() {
     }
 }
 
+<#
+    .Synopsis
+    Converts SQL Data to an Active Directory object
+
+    .Description
+    Converts SQL Data to an Active Directory object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMRule() {
+    param(
+        [System.Data.DataRow]$DataRow,
+        [System.Data.SqlClient.SqlConnection]$Connection
+
+    )
+
+    Write-Verbose "Found Rule object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemConditions = @()
+    foreach ($idCondition in ($DataRow.Conditions.Split(";") | Sort-Object)) { $vuemConditions += Get-WEMCondition -Connection $Connection -IdCondition $idCondition }
+
+    Return [pscustomobject] @{
+        'IdRule'      = [int]$DataRow.IdFilterRule
+        'IdSite'      = [int]$DataRow.IdSite
+        'Name'        = [string]$DataRow.Name
+        'Description' = [string]$DataRow.Description
+        'State'       = [string]$tableVUEMState[[int]$DataRow.State]
+        'Conditions'  = [pscustomobject]$vuemConditions
+        'Version'     = [int]$DataRow.RevisionId
+    }
+}
+
 #endregion
 
 #region Module Global variables
