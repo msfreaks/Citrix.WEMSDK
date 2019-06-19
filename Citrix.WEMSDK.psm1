@@ -228,7 +228,7 @@ Function New-VUEMSiteObject() {
 
     Write-Verbose "Found Site object '$($DataRow.Name)'"
 
-    $vuemSiteObject = [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdSite'      = [int]$DataRow.IdSite
         'Name'        = [string]$DataRow.Name
         'Description' = [string]$DataRow.Description
@@ -236,9 +236,9 @@ Function New-VUEMSiteObject() {
         'Version'     = [int]$DataRow.RevisionId
     } 
     # override the default ToScript() method
-    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    $vuemObject | Add-Member ScriptMethod ToString { } -Force
 
-    return $vuemSiteObject
+    return $vuemObject
 }
 
 <#

@@ -413,7 +413,7 @@ $conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 2" -Conditions
 # Get-WEMRule
 $conf | Get-WEMRule -Connection $dbconn -Verbose | Format-Table
 $allRules = $conf | Get-WEMRule -Connection $dbconn -Verbose
-$testRule = $cong | Get-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1"
+$testRule = $conf | Get-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1"
 $allRules | Select-Object IdSite, IdRule, Name, @{Name="ConditionName";Expression={ $_.Conditions | Select-Object Name} } | Format-Table
 
 # Set-WEMRule
@@ -436,19 +436,18 @@ $conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
 
 # New-WEMActionGroup
 $conf | New-WEMActionGroup -Connection $dbconn -Verbose -Name "POSH Action Group 1"
-
-$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 2" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition 2")
-$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Rule 3" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -Name "POSH Condition *")
-$conf | New-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1" -Conditions (Get-WEMCondition -Connection $dbconn -Verbose -IdCondition 1)
+$conf | New-WEMActionGroup -Connection $dbconn -Verbose -Name "POSH Action Group 2"
+$conf | New-WEMActionGroup -Connection $dbconn -Verbose -Name "POSH Test 1"
 
 # Get-WEMActionGroup
 $conf | Get-WEMActionGroup -Connection $dbconn -Verbose | Format-Table
-$allRules = $conf | Get-WEMRule -Connection $dbconn -Verbose
-$testRule = $cong | Get-WEMRule -Connection $dbconn -Verbose -Name "POSH Test 1"
-$allRules | Select-Object IdSite, IdRule, Name, @{Name="ConditionName";Expression={ $_.Conditions | Select-Object Name} } | Format-Table
+$allActionGroups = $conf | Get-WEMActionGroup -Connection $dbconn -Verbose
+$testActionGroup = $conf | Get-WEMActionGroup -Connection $dbconn -Verbose -Name "POSH Test 1"
+$allActionGroups | Format-Table
 
-# Set-WEMRule
-$allRules | Where-Object { $_.IdRule -gt 1 } | ForEach-Object { Set-WEMRule -Connection $dbconn -Verbose -IdRule $_.IdRule -Description "Set-WEMRule" }
+# Set-WEMActionGroup
+$allActionGroups | ForEach-Object { Set-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $_.IdActionGroup -Description "Set-WEMActionGroup" }
+
 $conditionArray = $testRule.Conditions
 $conditionArray += Get-WEMCondition -Connection $dbconn -IdSite $conf.IdSite -Name "POSH Condition *" 
 Set-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule -State "Disabled" -Conditions $conditionArray
