@@ -40,7 +40,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -86,11 +86,11 @@ function New-WEMIniFileOperation {
         $TargetValue =  ConvertTo-StringEscaped $TargetValue
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMIniFilesOps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMIniFilesOps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Action) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already a Ini File Operation named '$($Name)' in the Configuration"
+            Write-Error "There's already a Ini File Operation object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -101,14 +101,16 @@ function New-WEMIniFileOperation {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdIniFileOp AS IdAction FROM VUEMIniFilesOps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMIniFilesOps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Ini File Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdIniFileOp
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Ini File Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMPort -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMIniFileOpObject -DataRow $result.Tables.Rows
+        #Get-WEMIniFileOperation -Connection $Connection -IdAction $IdObject
     }
 }
 New-Alias -Name New-IniFilesOp -Value New-WEMIniFileOperation

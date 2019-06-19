@@ -70,7 +70,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -143,11 +143,11 @@ function New-WEMApplication {
         $IconLocation =  ConvertTo-StringEscaped $IconLocation
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMApps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Action) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already an application named '$($Name)' in the Configuration"
+            Write-Error "There's already an Application object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -175,14 +175,16 @@ function New-WEMApplication {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdApplication AS IdAction FROM VUEMApps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMApps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdApplication
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Application" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMApplication -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMApplicationObject -DataRow $result.Tables.Rows
+        #Get-WEMApplication -Connection $Connection -IdAction $IdObject
     }
 }
 New-Alias -Name New-WEMApp -Value New-WEMApplication

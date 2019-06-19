@@ -34,7 +34,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -75,11 +75,11 @@ function New-WEMEnvironmentVariable {
         $VariableValue =  ConvertTo-StringEscaped $VariableValue
         
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMEnvVariables WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMEnvVariables WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Action) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already a Environment Variable named '$($Name)' in the Configuration"
+            Write-Error "There's already a Environment Variable object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -94,14 +94,16 @@ function New-WEMEnvironmentVariable {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdEnvVariable AS IdAction FROM VUEMEnvVariables WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMEnvVariables WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Environment Variable" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdEnvVariable
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Environment Variable" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMEnvironmentVariable -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMEnvVariableObject -DataRow $result.Tables.Rows
+        #Get-WEMEnvironmentVariable -Connection $Connection -IdAction $IdObject
     }
 }
 New-Alias -Name New-WEMEnvVariable -Value New-WEMEnvironmentVariable

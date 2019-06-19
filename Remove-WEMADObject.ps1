@@ -34,16 +34,16 @@ function Remove-WEMADObject {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original object
-        $origADObject = Get-WEMADObject -Connection $Connection -IdADObject $IdADObject
+        $origObject = Get-WEMADObject -Connection $Connection -IdADObject $IdADObject
 
         # only continue if the action was found
-        if (-not $origADObject) { 
+        if (-not $origObject) { 
             Write-Warning "No Active Directory Object found for Id $($IdADObject)"
             Break
         }
         
         # don't remove Default Active Directory Objects
-        if ($origADObject.Type -like "BUILTIN") {
+        if ($origObject.Type -like "BUILTIN") {
             Write-Warning "Cannot remove a BUILTIN Active Directory Object"
             Break
         }
@@ -53,7 +53,7 @@ function Remove-WEMADObject {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $origADObject.Name).Account)"
-        New-ChangesLogEntry -Connection $Connection -IdSite $origAction.IdSite -IdElement $IdADObject -ChangeType "Delete" -ObjectName (Get-ActiveDirectoryName $origADObject.Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $origObject.Name).Account)"
+        New-ChangesLogEntry -Connection $Connection -IdSite $origObject.IdSite -IdElement $IdADObject -ChangeType "Delete" -ObjectName (Get-ActiveDirectoryName $origObject.Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }

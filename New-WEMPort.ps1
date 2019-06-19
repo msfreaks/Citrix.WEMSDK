@@ -31,7 +31,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -70,11 +70,11 @@ function New-WEMPort {
         $TargetPath = ConvertTo-StringEscaped $TargetPath
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMPorts WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMPorts WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Action) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already a Port named '$($Name)' in the Configuration"
+            Write-Error "There's already a Port object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -85,13 +85,15 @@ function New-WEMPort {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdPort AS IdAction FROM VUEMPorts WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMPorts WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Port" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdPort
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Port" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMPort -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMPortObject -DataRow $result.Tables.Rows
+        #Get-WEMPort -Connection $Connection -IdAction $IdObject
     }
 }

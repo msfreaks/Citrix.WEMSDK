@@ -34,7 +34,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -67,11 +67,11 @@ function New-WEMVirtualDrive {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMVirtualDrives WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMVirtualDrives WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Action) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already a Virtual Drive named '$($Name)' in the Configuration"
+            Write-Error "There's already a Virtual Drive object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -91,13 +91,15 @@ function New-WEMVirtualDrive {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdVirtualDrive AS IdAction FROM VUEMVirtualDrives WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMVirtualDrives WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Virtual Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdVirtualDrive
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\Virtual Drive" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMNetworkDrive -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMVirtualDriveObject -DataRow $result.Tables.Rows
+        #Get-WEMNetworkDrive -Connection $Connection -IdAction $IdObject
     }
 }

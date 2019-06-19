@@ -58,11 +58,11 @@ function New-WEMRule {
         $Description = ConvertTo-StringEscaped $Description
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS RuleCount FROM VUEMFiltersRules WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMFiltersRules WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.RuleCount -or $Name -like "always true") {
+        if ($result.Tables.Rows.ObjectCount -or $Name -like "always true") {
             # name must be unique
-            Write-Error "There's already an Rule object named '$($Name)' in the Configuration"
+            Write-Error "There's already a Rule object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -86,13 +86,15 @@ function New-WEMRule {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdFilterRule AS IdRule FROM VUEMFiltersRules WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMFiltersRules WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdRule -ChangeType "Create" -ObjectName $Name -ObjectType "Filters\Filter Rule" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdFilterRule
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Filters\Filter Rule" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMRule -Connection $Connection -IdRule $result.Tables.Rows.IdRule
+        return New-VUEMRule Connection $Connection -DataRow $result.Tables.Rows
+        #Get-WEMRule -Connection $Connection -IdRule $IdObject
     }
 }

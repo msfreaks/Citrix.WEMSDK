@@ -49,7 +49,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -102,11 +102,11 @@ function New-WEMFileAssociation {
         $TargetCommand = ConvertTo-StringEscaped $TargetCommand
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMFileAssocs WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMFileAssocs WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Action) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already a File Association named '$($Name)' in the Configuration"
+            Write-Error "There's already a File Association object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -117,14 +117,16 @@ function New-WEMFileAssociation {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdFileAssoc AS IdAction FROM VUEMFileAssocs WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMFileAssocs WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\File Association" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdFileAssoc
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\File Association" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMFileAssociation -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMFileAssocObject -DataRow $result.Tables.Rows
+        #Get-WEMFileAssociation -Connection $Connection -IdAction $result.Tables.Rows.IdAction
     }
 }
 New-Alias -Name New-WEMFileAssoc -Value New-WEMFileAssociation

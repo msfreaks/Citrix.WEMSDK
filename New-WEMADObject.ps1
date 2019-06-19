@@ -25,7 +25,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -61,9 +61,9 @@ function New-WEMADObject {
         $Description = ConvertTo-StringEscaped $Description
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS ADObject FROM VUEMItems WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMItems WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.ADObject) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
             Write-Error "There's already an Active Directory object named '$($Name)' in the Configuration"
             Break
@@ -89,14 +89,16 @@ function New-WEMADObject {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdItem AS IdADObject FROM VUEMItems WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMItems WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
         Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $Name).Account)"
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdADObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdItem
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMADObject -Connection $Connection -IdADObject $result.Tables.Rows.IdADObject
+        return New-VUEMADObject -DataRow $result.Tables.Rows
+        #Get-WEMADObject -Connection $Connection -IdADObject $IdObject
     }
 }

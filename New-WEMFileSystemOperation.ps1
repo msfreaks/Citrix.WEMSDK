@@ -40,7 +40,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -85,11 +85,11 @@ function New-WEMFileSystemOperation {
         $TargetPath = ConvertTo-StringEscaped $TargetPath
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Action FROM VUEMFileSystemOps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMFileSystemOps WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
         if ($result.Tables.Rows.Action) {
             # name must be unique
-            Write-Error "There's already a File System Operation named '$($Name)' in the Configuration"
+            Write-Error "There's already a File System Operation object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -104,14 +104,16 @@ function New-WEMFileSystemOperation {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdFileSystemOp AS IdAction FROM VUEMFileSystemOps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMFileSystemOps WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdAction -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\File System Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdFileSystemOp
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Actions\File System Operation" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMFileSystemOperation -Connection $Connection -IdAction $result.Tables.Rows.IdAction
+        return New-VUEMFileSystemOpObject -DataRow $result.Tables.Rows
+        #Get-WEMFileSystemOperation -Connection $Connection -IdAction $IdObject
     }
 }
 New-Alias -Name New-WEMFileSystemOp -Value New-WEMFileSystemOperation

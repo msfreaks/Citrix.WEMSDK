@@ -236,9 +236,99 @@ Function New-VUEMSiteObject() {
         'Version'     = [int]$DataRow.RevisionId
     } 
     # override the default ToScript() method
-    $vuemSiteObject | Add-Member scriptmethod ToString { } -force
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
 
     return $vuemSiteObject
+}
+
+<#
+    .Synopsis
+    Converts SQL Data to an Action Group object
+
+    .Description
+    Converts SQL Data to an Action Group object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMActionGroupObject() {
+    param(
+        [System.Data.DataRow]$DataRow,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    Write-Verbose "Found Action Group object '$($DataRow.Name)'"
+
+    # grab Actions belonging to this Action Group
+    $actionGroupActions = @()
+    $SQLQuery = "SELECT * FROM VUEMActionGroupsTemplates WHERE IdActionGroup = $($DataRow.IdActionGroup)"
+    $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+    foreach($row in $result.Tables.Rows) {
+        Write-Verbose "Grabbing Action $($row.IdAction) in category '$($ActionCategories[$row.ActionType])'"
+        $vuemAction = Get-WEMAction -Connection $Connection -IdAction $row.IdAction -Category $ActionCategories[$row.ActionType]
+        switch ($row.ActionType) {
+            0 {
+                # Application
+                Write-Verbose "Processing Application properties ($([int]$row.Properties))"
+                $bits = [int]$row.Properties
+                if ($bits) {
+                    $properties = @{1="CreateDesktopLink";2="CreateQuickLaunchLink";4="CreateStartMenuLink";8="PinToTaskbar";16="PinToStartMenu";32="AutoStart"}
+                    $vuemAction | Add-Member -NotePropertyName "AssignmentProperties" -NotePropertyValue ($properties.Keys | where { $_ -band $bits } | foreach { $properties.Get_Item($_) })
+                }
+                continue
+              }
+            1 {
+                # Printer
+                Write-Verbose "Processing Printer properties"
+                if ($row.Properties -eq "1") { 
+                    Add-Member -InputObject $vuemAction -NotePropertyName "AssignmentProperties" -NotePropertyValue "SetAsDefault"
+                }
+                continue
+            }
+            2 {
+                # NetDrive
+                Write-Verbose "Processing Drive properties"
+                Add-Member -InputObject $vuemAction -NotePropertyName "AssignmentProperties" -NotePropertyValue "DriveLetter: $($row.Properties)"
+                continue
+            }
+            3 {
+                # VirtualDrive
+                Write-Verbose "Processing Drive properties"
+                Add-Member -InputObject $vuemAction -NotePropertyName "AssignmentProperties" -NotePropertyValue "DriveLetter: $($row.Properties)"
+                continue
+            }
+            Default {}
+        }
+
+        # add the resulting object to the array
+        $actionGroupActions += $vuemAction
+    }
+
+    Write-Verbose "Actions processed: $($actionGroupActions.Count)"
+
+    $vuemObject = [pscustomobject] @{
+        'IdActionGroup' = [int]$DataRow.IdActionGroup
+        'IdSite'        = [int]$DataRow.IdSite
+        'Name'          = [string]$DataRow.Name
+        'Description'   = [string]$DataRow.Description
+        'State'         = [string]$tableVUEMState[$DataRow.State]
+        'Actions'       = [pscustomobject]$actionGroupActions
+        'Version'       = [int]$DataRow.RevisionId
+    } 
+    # override the default ToScript() method
+    $vuemObject | Add-Member scriptmethod ToString { } -force
+
+    return $vuemObject
 }
 
 <#
@@ -270,7 +360,7 @@ Function New-VUEMApplicationObject() {
     $vuemActionReserved = $DataRow.Reserved01
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'                            = [int]$DataRow.IdApplication
         'IdSite'                              = [int]$DataRow.IdSite
         'Category'                            = [string]"Application"
@@ -297,6 +387,10 @@ Function New-VUEMApplicationObject() {
         'CreateShortcutInUserFavoritesFolder' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value
         'Version'                             = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -331,7 +425,7 @@ Function New-VUEMPrinterObject() {
     if (-not $vuemActionReserved) { $vuemActionReserved = $defaultVUEMPrinterReserved }
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'               = [int]$DataRow.IdPrinter
         'IdSite'                 = [int]$DataRow.IdSite
         'Category'               = [string]"Printer"
@@ -347,6 +441,10 @@ Function New-VUEMPrinterObject() {
         'SelfHealingEnabled'     = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value
         'Version'                = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -378,7 +476,7 @@ Function New-VUEMNetDriveObject() {
     $vuemActionReserved = $DataRow.Reserved01
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'               = [int]$DataRow.IdNetDrive
         'IdSite'                 = [int]$DataRow.IdSite
         'Category'               = [string]"Network Drive"
@@ -395,6 +493,10 @@ Function New-VUEMNetDriveObject() {
         'SetAsHomeDriveEnabled'  = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
         'Version'                = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -426,7 +528,7 @@ Function New-VUEMVirtualDriveObject() {
     $vuemActionReserved = $DataRow.Reserved01
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'              = [int]$DataRow.IdVirtualDrive
         'IdSite'                = [int]$DataRow.IdSite
         'Category'              = [string]"Virtual Drive"
@@ -438,6 +540,10 @@ Function New-VUEMVirtualDriveObject() {
         'SetAsHomeDriveEnabled' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SetAsHomeDriveEnabled"}).Value
         'Version'               = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -466,7 +572,7 @@ Function New-VUEMRegValueObject() {
 
     Write-Verbose "Found Registry Value action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'    = [int]$DataRow.IdRegValue
         'IdSite'      = [int]$DataRow.IdSite
         'Category'    = [string]"Registry Value"
@@ -481,6 +587,10 @@ Function New-VUEMRegValueObject() {
         'RunOnce'     = [bool]$DataRow.RunOnce
         'Version'     = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -513,7 +623,7 @@ Function New-VUEMEnvVariableObject() {
 
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'       = [int]$DataRow.IdEnvVariable
         'IdSite'         = [int]$DataRow.IdSite
         'Category'       = [string]"Environment Variable"
@@ -527,6 +637,10 @@ Function New-VUEMEnvVariableObject() {
         'ExecutionOrder' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecOrder"}).Value
         'Version'        = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -555,7 +669,7 @@ Function New-VUEMPortObject() {
 
     Write-Verbose "Found Port action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'    = [int]$DataRow.IdPort
         'IdSite'      = [int]$DataRow.IdSite
         'Category'    = [string]"Port"
@@ -567,6 +681,10 @@ Function New-VUEMPortObject() {
         'TargetPath'  = [string]$DataRow.TargetPath
         'Version'     = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -595,7 +713,7 @@ Function New-VUEMIniFileOpObject() {
 
     Write-Verbose "Found Ini File action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'    = [int]$DataRow.IdIniFileOp
         'IdSite'      = [int]$DataRow.IdSite
         'Category'    = [string]"Ini File Operation"
@@ -609,6 +727,10 @@ Function New-VUEMIniFileOpObject() {
         'RunOnce'     = [bool]$DataRow.RunOnce
         'Version'     = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -640,7 +762,7 @@ Function New-VUEMExtTaskObject() {
     $vuemActionReserved = $DataRow.Reserved01
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'           = [int]$DataRow.IdExtTask
         'IdSite'             = [int]$DataRow.IdSite
         'Category'           = [string]"External Task"
@@ -658,6 +780,10 @@ Function New-VUEMExtTaskObject() {
         'ExecuteOnlyAtLogon' = [bool][int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteOnlyAtLogon"}).Value
         'Version'            = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -690,7 +816,7 @@ Function New-VUEMFileSystemOpObject() {
 
     [xml]$vuemActionXml = $vuemActionReserved.Substring($vuemActionReserved.ToLower().IndexOf("<array"))
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction' = [int]$DataRow.IdFileSystemOp
         'IdSite' = [int]$DataRow.IdSite
         'Category' = [string]"File System Operation"
@@ -705,6 +831,10 @@ Function New-VUEMFileSystemOpObject() {
         'ExecutionOrder' = [int]($vuemActionXml.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecOrder"}).Value
         'Version' = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -733,7 +863,7 @@ Function New-VUEMUserDSNObject() {
 
     Write-Verbose "Found User DSN action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'                  = [int]$DataRow.IdUserDSN
         'IdSite'                    = [int]$DataRow.IdSite
         'Category'                  = [string]"User DSN"
@@ -751,6 +881,10 @@ Function New-VUEMUserDSNObject() {
         'RunOnce'                   = [bool]$DataRow.RunOnce
         'Version'                   = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -779,7 +913,7 @@ Function New-VUEMFileAssocObject() {
 
     Write-Verbose "Found File Association action object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdAction'          = [int]$DataRow.IdFileAssoc
         'IdSite'            = [int]$DataRow.IdSite
         'Category'          = [string]"File Association"
@@ -797,6 +931,10 @@ Function New-VUEMFileAssocObject() {
         'RunOnce'           = [bool]$DataRow.RunOnce
         'Version'           = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
@@ -855,7 +993,7 @@ Function New-VUEMADObject() {
     $Type = [int]$DataRow.Type
     if ($DataRow.Name -like "S-1-1-0" -or $DataRow.Name -like "S-1-5-32-544") { $Type = 3 }
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdADObject'        = [int]$DataRow.IdItem
         'IdSite'            = [int]$DataRow.IdSite
         'Name'              = [string]$DataRow.Name
@@ -866,14 +1004,18 @@ Function New-VUEMADObject() {
         'Priority'          = [int]$DataRow.Priority
         'Version'           = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
     .Synopsis
-    Converts SQL Data to an Active Directory object
+    Converts SQL Data to a Filter Condition object
 
     .Description
-    Converts SQL Data to an Active Directory object
+    Converts SQL Data to a Filter Condition object
 
     .Link
     https://msfreaks.wordpress.com
@@ -894,7 +1036,7 @@ Function New-VUEMCondition() {
 
     Write-Verbose "Found Condition object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdCondition' = [int]$DataRow.IdFilterCondition
         'IdSite'      = [int]$DataRow.IdSite
         'Name'        = [string]$DataRow.Name
@@ -905,14 +1047,18 @@ Function New-VUEMCondition() {
         'TestResult'  = [string]$DataRow.TestResult
         'Version'     = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 <#
     .Synopsis
-    Converts SQL Data to an Active Directory object
+    Converts SQL Data to a Filter Rule object
 
     .Description
-    Converts SQL Data to an Active Directory object
+    Converts SQL Data to a Filter Rule object
 
     .Link
     https://msfreaks.wordpress.com
@@ -938,7 +1084,7 @@ Function New-VUEMRule() {
     $vuemConditions = @()
     foreach ($idCondition in ($DataRow.Conditions.Split(";") | Sort-Object)) { $vuemConditions += Get-WEMCondition -Connection $Connection -IdCondition $idCondition }
 
-    Return [pscustomobject] @{
+    $vuemObject = [pscustomobject] @{
         'IdRule'      = [int]$DataRow.IdFilterRule
         'IdSite'      = [int]$DataRow.IdSite
         'Name'        = [string]$DataRow.Name
@@ -947,6 +1093,10 @@ Function New-VUEMRule() {
         'Conditions'  = [pscustomobject]$vuemConditions
         'Version'     = [int]$DataRow.RevisionId
     }
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    return $vuemObject
 }
 
 #endregion
@@ -1036,6 +1186,8 @@ $configurationSettings = @{
         "CleanupTables"                   = @("VUEMActionGroups","VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMStorefrontSettings","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","GroupPolicyObjects","GroupPolicyGlobalSettings","VUEMSites")
     }
 }
+
+$ActionCategories = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")
 
 $defaultVUEMAppReserved                  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMPrinterReserved              = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'

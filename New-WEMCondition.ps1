@@ -70,11 +70,11 @@ function New-WEMCondition {
         $TestResult = ConvertTo-StringEscaped $TestResult
 
         # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS Condition FROM VUEMFiltersConditions WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMFiltersConditions WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Condition -or $Name -like "always true") {
+        if ($result.Tables.Rows.ObjectCount -or $Name -like "always true") {
             # name must be unique
-            Write-Error "There's already an Condition object named '$($Name)' in the Configuration"
+            Write-Error "There's already a Condition object named '$($Name)' in the Configuration"
             Break
         }
 
@@ -99,13 +99,15 @@ function New-WEMCondition {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
-        $SQLQuery = "SELECT IdFilterCondition AS IdCondition FROM VUEMFiltersConditions WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
+        $SQLQuery = "SELECT * FROM VUEMFiltersConditions WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $result.Tables.Rows.IdADObject -ChangeType "Create" -ObjectName $Name -ObjectType "Filters\Filter Condition" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        $IdObject = $result.Tables.Rows.IdFilterCondition
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Filters\Filter Condition" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        Get-WEMCondition -Connection $Connection -IdCondition $result.Tables.Rows.IdCondition
+        return New-VUEMCondition -DataRow $result.Tables.Rows
+        #Get-WEMCondition -Connection $Connection -IdCondition $IdObject
     }
 }

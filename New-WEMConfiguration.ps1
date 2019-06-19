@@ -16,7 +16,7 @@
 
     .Parameter Connection
     ..
-    
+
     .Example
 
     .Notes
@@ -44,11 +44,11 @@ function New-WEMConfiguration {
         $Description = ConvertTo-StringEscaped $Description
 
         # check if there's already a configuration with that name
-        $SQLQuery = "SELECT COUNT(*) AS Site FROM VUEMSites WHERE Name LIKE '$($Name)'"
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMSites WHERE Name LIKE '$($Name)'"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.Site) {
+        if ($result.Tables.Rows.ObjectCount) {
             # name must be unique
-            Write-Error "There's already a configuration named '$($Name)'"
+            Write-Error "There's already a Configuration object named '$($Name)'"
             Break
         }
 
