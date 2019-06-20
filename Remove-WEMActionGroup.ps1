@@ -46,6 +46,8 @@ function Remove-WEMActionGroup {
         $SQLQuery = "DELETE FROM VUEMActionGroups WHERE IdActionGroup = $($IdActionGroup)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
+        # deleting individual actions from VUEMActionGroupsTemplates is not needed. DB triggers handle this!
+        
         # Updating the ChangeLog
         New-ChangesLogEntry -Connection $Connection -IdSite $origObject.IdSite -IdElement $IdActionGroup -ChangeType "Delete" -ObjectName $origObject.Name -ObjectType "Actions\Action Groups" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }

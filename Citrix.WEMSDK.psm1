@@ -237,6 +237,8 @@ Function New-VUEMSiteObject() {
     } 
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Configuration")
 
     return $vuemObject
 }
@@ -282,8 +284,7 @@ Function New-VUEMActionGroupObject() {
                 Write-Verbose "Processing Application properties ($([int]$row.Properties))"
                 $bits = [int]$row.Properties
                 if ($bits) {
-                    $properties = @{1="CreateDesktopLink";2="CreateQuickLaunchLink";4="CreateStartMenuLink";8="PinToTaskbar";16="PinToStartMenu";32="AutoStart"}
-                    $vuemAction | Add-Member -NotePropertyName "AssignmentProperties" -NotePropertyValue ($properties.Keys | where { $_ -band $bits } | foreach { $properties.Get_Item($_) })
+                    $vuemAction | Add-Member -NotePropertyName "AssignmentProperties" -NotePropertyValue ($assignmentPropertiesEnum.Keys | Where-Object { ($_).GetType().Name -like "Int32" -and $_ -band $bits } | foreach { $assignmentPropertiesEnum.Get_Item($_) })
                 }
                 continue
               }
@@ -327,6 +328,8 @@ Function New-VUEMActionGroupObject() {
     } 
     # override the default ToScript() method
     $vuemObject | Add-Member scriptmethod ToString { } -force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActionGroup")
 
     return $vuemObject
 }
@@ -389,6 +392,8 @@ Function New-VUEMApplicationObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Application")
 
     return $vuemObject
 }
@@ -443,6 +448,8 @@ Function New-VUEMPrinterObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Printer")
 
     return $vuemObject
 }
@@ -495,7 +502,9 @@ Function New-VUEMNetDriveObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
-
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.NetworkDrive")
+    
     return $vuemObject
 }
 
@@ -542,6 +551,8 @@ Function New-VUEMVirtualDriveObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.VirtualDrive")
 
     return $vuemObject
 }
@@ -589,6 +600,8 @@ Function New-VUEMRegValueObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.RegistryValue")
 
     return $vuemObject
 }
@@ -639,6 +652,8 @@ Function New-VUEMEnvVariableObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.EnvironmentVariable")
 
     return $vuemObject
 }
@@ -683,6 +698,8 @@ Function New-VUEMPortObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Port")
 
     return $vuemObject
 }
@@ -729,6 +746,8 @@ Function New-VUEMIniFileOpObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.IniFileOperation")
 
     return $vuemObject
 }
@@ -782,6 +801,8 @@ Function New-VUEMExtTaskObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ExternalTask")
 
     return $vuemObject
 }
@@ -833,6 +854,8 @@ Function New-VUEMFileSystemOpObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.FileSystemOperation")
 
     return $vuemObject
 }
@@ -883,6 +906,8 @@ Function New-VUEMUserDSNObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.UserDSN")
 
     return $vuemObject
 }
@@ -933,6 +958,8 @@ Function New-VUEMFileAssocObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.FileAssociation")
 
     return $vuemObject
 }
@@ -1006,6 +1033,8 @@ Function New-VUEMADObject() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActiveDirectoryObject")
 
     return $vuemObject
 }
@@ -1049,6 +1078,8 @@ Function New-VUEMCondition() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Condition")
 
     return $vuemObject
 }
@@ -1095,6 +1126,8 @@ Function New-VUEMRule() {
     }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Rule")
 
     return $vuemObject
 }
@@ -1187,7 +1220,8 @@ $configurationSettings = @{
     }
 }
 
-$ActionCategories = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")
+$ActionCategories         = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")
+$assignmentPropertiesEnum = @{1="CreateDesktopLink";2="CreateQuickLaunchLink";4="CreateStartMenuLink";8="PinToTaskbar";16="PinToStartMenu";32="AutoStart";"CreateDesktopLink"=1;"CreateQuickLaunchLink"=2;"CreateStartMenuLink"=4;"PinToTaskbar"=8;"PinToStartMenu"=16;"AutoStart"=32}
 
 $defaultVUEMAppReserved                  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMPrinterReserved              = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
@@ -1442,6 +1476,32 @@ $tableVUEMActionCategoryId = @{
     "File System Operation" = "IdFileSystemOp"
     "User DSN"              = "IdUserDSN"
     "File Association"      = "IdFileAssoc"
+}
+$tableVUEMActionType = @{
+    0  = "Application"
+    1  = "Printer"
+    2  = "Network Drive"
+    3  = "Virtual Drive"
+    4  = "Registry Value"
+    5  = "Environment Variable"
+    6  = "Port"
+    7  = "Ini File Operation"
+    8  = "External Task"
+    9  = "File System Operation"
+    10 = "User DSN"
+    11 = "File Association"
+    "Application"           = 0
+    "Printer"               = 1
+    "Network Drive"         = 2
+    "Virtual Drive"         = 3
+    "Registry Value"        = 4
+    "Environment Variable"  = 5
+    "Port"                  = 6
+    "Ini File Operation"    = 7
+    "External Task"         = 8
+    "File System Operation" = 9
+    "User DSN"              = 10
+    "File Association"      = 11
 }
 
 $databaseVersion = ""

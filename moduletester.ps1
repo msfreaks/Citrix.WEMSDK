@@ -448,16 +448,14 @@ $allActionGroups | Format-Table
 # Set-WEMActionGroup
 $allActionGroups | ForEach-Object { Set-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $_.IdActionGroup -Description "Set-WEMActionGroup" }
 
-$conditionArray = $testRule.Conditions
-$conditionArray += Get-WEMCondition -Connection $dbconn -IdSite $conf.IdSite -Name "POSH Condition *" 
-Set-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule -State "Disabled" -Conditions $conditionArray
-$conditionArray = $conditionArray | Where-Object { $_.Name -notlike "POSH Condition 1" }
-Set-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule -Conditions $conditionArray
+$actionGroupId = (Get-WEMActionGroup -Connection $dbconn -IdSite $conf.IdSite -Name "POSH Action Group 1").IdActionGroup
+$allApps | ForEach-Object { Set-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $actionGroupId -AddApplication $_ -AssignmentProperties "CreateStartMenuLink", "PinToStartMenu" }
+$allPrinters | ForEach-Object { Set-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $actionGroupId -AddPrinter $_ }
+Set-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $actionGroupId -AddNetworkDrive $allDrives[0] -DriveLetter H
+Set-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $testActionGroup.IdActionGroup -AddNetworkDrive $allDrives[0] -DriveLetter H
 
-# Remove-WEMRule
-Remove-WEMRule -Connection $dbconn -Verbose -IdRule $testRule.IdRule
-Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Name "POSH Test 1").IdCondition
-Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition -Connection $dbconn -Name "POSH Test 2").IdCondition
+# Remove-WEMActionGroup
+Remove-WEMActionGroup -Connection $dbconn -Verbose -IdActionGroup $testActionGroup.IdActionGroup
 
 #endregion
 

@@ -56,10 +56,10 @@ function Set-WEMADObject {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
-        # grab original action
+        # grab original object
         $origADObject = Get-WEMADObject -Connection $Connection -IdADObject $IdADObject
 
-        # only continue if the action was found
+        # only continue if the object was found
         if (-not $origADObject) { 
             Write-Warning "No Active Directory object found for Id $($IdADObject)"
             Break
@@ -71,7 +71,7 @@ function Set-WEMADObject {
             Return
         }
         
-        # if a new name for the action is entered, check if it's unique
+        # if a new name for the object is entered, check if it's unique
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origADObject.Name ) {
             $SQLQuery = "SELECT COUNT(*) AS ADObject FROM VUEMItems WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origADObject.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
@@ -97,7 +97,7 @@ function Set-WEMADObject {
             Write-Verbose "Determined '$($Name)' ($($ADObject.DistinguishedName)) to be of type '$($Type)'"
         }
 
-        # build the query to update the action
+        # build the query to update the object
         $SQLQuery = "UPDATE VUEMItems SET "
         $updateFields = @()
         $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "idadobject" }
@@ -128,7 +128,7 @@ function Set-WEMADObject {
             }
         }
 
-        # if anything needs to be updated, update the action
+        # if anything needs to be updated, update the object
         if($updateFields) { 
             $SQLQuery += "{0}, " -f ($updateFields -join ", ")
             $SQLQuery += "RevisionId = $($origADObject.Version + 1) WHERE IdItem = $($IdADObject)"
