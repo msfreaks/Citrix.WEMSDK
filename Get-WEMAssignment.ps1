@@ -42,7 +42,7 @@ function Get-WEMAssignment {
         [int]$IdSite,
         [Parameter(Mandatory=$False)]
         [int]$IdAssignment,
-        [Parameter(Mandatory=$False)][ValidateSet("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association","Action Group")]
+        [Parameter(Mandatory=$False)][ValidateSet("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association","Action Groups")]
         [string]$AssignmentType,
         [Parameter(Mandatory=$False)]
 		[int]$IdAssignedObject,
@@ -63,7 +63,7 @@ function Get-WEMAssignment {
             Write-Verbose "Limiting result to type '$($AssignmentType)'"
             $vuemAssignmentTypes = @("$($AssignmentType)")
         } else {
-            $vuemAssignmentTypes = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association","Action Group")
+            $vuemAssignmentTypes = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association","Action Groups")
         }
 
         # create empty object array

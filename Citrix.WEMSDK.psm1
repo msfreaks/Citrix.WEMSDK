@@ -285,7 +285,7 @@ Function New-VUEMActionGroupObject() {
                 Write-Verbose "Processing Application properties ($([int]$row.Properties))"
                 $bits = [int]$row.Properties
                 if ($bits) {
-                    $vuemAction | Add-Member -NotePropertyName "AssignmentProperties" -NotePropertyValue ($assignmentPropertiesEnum.Keys | Where-Object { ($_).GetType().Name -like "Int32" -and $_ -band $bits } | foreach { $assignmentPropertiesEnum.Get_Item($_) })
+                    $vuemAction | Add-Member -NotePropertyName "AssignmentProperties" -NotePropertyValue ($assignmentPropertiesEnum.Keys | Where-Object { ($_).GetType().Name -like "Int32" -and $_ -band $bits } | ForEach-Object { $assignmentPropertiesEnum.Get_Item($_) })
                 }
 
                 continue
@@ -439,7 +439,7 @@ Function New-VUEMAssignmentObject() {
     Write-Verbose "Found Assignment object of Type '$($AssignmentType)' in IdSite $($DataRow.IdSite)"
 
     $assignedObject = $null
-    if ($AssignmentType -like "Action Group") {
+    if ($AssignmentType -like "Action Groups") {
         $assignedObject = Get-WEMActionGroup -Connection $Connection -IdActionGroup $row.IdAssignedObject
     } else {
         $assignedObject = Get-WEMAction -Connection $Connection -IdAction $row.IdAssignedObject -Category $AssignmentType
@@ -454,8 +454,45 @@ Function New-VUEMAssignmentObject() {
         'Rule'                                = Get-WEMRule -Connection $Connection -IdRule $row.IdFilterRule
     }
 
+    switch ($AssignmentType) {
+        "Application" {
+            # Application
+            Write-Verbose "Processing Application properties"
+            $bits = [int]$row.isDesktop + ([int]$row.isQuickLaunch * $assignmentPropertiesEnum["CreateQuickLaunchLink"]) + ([int]$row.isStartMenu * $assignmentPropertiesEnum["CreateStartMenuLink"]) + ([int]$row.isPinToTaskbar * $assignmentPropertiesEnum["PinToTaskbar"]) + ([int]$row.isPinToStartMenu * $assignmentPropertiesEnum["PinToStartMenu"]) + ([int]$row.isAutoStart * $assignmentPropertiesEnum["AutoStart"])
+            if ($bits) {
+                Add-Member -InputObject $vuemObject -NotePropertyName "AssignmentProperties" -NotePropertyValue ($assignmentPropertiesEnum.Keys | Where-Object { ($_).GetType().Name -like "Int32" -and $_ -band $bits } | ForEach-Object { $assignmentPropertiesEnum.Get_Item($_) })
+            }
+
+            continue
+          }
+        "Printer" {
+            # Printer
+            Write-Verbose "Processing Printer properties"
+            if ([int]$row.isDefault -eq 1) { 
+                Add-Member -InputObject $vuemObject -NotePropertyName "AssignmentProperties" -NotePropertyValue "SetAsDefault"
+            }
+
+            continue
+        }
+        "Network Drive" {
+            # NetDrive
+            Write-Verbose "Processing Drive properties"
+            Add-Member -InputObject $vuemObject -NotePropertyName "AssignmentProperties" -NotePropertyValue "DriveLetter: $($row.DriveLetter)"
+
+            continue
+        }
+        "Virtual Drive" {
+            # VirtualDrive
+            Write-Verbose "Processing Drive properties"
+            Add-Member -InputObject $vuemObject -NotePropertyName "AssignmentProperties" -NotePropertyValue "DriveLetter: $($row.DriveLetter)"
+
+            continue
+        }
+        Default {}
+    }
+
     # override the default ToScript() method
-    $vuemObject | Add-Member ScriptMethod ToString { } -Force
+    Add-Member -InputObject $vuemObject ScriptMethod ToString { "$($this.AssignedObject.Name) -> $($this.ADObject.Name)" } -Force
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Assignment")
 
@@ -1037,8 +1074,9 @@ function Get-ActiveDirectoryName {
     )
 
     $account = $null
-    $account = [adsi]"LDAP://<SID=$($SID)>"
     try {
+        $account = [adsi]"LDAP://<SID=$($SID)>"
+
         $type = "Group"
         if ($account.objectClass -match "user") { $type = "User" } 
 
@@ -1544,7 +1582,7 @@ $tableVUEMActionCategory = @{
     "File System Operation" = "FileSystemOps"
     "User DSN"              = "UserDSNs"
     "File Association"      = "FileAssocs"
-    "Action Group"          = "ActionGroups"
+    "Action Groups"          = "ActionGroups"
 }
 $tableVUEMActionCategoryId = @{
     "Application"           = "IdApplication"
@@ -1559,7 +1597,7 @@ $tableVUEMActionCategoryId = @{
     "File System Operation" = "IdFileSystemOp"
     "User DSN"              = "IdUserDSN"
     "File Association"      = "IdFileAssoc"
-    "Action Group"          = "IdActionGroup"
+    "Action Groups"          = "IdActionGroup"
 }
 $tableVUEMActionType = @{
     0  = "Application"

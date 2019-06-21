@@ -2,7 +2,7 @@ $name       = "POSH 1906"
 $database   = "CitrixWEM1906"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
-$dbconn = New-WEMDatabaseConnection -Server "ca002511" -Database "$($database)" -Verbose
+$dbconn     = New-WEMDatabaseConnection -Server "ca002511" -Database "$($database)" -Verbose
 
 #region WEMConfiguration
 # New-WEMConfiguration
