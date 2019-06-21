@@ -41,6 +41,9 @@ function Get-WEMRule {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # todo:
+        # If both Site and IdRule is entered and IdRule = 1, default rule is not returned!!
+        
         # build query
         $SQLQuery = "SELECT * FROM VUEMFiltersRules"
         if ($IdSite -or $Name -or $IdRule) {

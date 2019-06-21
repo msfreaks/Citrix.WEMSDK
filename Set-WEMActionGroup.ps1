@@ -269,23 +269,34 @@ function Set-WEMActionGroup {
                 if ($parameterObject.PSObject.TypeNames[0] -eq "Citrix.WEMSDK.NetworkDrive" -or $parameterObject.PSObject.TypeNames[0] -eq "Citrix.WEMSDK.VirtualDrive") {
                     # assignmentproperties
                     $properties = $DriveLetter.ToUpper()
-                    # drivemapping detected, in Action Group, DriveLetter must be unique
-                    $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMActionGroupsTemplates WHERE IdActionGroup = $($IdActionGroup) AND (ActionType = $($tableVUEMActionType["Network Drive"]) OR ActionType = $($tableVUEMActionType["Virtual Drive"])) AND Properties = '$($properties)' AND IdAction <> $($parameterObject.IdAction)"
-                    $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-                    if ($result.Tables.Rows.ObjectCount) {
-                        # DriveLetter must be unique
-                        Write-Error "There's already a Drive object using DriveLetter '$($properties)' in the Action Group"
-                        Break
-                    }
 
-                    # DriveLetter must not be excluded in the Configuration
+                    # grab configuration properties
                     $SQLQuery = "SELECT Value AS Exclusions FROM VUEMParameters WHERE IdSite = $($origObject.IdSite) AND Name = 'excludedDriveletters'"
                     $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
                     $excludedDriveletters = $result.Tables.Rows.Exclusions
+                    Write-Verbose "Found excluded driveletters: $($excludedDriveletters)"
+
+                    $SQLQuery = "SELECT Value AS AllowReuse FROM VUEMParameters WHERE IdSite = $($origObject.IdSite) AND Name = 'AllowDriveLetterReuse'"
+                    $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+                    $allowDriveletterReuse = [bool][int]$result.Tables.Rows.AllowReuse
+                    Write-Verbose "Found Driveletter Re-use setting: $([string]$allowDriveletterReuse)"
+
+                    # DriveLetter must not be excluded in the Configuration
                     if (($excludedDriveLetters -split ";") -contains $properties) {
                         # DriveLetter must not be Excluded
                         Write-Error "DriveLetter '$($properties)' is excluded in the Configuration (Exclusions: $($excludedDriveLetters.Replace(";",", ")))"
                         Break
+                    }
+
+                    # drivemapping detected, in Action Group, DriveLetter must be unique if re-use is $false
+                    if (-not $allowDriveletterReuse) {
+                        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMActionGroupsTemplates WHERE IdActionGroup = $($IdActionGroup) AND (ActionType = $($tableVUEMActionType["Network Drive"]) OR ActionType = $($tableVUEMActionType["Virtual Drive"])) AND Properties = '$($properties)' AND IdAction <> $($parameterObject.IdAction)"
+                        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+                        if ($result.Tables.Rows.ObjectCount) {
+                            # DriveLetter must be unique
+                            Write-Error "There's already a Drive object using DriveLetter '$($properties)' in the Action Group"
+                            Break
+                        }
                     }
                 }
 

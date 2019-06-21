@@ -432,7 +432,7 @@ Remove-WEMCondition -Connection $dbconn -Verbose -IdCondition (Get-WEMCondition 
 #endregion
 
 #region WEMActionGroup
-$conf = Get-WEMConfiguration -Connection $dbconn -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $dbconn -Name "$($name)" -Verbose
 
 # New-WEMActionGroup
 $conf | New-WEMActionGroup -Connection $dbconn -Verbose -Name "POSH Action Group 1"
@@ -470,6 +470,9 @@ $allConditions | Select-Object IdSite, IdCondition, Name, Type, TestValue, TestR
 
 $allRules = $conf | Get-WEMRule -Connection $dbconn -Verbose
 $allRules | Select-Object IdSite, IdRule, Name, @{Name="ConditionName";Expression={ $_.Conditions | Select-Object Name} } | Format-Table
+
+$allActionGroups = $conf | Get-WEMActionGroup -Connection $dbconn -Verbose
+$allActionGroups | Format-Table
 
 # Cleanup
 # $conf | Remove-WEMConfiguration -Connection $dbconn

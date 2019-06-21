@@ -278,6 +278,7 @@ Function New-VUEMActionGroupObject() {
     foreach($row in $result.Tables.Rows) {
         Write-Verbose "Grabbing Action $($row.IdAction) in category '$($ActionCategories[$row.ActionType])'"
         $vuemAction = Get-WEMAction -Connection $Connection -IdAction $row.IdAction -Category $ActionCategories[$row.ActionType]
+
         switch ($row.ActionType) {
             0 {
                 # Application
@@ -286,6 +287,7 @@ Function New-VUEMActionGroupObject() {
                 if ($bits) {
                     $vuemAction | Add-Member -NotePropertyName "AssignmentProperties" -NotePropertyValue ($assignmentPropertiesEnum.Keys | Where-Object { ($_).GetType().Name -like "Int32" -and $_ -band $bits } | foreach { $assignmentPropertiesEnum.Get_Item($_) })
                 }
+
                 continue
               }
             1 {
@@ -294,18 +296,21 @@ Function New-VUEMActionGroupObject() {
                 if ($row.Properties -eq "1") { 
                     Add-Member -InputObject $vuemAction -NotePropertyName "AssignmentProperties" -NotePropertyValue "SetAsDefault"
                 }
+
                 continue
             }
             2 {
                 # NetDrive
                 Write-Verbose "Processing Drive properties"
                 Add-Member -InputObject $vuemAction -NotePropertyName "AssignmentProperties" -NotePropertyValue "DriveLetter: $($row.Properties)"
+
                 continue
             }
             3 {
                 # VirtualDrive
                 Write-Verbose "Processing Drive properties"
                 Add-Member -InputObject $vuemAction -NotePropertyName "AssignmentProperties" -NotePropertyValue "DriveLetter: $($row.Properties)"
+
                 continue
             }
             Default {}
@@ -326,8 +331,9 @@ Function New-VUEMActionGroupObject() {
         'Actions'       = [pscustomobject]$actionGroupActions
         'Version'       = [int]$DataRow.RevisionId
     } 
+
     # override the default ToScript() method
-    $vuemObject | Add-Member scriptmethod ToString { } -force
+    $vuemObject | Add-Member scriptmethod ToString { $this.Name } -force
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActionGroup")
 
@@ -394,6 +400,64 @@ Function New-VUEMApplicationObject() {
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Application")
+
+    return $vuemObject
+}
+
+<#
+    .Synopsis
+    Converts SQL Data to an Assignment object
+
+    .Description
+    Converts SQL Data to an Assignment object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Parameter AssignmentType
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMAssignmentObject() {
+    param(
+        [System.Data.DataRow]$DataRow,
+        [string]$AssignmentType,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    Write-Verbose "Found Assignment object of Type '$($AssignmentType)' in IdSite $($DataRow.IdSite)"
+
+    $assignedObject = $null
+    if ($AssignmentType -like "Action Group") {
+        $assignedObject = Get-WEMActionGroup -Connection $Connection -IdActionGroup $row.IdAssignedObject
+    } else {
+        $assignedObject = Get-WEMAction -Connection $Connection -IdAction $row.IdAssignedObject -Category $AssignmentType
+    }
+    $vuemObject = [pscustomobject] @{
+        'IdAssignment'                        = [int]$DataRow.IdAssignment
+        'IdSite'                              = [int]$DataRow.IdSite
+        'AssignmentType'                      = $AssignmentType
+        'IdAssignedObject'                    = [int]$DataRow.IdAssignedObject
+        'AssignedObject'                      = $assignedObject
+        'ADObject'                            = Get-WEMADObject -Connection $Connection -IdSite $row.IdSite -IdADObject $row.Iditem
+        'Rule'                                = Get-WEMRule -Connection $Connection -IdRule $row.IdFilterRule
+    }
+
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Assignment")
 
     return $vuemObject
 }
@@ -984,6 +1048,7 @@ function Get-ActiveDirectoryName {
                 'DistinguishedName' = $account.distinguishedName.ToString()
                 'Type' = $type
                 'Account' = "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
+                'SID' = $SID
         }
     }
     catch {
@@ -1024,15 +1089,20 @@ Function New-VUEMADObject() {
         'IdADObject'        = [int]$DataRow.IdItem
         'IdSite'            = [int]$DataRow.IdSite
         'Name'              = [string]$DataRow.Name
-        'DistinguishedName' = [string]$DataRow.DistinguishedName
+        'SID'               = [string]$DataRow.Name
+        #'DistinguishedName' = [string]$DataRow.DistinguishedName
         'Description'       = [string]$DataRow.Description
         'State'             = [string]$tableVUEMState[[int]$DataRow.State]
         'Type'              = [string]$tableVUEMADObjectType[$Type]
         'Priority'          = [int]$DataRow.Priority
         'Version'           = [int]$DataRow.RevisionId
     }
+    # try and get LDAP properties
+    $ldap = Get-ActiveDirectoryName -SID $DataRow.Name
+    if ($ldap) { $vuemObject | Add-Member -NotePropertyName "Name" -NotePropertyValue $ldap.Account -Force }
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActiveDirectoryObject")
 
@@ -1121,7 +1191,7 @@ Function New-VUEMRule() {
         'Name'        = [string]$DataRow.Name
         'Description' = [string]$DataRow.Description
         'State'       = [string]$tableVUEMState[[int]$DataRow.State]
-        'Conditions'  = [pscustomobject]$vuemConditions
+        'Conditions'  = $vuemConditions
         'Version'     = [int]$DataRow.RevisionId
     }
     # override the default ToScript() method
@@ -1223,13 +1293,15 @@ $configurationSettings = @{
 $ActionCategories         = @("Application","Printer","Network Drive","Virtual Drive","Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")
 $assignmentPropertiesEnum = @{1="CreateDesktopLink";2="CreateQuickLaunchLink";4="CreateStartMenuLink";8="PinToTaskbar";16="PinToStartMenu";32="AutoStart";"CreateDesktopLink"=1;"CreateQuickLaunchLink"=2;"CreateStartMenuLink"=4;"PinToTaskbar"=8;"PinToStartMenu"=16;"AutoStart"=32}
 
-$defaultVUEMAppReserved                  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
-$defaultVUEMPrinterReserved              = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
-$defaultVUEMNetworkDriveReserved         = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
-$defaultVUEMVirtualDriveReserved         = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
-$defaultVUEMEnvironmentVariableReserved  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
-$defaultVUEMExternalTaskReserved         = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
-$defaultVUEMFileSystemOperationReserved  = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>'
+$XmlHeader                               = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+$XmlFooter                               = '</ArrayOfVUEMActionAdvancedOption>'
+$defaultVUEMAppReserved                  = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMPrinterReserved              = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMNetworkDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMVirtualDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMEnvironmentVariableReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMExternalTaskReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMFileSystemOperationReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
 
 $defaultIconStream = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEaSURBVFhH7ZTbCoJAEIaFCCKCCKJnLTpQVBdB14HQ00T0CqUP4AN41puJAVe92F3HRZegHfgQFvH7/1nQMmPmZ+Z8uYJOCm01vJe64PF8cZ+Ftho89DxPC8IAeZ73QpZlJWmattsAfsBavsk0yRsD3Ox7ST3A4uTC/OjC7ODCdO/AZOfAeOvAaPOB4foDg1UVwLZtIUmSqG2AIq9vgNcc5coBKHIWgNec0RhAdAUUOSJrjsRxrLYBihxBMa85QzkARY7ImjOkAURXQJEjKOY1Z0RRpLYBihyRNUe5cgCKHEEprzmjMYDoCqjImiNhGKptgApvA3V57wFkzbUGEMmDIGgfAKH84ShypQBdyn3fFwfQSaE1Y+bvx7K+efsbU5+Ow3MAAAAASUVORK5CYII="
 
@@ -1462,6 +1534,7 @@ $tableVUEMActionCategory = @{
     "File System Operation" = "FileSystemOps"
     "User DSN"              = "UserDSNs"
     "File Association"      = "FileAssocs"
+    "Action Group"          = "ActionGroups"
 }
 $tableVUEMActionCategoryId = @{
     "Application"           = "IdApplication"
@@ -1476,6 +1549,7 @@ $tableVUEMActionCategoryId = @{
     "File System Operation" = "IdFileSystemOp"
     "User DSN"              = "IdUserDSN"
     "File Association"      = "IdFileAssoc"
+    "Action Group"          = "IdActionGroup"
 }
 $tableVUEMActionType = @{
     0  = "Application"
@@ -1505,6 +1579,6 @@ $tableVUEMActionType = @{
 }
 
 $databaseVersion = ""
-$databaseSchema = ""
+$databaseSchema  = ""
 
 #endregion
