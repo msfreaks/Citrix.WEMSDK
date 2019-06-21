@@ -1,109 +1,103 @@
-# Citrix.WEMSDK
-
-CommandType     Name                                               Version    Source                                   
------------     ----                                               -------    ------                                   
-Alias           Get-WEMApp                                         0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMEnvVariable                                 0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMExtTask                                     0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMFileAssoc                                   0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMFileSystemOp                                0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMIniFilesOp                                  0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMNetDrive                                    0.9.0      Citrix.WEMSDK                            
-Alias           Get-WEMRegValue                                    0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMApp                                         0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMEnvVariable                                 0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMExtTask                                     0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMFileAssoc                                   0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMFileSystemOp                                0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMNetDrive                                    0.9.0      Citrix.WEMSDK                            
-Alias           New-WEMRegValue                                    0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMApp                                      0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMEnvVariable                              0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMExtTask                                  0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMFileAssoc                                0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMFileSystemOp                             0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMIniFilesOp                               0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMNetDrive                                 0.9.0      Citrix.WEMSDK                            
-Alias           Remove-WEMRegValue                                 0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMApp                                         0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMEnvVariable                                 0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMExtTask                                     0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMFileAssoc                                   0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMFileSystemOp                                0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMIniFilesOp                                  0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMNetDrive                                    0.9.0      Citrix.WEMSDK                            
-Alias           Set-WEMRegValue                                    0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMAction                                      0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMActionGroup                                 0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMADObject                                    0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMApplication                                 0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMAssignment                                  0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMCondition                                   0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMConfiguration                               0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMEnvironmentVariable                         0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMExternalTask                                0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMFileAssociation                             0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMFileSystemOperation                         0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMIniFileOperation                            0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMNetworkDrive                                0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMPort                                        0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMPrinter                                     0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMRegistryEntry                               0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMRule                                        0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMUserDSN                                     0.9.0      Citrix.WEMSDK                            
-Function        Get-WEMVirtualDrive                                0.9.0      Citrix.WEMSDK                            
-Function        New-WEMActionGroup                                 0.9.0      Citrix.WEMSDK                            
-Function        New-WEMADObject                                    0.9.0      Citrix.WEMSDK                            
-Function        New-WEMApplication                                 0.9.0      Citrix.WEMSDK                            
-Function        New-WEMCondition                                   0.9.0      Citrix.WEMSDK                            
-Function        New-WEMConfiguration                               0.9.0      Citrix.WEMSDK                            
-Function        New-WEMDatabaseConnection                          0.9.0      Citrix.WEMSDK                            
-Function        New-WEMEnvironmentVariable                         0.9.0      Citrix.WEMSDK                            
-Function        New-WEMExternalTask                                0.9.0      Citrix.WEMSDK                            
-Function        New-WEMFileAssociation                             0.9.0      Citrix.WEMSDK                            
-Function        New-WEMFileSystemOperation                         0.9.0      Citrix.WEMSDK                            
-Function        New-WEMIniFileOperation                            0.9.0      Citrix.WEMSDK                            
-Function        New-WEMNetworkDrive                                0.9.0      Citrix.WEMSDK                            
-Function        New-WEMPort                                        0.9.0      Citrix.WEMSDK                            
-Function        New-WEMPrinter                                     0.9.0      Citrix.WEMSDK                            
-Function        New-WEMRegistryEntry                               0.9.0      Citrix.WEMSDK                            
-Function        New-WEMRule                                        0.9.0      Citrix.WEMSDK                            
-Function        New-WEMUserDSN                                     0.9.0      Citrix.WEMSDK                            
-Function        New-WEMVirtualDrive                                0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMAction                                   0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMActionGroup                              0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMADObject                                 0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMApplication                              0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMCondition                                0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMConfiguration                            0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMEnvironmentVariable                      0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMExternalTask                             0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMFileAssociation                          0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMFileSystemOperation                      0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMIniFileOperation                         0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMNetworkDrive                             0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMPort                                     0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMPrinter                                  0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMRegistryEntry                            0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMRule                                     0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMUserDSN                                  0.9.0      Citrix.WEMSDK                            
-Function        Remove-WEMVirtualDrive                             0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMActionGroup                                 0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMADObject                                    0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMApplication                                 0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMCondition                                   0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMConfiguration                               0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMEnvironmentVariable                         0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMExternalTask                                0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMFileAssociation                             0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMFileSystemOperation                         0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMIniFileOperation                            0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMNetworkDrive                                0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMPort                                        0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMPrinter                                     0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMRegistryEntry                               0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMRule                                        0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMUserDSN                                     0.9.0      Citrix.WEMSDK                            
-Function        Set-WEMVirtualDrive                                0.9.0      Citrix.WEMSDK                            
-
-
+Get-WEMApp                   
+Get-WEMEnvVariable           
+Get-WEMExtTask               
+Get-WEMFileAssoc             
+Get-WEMFileSystemOp          
+Get-WEMIniFilesOp            
+Get-WEMNetDrive              
+Get-WEMRegValue              
+New-WEMApp                   
+New-WEMEnvVariable           
+New-WEMExtTask               
+New-WEMFileAssoc             
+New-WEMFileSystemOp          
+New-WEMNetDrive              
+New-WEMRegValue              
+Remove-WEMApp                
+Remove-WEMEnvVariable        
+Remove-WEMExtTask            
+Remove-WEMFileAssoc          
+Remove-WEMFileSystemOp       
+Remove-WEMIniFilesOp         
+Remove-WEMNetDrive           
+Remove-WEMRegValue           
+Set-WEMApp                   
+Set-WEMEnvVariable           
+Set-WEMExtTask               
+Set-WEMFileAssoc             
+Set-WEMFileSystemOp          
+Set-WEMIniFilesOp            
+Set-WEMNetDrive              
+Set-WEMRegValue              
+Get-WEMAction                
+Get-WEMActionGroup           
+Get-WEMADObject              
+Get-WEMApplication           
+Get-WEMAssignment            
+Get-WEMCondition             
+Get-WEMConfiguration         
+Get-WEMEnvironmentVariable   
+Get-WEMExternalTask          
+Get-WEMFileAssociation       
+Get-WEMFileSystemOperation   
+Get-WEMIniFileOperation      
+Get-WEMNetworkDrive          
+Get-WEMPort                  
+Get-WEMPrinter               
+Get-WEMRegistryEntry         
+Get-WEMRule                  
+Get-WEMUserDSN               
+Get-WEMVirtualDrive          
+New-WEMActionGroup           
+New-WEMADObject              
+New-WEMApplication           
+New-WEMCondition             
+New-WEMConfiguration         
+New-WEMDatabaseConnection    
+New-WEMEnvironmentVariable   
+New-WEMExternalTask          
+New-WEMFileAssociation       
+New-WEMFileSystemOperation   
+New-WEMIniFileOperation      
+New-WEMNetworkDrive          
+New-WEMPort                  
+New-WEMPrinter               
+New-WEMRegistryEntry         
+New-WEMRule                  
+New-WEMUserDSN               
+New-WEMVirtualDrive          
+Remove-WEMAction             
+Remove-WEMActionGroup        
+Remove-WEMADObject           
+Remove-WEMApplication        
+Remove-WEMCondition          
+Remove-WEMConfiguration      
+Remove-WEMEnvironmentVariable
+Remove-WEMExternalTask       
+Remove-WEMFileAssociation    
+Remove-WEMFileSystemOperation
+Remove-WEMIniFileOperation   
+Remove-WEMNetworkDrive       
+Remove-WEMPort               
+Remove-WEMPrinter            
+Remove-WEMRegistryEntry      
+Remove-WEMRule               
+Remove-WEMUserDSN            
+Remove-WEMVirtualDrive       
+Set-WEMActionGroup           
+Set-WEMADObject              
+Set-WEMApplication           
+Set-WEMCondition             
+Set-WEMConfiguration         
+Set-WEMEnvironmentVariable   
+Set-WEMExternalTask          
+Set-WEMFileAssociation       
+Set-WEMFileSystemOperation   
+Set-WEMIniFileOperation      
+Set-WEMNetworkDrive          
+Set-WEMPort                  
+Set-WEMPrinter               
+Set-WEMRegistryEntry         
+Set-WEMRule                  
+Set-WEMUserDSN               
+Set-WEMVirtualDrive          
