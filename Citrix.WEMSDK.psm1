@@ -1044,12 +1044,17 @@ function Get-ActiveDirectoryName {
 
         $domain = ((($account.distinguishedName.ToLower().Split(",")) | Where-Object { $_ -match "dc="}).Replace("dc=","") -join ".")
 
-        return [pscustomobject] @{
-                'DistinguishedName' = $account.distinguishedName.ToString()
-                'Type' = $type
-                'Account' = "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
-                'SID' = $SID
+        $ldapObject = [pscustomobject] @{
+            'DistinguishedName' = $account.distinguishedName.ToString()
+            'Type' = $type
+            'Account' = "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
+            'SID' = $SID
         }
+
+        # override the default ToScript() method
+        $ldapObject | Add-Member ScriptMethod ToString { $this.DistinguishedName } -Force
+
+        return $ldapObject
     }
     catch {
         return $null
@@ -1097,9 +1102,14 @@ Function New-VUEMADObject() {
         'Priority'          = [int]$DataRow.Priority
         'Version'           = [int]$DataRow.RevisionId
     }
-    # try and get LDAP properties
-    $ldap = Get-ActiveDirectoryName -SID $DataRow.Name
-    if ($ldap) { $vuemObject | Add-Member -NotePropertyName "Name" -NotePropertyValue $ldap.Account -Force }
+
+    # try and get LDAP properties for the SID
+    $ldapObject = Get-ActiveDirectoryName -SID $DataRow.Name
+    if ($ldapObject) { 
+        $vuemObject | Add-Member -NotePropertyName "Name" -NotePropertyValue $ldapObject.Account -Force
+        $vuemObject | Add-Member -NotePropertyName "LDAPObject" -NotePropertyValue $ldapObject -Force
+     }
+
     # override the default ToScript() method
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
 
