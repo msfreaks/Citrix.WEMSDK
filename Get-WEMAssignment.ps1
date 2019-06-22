@@ -49,7 +49,8 @@ function Get-WEMAssignment {
         [Parameter(Mandatory=$False)]
 		[int]$IdADObject,
         [Parameter(Mandatory=$False)]
-		[int]$IdRule,
+        [int]$IdRule,
+        
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
     )
@@ -147,3 +148,713 @@ function Get-WEMAssignmentsByType {
 
     return $vuemAssignments
 }
+
+<#
+    .Synopsis
+    Returns one or more WEM Action Group Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Action Group Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdActionGroup
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMActionGroupAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdActionGroup,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdActionGroup -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Action Groups"
+
+    }    
+}
+
+<#
+    .Synopsis
+    Returns one or more WEM Application Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Application Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMApplicationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Application"
+
+    }    
+}
+New-Alias -Name Get-WEMAppAssignment -Value Get-WEMApplicationAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM Printer Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Printer Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMPrinterAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Printer"
+
+    }    
+}
+
+<#
+    .Synopsis
+    Returns one or more WEM Network Drive Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Network Drive Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMNetworkDriveAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Network Drive"
+
+    }    
+}
+New-Alias -Name Get-WEMNetDriveAssignment -Value Get-WEMNetworkDriveAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM Virtual Drive Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Virtual Drive Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMVirtualDriveAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Virtual Drive"
+
+    }    
+}
+
+<#
+    .Synopsis
+    Returns one or more WEM Registry Entry Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Registry Entry Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMRegistryEntryAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Registry Value"
+
+    }    
+}
+New-Alias -Name Get-WEMRegValueAssignment -Value Get-WEMRegistryEntryAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM Environment Variable Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Environment Variable Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMEnvironmentVariableAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Environment Variable"
+
+    }    
+}
+New-Alias -Name Get-WEMEnvVariableAssignment -Value Get-WEMEnvironmentVariableAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM Port Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Port Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMPortAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Port"
+
+    }    
+}
+
+<#
+    .Synopsis
+    Returns one or more WEM Ini File Operation Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM Ini File Operation Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMIniFileOperationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "Ini File Operation"
+
+    }    
+}
+New-Alias -Name Get-WEMIniFilesOpAssignment -Value Get-WEMIniFileOperationAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM External Task Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM External Task Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMExternalTaskAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "External Task"
+
+    }    
+}
+New-Alias -Name Get-WEMExtTaskAssignment -Value Get-WEMExternalTaskAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM File System Operation Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM File System Operation Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMFileSystemOperationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "File System Operation"
+
+    }    
+}
+New-Alias -Name Get-WEMFileSystemOpAssignment -Value Get-WEMFileSystemOperationAssignment
+
+<#
+    .Synopsis
+    Returns one or more WEM User DSN Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM User DSN Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMUserDSNAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "User DSN"
+
+    }    
+}
+
+<#
+    .Synopsis
+    Returns one or more WEM File Association Assignment objects from the WEM Database based on Category.
+
+    .Description
+    Returns one or more WEM File Association Assignment objects from the WEM Database based on Category.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAction
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Get-WEMApplicationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdAction,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        Get-WEMAssignment -Connection $Connection -IdSite $IdSite -IdAssignedObject $IdAction -IdADObject $IdADObject -IdRule $IdRule -AssignmentType "File Association"
+
+    }    
+}
+New-Alias -Name Get-WEMFileAssocAssignment -Value Get-WEMFileAssociationAssignment
