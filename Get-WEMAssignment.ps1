@@ -835,7 +835,7 @@ function Get-WEMUserDSNAssignment {
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Get-WEMApplicationAssignment {
+function Get-WEMFileAssociationAssignment {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]

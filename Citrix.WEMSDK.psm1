@@ -452,6 +452,7 @@ Function New-VUEMAssignmentObject() {
         'AssignedObject'                      = $assignedObject
         'ADObject'                            = Get-WEMADObject -Connection $Connection -IdSite $row.IdSite -IdADObject $row.Iditem
         'Rule'                                = Get-WEMRule -Connection $Connection -IdRule $row.IdFilterRule
+        'Version'                             = [int]$DataRow.RevisionId
     }
 
     switch ($AssignmentType) {
@@ -1195,7 +1196,7 @@ Function New-VUEMCondition() {
         'Version'     = [int]$DataRow.RevisionId
     }
     # override the default ToScript() method
-    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    Add-Member -InputObject $vuemObject ScriptMethod ToString { $this.Name } -Force
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Condition")
 
@@ -1344,12 +1345,12 @@ $assignmentPropertiesEnum = @{1="CreateDesktopLink";2="CreateQuickLaunchLink";4=
 $XmlHeader                               = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMActionAdvancedOption xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
 $XmlFooter                               = '</ArrayOfVUEMActionAdvancedOption>'
 $defaultVUEMAppReserved                  = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforceIconLocation</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconXValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>EnforcedIconYValue</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>DoNotShowInSelfService</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>CreateShortcutInUserFavoritesFolder</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
-$defaultVUEMPrinterReserved              = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
-$defaultVUEMNetworkDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
-$defaultVUEMVirtualDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
-$defaultVUEMEnvironmentVariableReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
-$defaultVUEMExternalTaskReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
-$defaultVUEMFileSystemOperationReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption></ArrayOfVUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMPrinterReserved              = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMNetworkDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>SelfHealingEnabled</Name><Value>0</Value></VUEMActionAdvancedOption><VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMVirtualDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>SetAsHomeDriveEnabled</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMEnvironmentVariableReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMExternalTaskReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMFileSystemOperationReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
 
 $defaultIconStream = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEaSURBVFhH7ZTbCoJAEIaFCCKCCKJnLTpQVBdB14HQ00T0CqUP4AN41puJAVe92F3HRZegHfgQFvH7/1nQMmPmZ+Z8uYJOCm01vJe64PF8cZ+Ftho89DxPC8IAeZ73QpZlJWmattsAfsBavsk0yRsD3Ox7ST3A4uTC/OjC7ODCdO/AZOfAeOvAaPOB4foDg1UVwLZtIUmSqG2AIq9vgNcc5coBKHIWgNec0RhAdAUUOSJrjsRxrLYBihxBMa85QzkARY7ImjOkAURXQJEjKOY1Z0RRpLYBihyRNUe5cgCKHEEprzmjMYDoCqjImiNhGKptgApvA3V57wFkzbUGEMmDIGgfAKH84ShypQBdyn3fFwfQSaE1Y+bvx7K+efsbU5+Ow3MAAAAASUVORK5CYII="
 

@@ -94,7 +94,7 @@ function New-WEMRule {
         New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName $Name -ObjectType "Filters\Filter Rule" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        return New-VUEMRule Connection $Connection -DataRow $result.Tables.Rows
+        return New-VUEMRule -Connection $Connection -DataRow $result.Tables.Rows
         #Get-WEMRule -Connection $Connection -IdRule $IdObject
     }
 }

@@ -63,9 +63,9 @@ function Set-WEMRule {
         # grab original rule
         $origRule = Get-WEMRule -Connection $Connection -IdRule $IdRule
 
-        # only continue if the condition was found
-        if (-not $origCondition) { 
-            Write-Warning "No Condition object found for Id $($IdRule)"
+        # only continue if the rule was found
+        if (-not $origRule) { 
+            Write-Warning "No Rule object found for Id $($IdRule)"
             Break
         }
 
@@ -84,10 +84,10 @@ function Set-WEMRule {
             }
         }
 
-        # build the query to update the action
+        # build the query to update the rule
         $SQLQuery = "UPDATE VUEMFiltersRules SET "
         $updateFields = @()
-        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "idcondition" }
+        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $_ -notmatch "connection" -and $_ -notmatch "idrule" }
         foreach ($key in $keys) {
             switch ($key) {
                 "Name" {
@@ -110,10 +110,10 @@ function Set-WEMRule {
             }
         }
 
-        # if anything needs to be updated, update the action
+        # if anything needs to be updated, update the rule
         if($updateFields) { 
             $SQLQuery += "{0}, " -f ($updateFields -join ", ")
-            $SQLQuery += "RevisionId = $($origConditions.Version + 1) WHERE IdFilterRule = $($IdRule)"
+            $SQLQuery += "RevisionId = $($origRule.Version + 1) WHERE IdFilterRule = $($IdRule)"
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
