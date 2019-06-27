@@ -325,6 +325,13 @@ function Set-WEMActionGroup {
                 if ($queryAction) {
                     $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
+                    # check if the action group is assigned, and if so, add this assignment property
+                    $assignedActionGroup = Get-WEMActionGroupAssignment -Connection $Connection -IdActionGroup $IdActionGroup
+                    if ($assignedActionGroup) {
+                        $SQLQuery = "INSERT INTO VUEMAssignedActionGroupsProperties (IdAssignedActionGroup,ActionType,IdAction,Properties,RevisionId) VALUES ($($assignedActionGroup.IdAssignment),$($tableVUEMActionType[$parameterObject.Category]),$($parameterObject.IdAction),'$($properties)',1)"
+                        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+                    }
+
                     # tell logic we changed the database
                     $updateActions = $true
                 }
@@ -343,6 +350,13 @@ function Set-WEMActionGroup {
                     # Action found in Action Group, Create and execute a Delete query
                     $SQLQuery = "DELETE FROM VUEMActionGroupsTemplates WHERE IdActionGroup = $($IdActionGroup) AND ActionType = $($tableVUEMActionType[$parameterObject.Category]) AND IdAction = $($parameterObject.IdAction)"
                     $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+                    # check if the action group is assigned, and if so, remove this assignment property
+                    $assignedActionGroup = Get-WEMActionGroupAssignment -Connection $Connection -IdActionGroup $IdActionGroup
+                    if ($assignedActionGroup) {
+                        $SQLQuery = "DELETE FROM VUEMAssignedActionGroupsProperties WHERE IdAssignedActionGroup = $($assignedActionGroup.IdAssignment) AND ActionType = $($tableVUEMActionType[$parameterObject.Category]) AND IdAction = $($parameterObject.IdAction)"
+                        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+                    }
 
                     # tell logic we changed the database
                     $updateActions = $true

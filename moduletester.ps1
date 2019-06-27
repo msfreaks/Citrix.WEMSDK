@@ -4,6 +4,33 @@ Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
 $db     = New-WEMDatabaseConnection -Server "ca002511" -Database "$($database)" -Verbose
 
+# variables used in Action
+$printServer    = "SERVER"                      # used for Printer mappings
+$fileServer     = "SERVER"                      # used for Network Drive mappings
+
+$printer1       = "\\$($printServer)\printer1"  # used for Printer Mapping 1
+$printer2       = "\\$($printServer)\printer2"  # used for Printer Mapping 1
+$printer3       = "\\$($printServer)\printer3"  # used for Printer Mapping 1
+
+$share1         = "\\$($fileServer)\share1"     # used for DriveShare 1
+$share2         = "\\$($fileServer)\share2"     # used for DriveShare 2
+$share3         = "\\$($fileServer)\home"       # used for DriveShare 3 -> HomeDrive
+$share4         = "\\$($fileServer)\test"       # used for DriveShare 4 -> Test Share which gets deleted
+
+# this only works if the ActiveDirectory Module is present
+$SID1 = (Get-ADUser "amensc").SID.ToString()                # used for ADObjects creation and assignment tests
+$SID2 = (Get-ADUser "adm_amensc").SID.ToString()            # used for ADObjects creation
+$SID3 = (Get-ADGroup "Domain Users").SID.ToString()         # used for ADObjects creation and to modify assignments
+$SID4 = (Get-ADGroup "Domain Admins").SID.ToString()        # used for ADObjects tests
+$SID5 = (Get-ADGroup "Enterprise Admins").SID.ToString()    # used for ADObjects tests
+
+# uncomment this if ActiveDirectory Module is not to be used
+#$SID1 = "S-1-5-21-1644858761-3736240991-3467507639-1299"   # used for ADObjects creation and assignment tests
+#$SID2 = "S-1-5-21-1644858761-3736240991-3467507639-13864"  # used for ADObjects creation
+#$SID3 = "S-1-5-21-1644858761-3736240991-3467507639-513"    # used for ADObjects creation and to modify assignments
+#$SID4 = "S-1-5-21-1644858761-3736240991-3467507639-512"    # used for ADObjects tests
+#$SID5 = "S-1-5-21-1644858761-3736240991-3467507639-519"    # used for ADObjects tests
+
 #region WEMConfiguration
 # New-WEMConfiguration
 $conf = New-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
@@ -31,13 +58,13 @@ $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMApplication
 $conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Notepad" -TargetPath "C:\Windows\notepad.exe"
-$conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Regedit" -TargetPath "C:\Windows\regedit.exe"
+$conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Explorer" -TargetPath "C:\Windows\explorer.exe"
 $conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Google" -TargetPath "https://www.google.com" -Type "URL"
-$conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Update Log" -TargetPath "C:\Windows\WindowsUpdate.log" -Type "File / Folder"
+$conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Update Log" -TargetPath "C:\Windows\logs\DISM\dism.log" -Type "File / Folder"
 $conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Test" -TargetPath "C:\Windows\explorer.exe"
 
 # Get-WEMApplication
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Application" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Application" | Format-Table
 $allApps = $conf | Get-WEMApplication -Connection $db -Verbose
 $appLog = $conf | Get-WEMApp -Connection $db -Verbose -Name "*log"
 
@@ -59,12 +86,12 @@ $allApps = $conf | Get-WEMApplication -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMPrinter
-$conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Printer 1" -TargetPath "\\server\printer1"
-$conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Printer 2" -TargetPath "\\server\printer2"
-$conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Test" -TargetPath "\\server\printertest"
+$conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Printer 1" -TargetPath "$($printer1)"
+$conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Printer 2" -TargetPath "$($printer2)"
+$conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Test" -TargetPath "$($printer3)"
 
 # Get-WEMPrinter
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Printer" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Printer" | Format-Table
 $allPrinters = $conf | Get-WEMPrinter -Connection $db -Verbose
 $printerTest = $conf | Get-WEMPrinter -Connection $db -Verbose -Name "*test"
 
@@ -85,13 +112,13 @@ $allPrinters = $conf | Get-WEMPrinter -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMNetworkDrive
-$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Network Drive 1" -TargetPath "\\server\share1"
-$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Network Drive 2" -TargetPath "\\server\share3"
-$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Home Drive" -TargetPath "\\server\home" -SetAsHomeDriveEnabled $true
-$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Test" -TargetPath "\\server\test"
+$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Network Drive 1" -TargetPath "$($share1)"
+$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Network Drive 2" -TargetPath "$($share2)"
+$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Home Drive" -TargetPath "$($share3)" -SetAsHomeDriveEnabled $true
+$conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Test" -TargetPath "$($share4)"
 
 # Get-WEMNetworkDrive
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Network Drive" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Network Drive" | Format-Table
 $allDrives = $conf | Get-WEMNetworkDrive -Connection $db -Verbose
 $homeDrive = $conf | Get-WEMNetDrive -Connection $db -Verbose | Where-Object { $_.SetAsHomeDriveEnabled }
 $driveTest = $conf | Get-WEMNetworkDrive -Connection $db -Verbose -Name "*test"
@@ -100,7 +127,7 @@ $allDrives | Select-Object IdSite, IdAction, Name, Description
 
 # Set-WEMNetworkDrive
 $allDrives | ForEach-Object { Set-WEMNetworkDrive -Connection $db -Verbose -IdAction $_.IdAction -Description "Set-WEMNetworkDrive" -DisplayName $_.Name -SelfHealingEnabled $true }
-Set-WEMNetworkDrive -Connection $db -Verbose -IdAction $homeDrive.IdAction -TargetPath "\\server\home\##username##"
+Set-WEMNetworkDrive -Connection $db -Verbose -IdAction $homeDrive.IdAction -TargetPath "$($share3)\##username##"
 Set-WEMNetworkDrive -Connection $db -Verbose -IdAction $driveTest.IdAction -State "Disabled"
 
 # Remove-WEMAction (Network Drive)
@@ -120,7 +147,7 @@ $conf | New-WEMVirtualDrive -Connection $db -Verbose -Name "POSH Virtual Home Dr
 $conf | New-WEMVirtualDrive -Connection $db -Verbose -Name "POSH Test" -TargetPath "D:\vdisks\test"
 
 # Get-WEMVirtualDrive
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Virtual Drive" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Virtual Drive" | Format-Table
 $allVDrives = $conf | Get-WEMVirtualDrive -Connection $db -Verbose
 $homeDrive = $conf | Get-WEMVirtualDrive -Connection $db -Verbose | Where-Object { $_.SetAsHomeDriveEnabled }
 $driveTest = $conf | Get-WEMVirtualDrive -Connection $db -Verbose -Name "*test"
@@ -149,7 +176,7 @@ $conf | New-WEMRegistryEntry -Connection $db -Verbose -Name "POSH Registry Entry
 $conf | New-WEMRegistryEntry -Connection $db -Verbose -Name "POSH Test" -TargetPath "Citrix.WEMSDK\POSH\Test" -TargetName "Test" -TargetType "REG_SZ" -TargetValue ""
 
 # Get-WEMRegistryEntry
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Registry Value" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Registry Value" | Format-Table
 $allRegistryEntries = $conf | Get-WEMRegistryEntry -Connection $db -Verbose
 $registryEntryTest = $conf | Get-WEMRegistryEntry -Connection $db -Verbose -Name "*test"
 
@@ -176,7 +203,7 @@ $conf | New-WEMEnvironmentVariable -Connection $db -Verbose -Name "POSH Test" -V
 $conf | New-WEMEnvironmentVariable -Connection $db -Verbose -Name "POSH Test 2" -VariableName "POSHTest 2"
 
 # Get-WEMEnvironmentVariable
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Environment Variable" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Environment Variable" | Format-Table
 $allEnvironmentVariables = $conf | Get-WEMEnvironmentVariable -Connection $db -Verbose
 $environmentVariableTest = $conf | Get-WEMEnvironmentVariable -Connection $db -Verbose -Name "*test"
 
@@ -205,7 +232,7 @@ $conf | New-WEMPort -Connection $db -Verbose -Name "POSH Test 1" -PortName "COM9
 $conf | New-WEMPort -Connection $db -Verbose -Name "POSH Test 2" -PortName "LPT9:" -TargetPath "Unknown"
 
 # Get-WEMPort
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Port" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Port" | Format-Table
 $allPorts = $conf | Get-WEMPort -Connection $db -Verbose
 $portTest = $conf | Get-WEMPort -Connection $db -Verbose -Name "*test 1"
 
@@ -228,13 +255,13 @@ $allPorts = $conf | Get-WEMPort -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMIniFileOperation
-$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Ini File Op 1" -TargetPath "C:\Windows\system.ini" -TargetSectionName "startup" -TargetValueName "init" -TargetValue "None"
-$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Ini File Op 2" -TargetPath "C:\Windows\system.ini" -TargetSectionName "startup" -TargetValueName "deinit"
-$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Test 1" -TargetPath "C:\Windows\system.ini" -TargetSectionName "Test" -TargetValueName "1" -TargetValue "A"
-$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Test 2" -TargetPath "C:\Windows\system.ini" -TargetSectionName "Test" -TargetValueName "2" -TargetValue "B"
+$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Ini File Op 1" -TargetPath "C:\Windows\Citrix.WEMSDK.ini" -TargetSectionName "Citrix.WEMSDK" -TargetValueName "init" -TargetValue "None"
+$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Ini File Op 2" -TargetPath "C:\Windows\Citrix.WEMSDK.ini" -TargetSectionName "Citrix.WEMSDK" -TargetValueName "deinit"
+$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Test 1" -TargetPath "C:\Windows\Citrix.WEMSDK.ini" -TargetSectionName "Test" -TargetValueName "1" -TargetValue "A"
+$conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Test 2" -TargetPath "C:\Windows\Citrix.WEMSDK.ini" -TargetSectionName "Test" -TargetValueName "2" -TargetValue "B"
 
 # Get-WEMIniFileOperation
-$conf | Get-WEMAction -Connection $db -Verbose -Category "Ini File Operation" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "Ini File Operation" | Format-Table
 $allIniFileOps = $conf | Get-WEMIniFileOperation -Connection $db -Verbose
 $iniFileOpTest = $conf | Get-WEMIniFileOperation -Connection $db -Verbose -Name "*test 1"
 
@@ -258,12 +285,12 @@ $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMExternalTask
 $conf | New-WEMExternalTask -Connection $db -Verbose -Name "POSH External Task 1" -TargetPath "C:\Windows\SetScreensaver.exe" -TargetArguments "-Seconds 600" -RunHidden $true
-$conf | New-WEMExternalTask -Connection $db -Verbose -Name "POSH External Task 2" -TargetPath "C:\Windows\Notepad.exe" -TargetArguments "'c:\temp\new file[]%.txt'" -WaitForFinish $false -TimeOut 120 -ExecuteOnlyAtLogon $true
+$conf | New-WEMExternalTask -Connection $db -Verbose -Name "POSH External Task 2" -TargetPath "C:\Windows\Notepad.exe" -TargetArguments "'c:\temp\new file.txt'" -WaitForFinish $false -TimeOut 120 -ExecuteOnlyAtLogon $true
 $conf | New-WEMExternalTask -Connection $db -Verbose -Name "POSH Test 1" -TargetPath "C:\Windows\System32\explorer.exe" -TargetArguments "C:"
 $conf | New-WEMExternalTask -Connection $db -Verbose -Name "POSH Test 2" -TargetPath "reg.exe"
 
 # Get-WEMExternalTask
-$conf | Get-WEMAction -Connection $db -Verbose -Category "External Task" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "External Task" | Format-Table
 $allExternalTasks = $conf | Get-WEMExternalTask -Connection $db -Verbose
 $externalTaskTest = $conf | Get-WEMExternalTask -Connection $db -Verbose -Name "*test 1"
 
@@ -286,13 +313,13 @@ $allExternalTasks = $conf | Get-WEMExternalTask -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMFileSystemOperation
-$conf | New-WEMFileSystemOperation -Connection $db -Verbose -Name "POSH File System Operation 1" -SourcePath "\\server\share\file.ini" -TargetPath "C:\Windows\file.ini"
+$conf | New-WEMFileSystemOperation -Connection $db -Verbose -Name "POSH File System Operation 1" -SourcePath "$($share1)\file.ini" -TargetPath "C:\Temp\file.tst"
 $conf | New-WEMFileSystemOperation -Connection $db -Verbose -Name "POSH File System Operation 2" -SourcePath "C:\Temp" -ActionType "Create Directory"
 $conf | New-WEMFileSystemOperation -Connection $db -Verbose -Name "POSH Test 1" -SourcePath "\\server\share\malware.exe" -TargetPath "C:\Windows\System32\explorer.exe" -RunOnce $false -ExecutionOrder 69
 $conf | New-WEMFileSystemOperation -Connection $db -Verbose -Name "POSH Test 2" -SourcePath "\\server\share\malware.exe" -TargetPath "C:\Windows\System32\notepad.exe" -TargetOverwrite $false
 
 # Get-WEMFileSystemOperation
-$conf | Get-WEMAction -Connection $db -Verbose -Category "File System Operation" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "File System Operation" | Format-Table
 $allFileSystemOps = $conf | Get-WEMFileSystemOperation -Connection $db -Verbose
 $fileSystemOpsTest = $conf | Get-WEMFileSystemOp -Connection $db -Verbose -Name "*test 1"
 
@@ -321,7 +348,7 @@ $conf | New-WEMUserDSN -Connection $db -Verbose -Name "POSH Test 1" -TargetName 
 $conf | New-WEMUserDSN -Connection $db -Verbose -Name "POSH Test 2" -TargetName "POSH Test 2" -TargetDriverName "SQL Server" -TargetServer "ITWTEMP" -TargetDatabaseName "TEMPDB" -RunOnce $true
 
 # Get-WEMUserDSN
-$conf | Get-WEMAction -Connection $db -Verbose -Category "User DSN" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "User DSN" | Format-Table
 $allUserDSNs = $conf | Get-WEMUserDSN -Connection $db -Verbose
 $userDSNTest = $conf | Get-WEMUserDSN -Connection $db -Verbose -Name "*test 1"
 
@@ -350,7 +377,7 @@ $conf | New-WEMFileAssociation -Connection $db -Verbose -Name "POSH Test 1" -Fil
 $conf | New-WEMFileAssociation -Connection $db -Verbose -Name "POSH Test 2" -FileExtension "csv" -ProgramId "450" -Action "open" -TargetPath "c:\notepad++\notepad++.exe" -TargetCommand "%1"
 
 # Get-WEMFileAssociation
-$conf | Get-WEMAction -Connection $db -Verbose -Category "File Association" | Format-Table
+# $conf | Get-WEMAction -Connection $db -Verbose -Category "File Association" | Format-Table
 $allFileAssocs = $conf | Get-WEMFileAssociation -Connection $db -Verbose
 $fileAssocTest = $conf | Get-WEMFileAssoc -Connection $db -Verbose -Name "*test 1"
 
@@ -377,24 +404,23 @@ $allActions = $conf | Get-WEMAction -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
 # New-WEMADObject
-# NOTE: This test requires the ActiveDirectory module to be present!
-$conf | New-WEMADObject -Connection $db -Verbose -Name (Get-ADUser "amensc").SID
-$conf | New-WEMADObject -Connection $db -Verbose -Name (Get-ADUser "adm_amensc").SID
-$conf | New-WEMADObject -Connection $db -Verbose -Name (Get-ADGroup "Domain Users").SID
+$conf | New-WEMADObject -Connection $db -Verbose -Name $SID1
+$conf | New-WEMADObject -Connection $db -Verbose -Name $SID2
+$conf | New-WEMADObject -Connection $db -Verbose -Name $SID3
 # Adding Domain Admins group as test for Remove-WEMADObject
-$conf | New-WEMADObject -Connection $db -Verbose -Name (Get-ADGroup "Domain Admins").SID
+$conf | New-WEMADObject -Connection $db -Verbose -Name $SID4
 
 # Get-WEMADObject
-$conf | Get-WEMADObject -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMADObject -Connection $db -Verbose | Format-Table
 $allADObjects = $conf | Get-WEMADObject -Connection $db -Verbose
 $allADObjects | Select-Object IdSite, IdADObject, Name, Type
 
 # Set-WEMADObject
 $allADObjects | ForEach-Object { Set-WEMADObject -Connection $db -Verbose -IdADObject $_.IdADObject -Description "Set-WEMADObject" }
-Set-WEMADObject -Connection $db -Verbose -IdADObject (Get-WEMADObject -Connection $db -Verbose -Name (Get-ADGroup "Domain Admins").SID).IdADObject -Name (Get-ADGroup "Enterprise Admins").SID -State "Disabled"
+Set-WEMADObject -Connection $db -Verbose -IdADObject (Get-WEMADObject -Connection $db -Verbose -Name $SID4).IdADObject -Name $SID5 -State "Disabled"
 
 # Remove-WEMADObject
-Remove-WEMADObject -Connection $db -Verbose -IdADObject (Get-WEMADObject -Connection $db -Verbose -Name (Get-ADGroup "Enterprise Admins").SID).IdADObject
+Remove-WEMADObject -Connection $db -Verbose -IdADObject (Get-WEMADObject -Connection $db -Verbose -Name $SID5).IdADObject
 
 $allADObjects = $conf | Get-WEMADObject -Connection $db -Verbose
 
@@ -410,7 +436,7 @@ $conf | New-WEMCondition -Connection $db -Verbose -Name "POSH Test 1" -Type "Act
 $conf | New-WEMCondition -Connection $db -Verbose -Name "POSH Test 2" -Type "No Active Directory Group Match" -TestResult "Domain Admins"
 
 # Get-WEMCondition
-$conf | Get-WEMCondition -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMCondition -Connection $db -Verbose | Format-Table
 $allConditions = $conf | Get-WEMCondition -Connection $db -Verbose
 $allConditions | Select-Object IdSite, IdCondition, Name, Type, TestValue, TestResult | Format-Table
 
@@ -440,7 +466,7 @@ $conf | New-WEMCondition -Connection $db -Verbose -Name "POSH Test 2" -Type "No 
 $conf | New-WEMRule -Connection $db -Verbose -Name "POSH Test 2" -Conditions (Get-WEMCondition -Connection $db -Verbose -Name "POSH Test *")
 
 # Get-WEMRule
-$conf | Get-WEMRule -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMRule -Connection $db -Verbose | Format-Table
 $allRules = $conf | Get-WEMRule -Connection $db -Verbose
 $testRule = $conf | Get-WEMRule -Connection $db -Verbose -Name "POSH Test 1"
 $allRules | Select-Object IdSite, IdRule, Name, Conditions | Format-Table
@@ -471,7 +497,7 @@ $conf | New-WEMActionGroup -Connection $db -Verbose -Name "POSH Action Group 2"
 $conf | New-WEMActionGroup -Connection $db -Verbose -Name "POSH Test 1"
 
 # Get-WEMActionGroup
-$conf | Get-WEMActionGroup -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMActionGroup -Connection $db -Verbose | Format-Table
 $allActionGroups = $conf | Get-WEMActionGroup -Connection $db -Verbose
 $testActionGroup = $conf | Get-WEMActionGroup -Connection $db -Verbose -Name "POSH Test 1"
 $allActionGroups | Format-Table
@@ -482,7 +508,7 @@ $allActionGroups | ForEach-Object { Set-WEMActionGroup -Connection $db -Verbose 
 $actionGroupId = (Get-WEMActionGroup -Connection $db -IdSite $conf.IdSite -Name "POSH Action Group 1").IdActionGroup
 $allApps | ForEach-Object { Set-WEMActionGroup -Connection $db -Verbose -IdActionGroup $actionGroupId -AddApplication $_ -AssignmentProperties "CreateStartMenuLink", "PinToStartMenu" }
 $allPrinters | ForEach-Object { Set-WEMActionGroup -Connection $db -Verbose -IdActionGroup $actionGroupId -AddPrinter $_ }
-Set-WEMActionGroup -Connection $db -Verbose -IdActionGroup $actionGroupId -AddNetworkDrive $allDrives[0] -DriveLetter H
+Set-WEMActionGroup -Connection $db -Verbose -IdActionGroup $actionGroupId -AddNetworkDrive $allDrives[0] -DriveLetter X
 Set-WEMActionGroup -Connection $db -Verbose -IdActionGroup $testActionGroup.IdActionGroup -AddNetworkDrive $allDrives[0] -DriveLetter H
 
 # Remove-WEMActionGroup
@@ -498,30 +524,30 @@ $allActionGroups = $conf | Get-WEMActionGroup -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
 
 # New-WEMApplicationAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $allApps[0] | New-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allApps[1] | New-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -AssignmentProperties "CreateDesktopLink","AutoStart","PinToStartMenu"
 $allApps[2..3] | New-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 
 # Get-WEMApplicationAssignment
-$conf | Get-WEMApplicationAssignment -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMApplicationAssignment -Connection $db -Verbose | Format-Table
 $allAppAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Application"
 $allAppAssignments | Format-Table
 
 # Set-WEMApplicationAssignment
 $rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-513").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
 $allAppAssignments | Set-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allAppAssignments | Set-WEMApplicationAssignment -Connection $db -Verbose -AssignmentProperties "CreateStartMenuLink", "PinToStartMenu"
 
 # Remove-WEMApplicationAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $testAssignment = $allApps[0] | New-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $testAssignment | Remove-WEMApplicationAssignment -Connection $db -Verbose
 
-$allAppAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Application"
+# $allAppAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Application"
 
 #endregion
 
@@ -529,29 +555,29 @@ $allAppAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -Assignm
 $conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
 
 # New-WEMPrinterAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $allPrinters[0] | New-WEMPrinterAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allPrinters[1] | New-WEMPrinterAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -SetAsDefault $true
 
 # Get-WEMPrinterAssignment
-$conf | Get-WEMPrinterAssignment -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMPrinterAssignment -Connection $db -Verbose | Format-Table
 $allPrinterAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Printer"
 $allPrinterAssignments | Format-Table
 
 # Set-WEMPrinterAssignment
 $rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-513").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
 $allPrinterAssignments | Set-WEMPrinterAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allPrinterAssignments | Set-WEMPrinterAssignment -Connection $db -Verbose -SetAsDefault $false
 
 # Remove-WEMPrinterAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $testAssignment = $allPrinters[0] | New-WEMPrinterAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $testAssignment | Remove-WEMPrinterAssignment -Connection $db -Verbose
 
-$allPrinterAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Printer"
+# $allPrinterAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Printer"
 
 #endregion
 
@@ -559,31 +585,31 @@ $allPrinterAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -Ass
 $conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
 
 # New-WEMNetworkDriveAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $allDrives[0] | New-WEMNetworkDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "E"
 $allDrives[1] | New-WEMNetworkDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "F"
 $allDrives[2] | New-WEMNetworkDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "H"
 
 # Get-WEMNetworkDriveAssignment
-$conf | Get-WEMNetworkDriveAssignment -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMNetworkDriveAssignment -Connection $db -Verbose | Format-Table
 $allDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Network Drive"
 $allDriveAssignments | Format-Table
 
 # Set-WEMNetworkDriveAssignment
 $rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-513").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
 $allDriveAssignments | Set-WEMNetworkDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allDriveAssignments[0] | Set-WEMNetworkDriveAssignment -Connection $db -Verbose -DriveLetter "G"
 $allDriveAssignments[1] | Set-WEMNetworkDriveAssignment -Connection $db -Verbose -DriveLetter "J"
 
 # Remove-WEMNetworkDriveAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $testAssignment = $allDrives[0] | New-WEMNetworkDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "G"
 $testAssignment | Remove-WEMNetworkDriveAssignment -Connection $db -Verbose
 
-$allDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Network Drive"
+# $allDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Network Drive"
 
 #endregion
 
@@ -591,31 +617,31 @@ $allDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -Assig
 $conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
 
 # New-WEMVirtualDriveAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $allVDrives[0] | New-WEMVirtualDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "E"
 $allVDrives[1] | New-WEMVirtualDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "F"
 $allVDrives[2] | New-WEMvirtualDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "K"
 
 # Get-WEMVirtualDriveAssignment
-$conf | Get-WEMNetworkDriveAssignment -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMNetworkDriveAssignment -Connection $db -Verbose | Format-Table
 $allVDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Virtual Drive"
 $allVDriveAssignments | Format-Table
 
 # Set-WEMVirtualDriveAssignment
 $rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-513").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
 $allVDriveAssignments | Set-WEMVirtualDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allVDriveAssignments[0] | Set-WEMVirtualDriveAssignment -Connection $db -Verbose -DriveLetter "L"
 $allVDriveAssignments[1] | Set-WEMVirtualDriveAssignment -Connection $db -Verbose -DriveLetter "M"
 
 # Remove-WEMVirtualDriveAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $testAssignment = $allVDrives[0] | New-WEMVirtualDriveAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -DriveLetter "E"
 $testAssignment | Remove-WEMVirtualDriveAssignment -Connection $db -Verbose
 
-$allVDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Virtual Drive"
+# $allVDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Virtual Drive"
 
 #endregion
 
@@ -623,27 +649,255 @@ $allVDriveAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -Assi
 $conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
 
 # New-WEMRegistryEntryAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $allRegistryEntries | New-WEMRegistryEntryAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 
 # Get-WEMRegistryEntryAssignment
-$conf | Get-WEMRegistryEntryAssignment -Connection $db -Verbose | Format-Table
+# $conf | Get-WEMRegistryEntryAssignment -Connection $db -Verbose | Format-Table
 $allRegValueAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Registry Value"
 $allRegValueAssignments | Format-Table
 
 # Set-WEMRegistryEntryAssignment
 $rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-513").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
 $allRegValueAssignments | Set-WEMRegistryEntryAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 
 # Remove-WEMRegistryEntryAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name "S-1-5-21-1644858761-3736240991-3467507639-1299").IdADObject
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $testAssignment = $allRegistryEntries[0] | New-WEMRegistryEntryAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $testAssignment | Remove-WEMRegistryEntryAssignment -Connection $db -Verbose
 
-$allRegValueAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Virtual Drive"
+# $allRegValueAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Registry Value"
+
+#endregion
+
+#region WEMEnvironmentVariableAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMEnvironmentVariableAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allEnvironmentVariables | New-WEMEnvironmentVariableAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMEnvironmentVariableAssignment
+# $conf | Get-WEMEnvironmentVariableAssignment -Connection $db -Verbose | Format-Table
+$allEnvVariableAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Environment Variable"
+$allEnvVariableAssignments | Format-Table
+
+# Set-WEMEnvironmentVariableAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allEnvVariableAssignments | Set-WEMEnvironmentVariableAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMEnvironmentVariableAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allEnvironmentVariables[0] | New-WEMEnvironmentVariableAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMEnvironmentVariableAssignment -Connection $db -Verbose
+
+# $allEnvVariableAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Environment Variable"
+
+#endregion
+
+#region WEMPortAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMPortAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allPorts | New-WEMPortAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMPortAssignment
+# $conf | Get-WEMPortAssignment -Connection $db -Verbose | Format-Table
+$allPortAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Port"
+$allPortAssignments | Format-Table
+
+# Set-WEMPortAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allPortAssignments | Set-WEMPortAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMPortAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allPorts[0] | New-WEMPortAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMPortAssignment -Connection $db -Verbose
+
+# $allPortAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Port"
+
+#endregion
+
+#region WEMIniFileOperationAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMIniFileOperationAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allIniFileOps | New-WEMIniFileOperationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMIniFileOperationAssignment
+# $conf | Get-WEMIniFileOperationAssignment -Connection $db -Verbose | Format-Table
+$allIniFileOpAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Ini File Operation"
+$allIniFileOpAssignments | Format-Table
+
+# Set-WEMIniFileOperationAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allIniFileOpAssignments | Set-WEMIniFileOperationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMIniFileOperationAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allIniFileOps[0] | New-WEMIniFileOperationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMIniFileOperationAssignment -Connection $db -Verbose
+
+# $allIniFileOpAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Port"
+
+#endregion
+
+#region WEMWEMExternalTaskAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMExternalTaskAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allExternalTasks | New-WEMExternalTaskAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMExternalTaskAssignment
+# $conf | Get-WEMExternalTaskAssignment -Connection $db -Verbose | Format-Table
+$allExtTaskAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "External Task"
+$allExtTaskAssignments | Format-Table
+
+# Set-WEMExternalTaskAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allExtTaskAssignments | Set-WEMExternalTaskAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMExternalTaskAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allExternalTasks[0] | New-WEMExternalTaskAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMExternalTaskAssignment -Connection $db -Verbose
+
+# $allExtTaskAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "External Task"
+
+#endregion
+
+#region WEMFileSystemOperationAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMFileSystemOperationAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allFileSystemOps | New-WEMFileSystemOperationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMFileSystemOperationAssignment
+# $conf | Get-WEMExternalTaskAssignment -Connection $db -Verbose | Format-Table
+$allFileSystemOpAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "File System Operation"
+$allFileSystemOpAssignments | Format-Table
+
+# Set-WEMFileSystemOperationAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allFileSystemOpAssignments | Set-WEMFileSystemOperationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMFileSystemOperationAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allFileSystemOps[0] | New-WEMFileSystemOperationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMFileSystemOperationAssignment -Connection $db -Verbose
+
+# $allFileSystemOpAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "File System Operation"
+
+#endregion
+
+#region WEMUserDSNAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMUserDSNAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allUserDSNs | New-WEMUserDSNAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMUserDSNAssignment
+# $conf | Get-WEMUserDSNAssignment -Connection $db -Verbose | Format-Table
+$allUserDSNAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "User DSN"
+$allUserDSNAssignments | Format-Table
+
+# Set-WEMUserDSNAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allUserDSNAssignments | Set-WEMUserDSNAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMUserDSNAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allUserDSNs[0] | New-WEMUserDSNAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMUserDSNAssignment -Connection $db -Verbose
+
+# $allUserDSNAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "User DSN"
+
+#endregion
+
+#region WEMFileAssociationAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMFileAssociationAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allFileAssocs | New-WEMFileAssociationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMFileAssociationAssignment
+# $conf | Get-WEMFileAssociationAssignment -Connection $db -Verbose | Format-Table
+$allFileAssocAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "File Association"
+$allFileAssocAssignments | Format-Table
+
+# Set-WEMFileAssociationAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allFileAssocAssignments | Set-WEMFileAssociationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Remove-WEMUserDSNAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$testAssignment = $allFileAssocs[0] | New-WEMFileAssociationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+$testAssignment | Remove-WEMFileAssociationAssignment -Connection $db -Verbose
+
+# $allFileAssocAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "File Association"
+
+#endregion
+
+#region WEMActionGroupAssignments
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMActionGroupAssignment
+$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
+$allActionGroups | New-WEMActionGroupAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Get-WEMActionGroupAssignment
+# $conf | Get-WEMActionGroupAssignment -Connection $db -Verbose | Format-Table
+$allActionGroupAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "Action Groups"
+$allActionGroupAssignments | Format-Table
+
+# Set-WEMActionGroupAssignment
+$rule = (Get-WEMRule -Connection $db -Name "Always True").IdRule
+$adobject = (Get-WEMADObject -Connection $db -Name $SID3).IdADObject
+$allActionGroupAssignments | Set-WEMActionGroupAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
+
+# Add an extra app to already published Action Group
+$allActionGroups[1] | Set-WEMActionGroup -Connection $db -Verbose -AddExternalTask (Get-WEMExternalTask -Connection $db -Name "POSH External Task 2")
+
+# Remove the extra app from the already published Action Group
+$allActionGroups[1] | Set-WEMActionGroup -Connection $db -Verbose -RemoveExternalTask (Get-WEMExternalTask -Connection $db -Name "POSH External Task 2")
+
+# Remove-WEMUserDSNAssignment
+$testAssignment = $allActionGroupAssignments[1]
+$testAssignment | Remove-WEMActionGroupAssignment -Connection $db -Verbose
+
+# $allActionGroupAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose -AssignmentType "File Association"
 
 #endregion
 

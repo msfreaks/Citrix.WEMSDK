@@ -41,7 +41,7 @@ function Set-WEMAssignment {
         [int]$IdADObject,
         [Parameter(Mandatory=$False)]
         [int]$IdRule,
-        [Parameter(Mandatory=$False)][ValidateSet("Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association")]
+        [Parameter(Mandatory=$False)][ValidateSet("Registry Value","Environment Variable","Port","Ini File Operation","External Task","File System Operation","User DSN","File Association","Action Groups")]
         [string]$AssignmentType,
 
         [Parameter(Mandatory=$True)]
@@ -175,3 +175,415 @@ function Set-WEMRegistryEntryAssignment {
 }
 New-Alias -Name Set-WEMRegValueAssignment -Value Set-WEMRegistryEntryAssignment
 
+<#
+    .Synopsis
+    Updates a Environment Variable Assignment object in the WEM Database.
+
+    .Description
+    Updates a Environment Variable Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMEnvironmentVariableAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "Environment Variable"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+New-Alias -Name Set-WEMEnvVariableAssignment -Value Set-WEMEnvironmentVariableAssignment
+
+<#
+    .Synopsis
+    Updates a Port Assignment object in the WEM Database.
+
+    .Description
+    Updates a Port Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMPortAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "Port"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+
+<#
+    .Synopsis
+    Updates a Ini File Operation Assignment object in the WEM Database.
+
+    .Description
+    Updates a Ini File Operation Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMIniFileOperationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "Ini File Operation"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+New-Alias -Name Set-WEMIniFilesOpAssignment -Value Set-WEMIniFileOperationAssignment
+
+<#
+    .Synopsis
+    Updates a External Task Assignment object in the WEM Database.
+
+    .Description
+    Updates a External Task Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMExternalTaskAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "External Task"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+New-Alias -Name Set-WEMExtTaskAssignment -Value Set-WEMExternalTaskAssignment
+
+<#
+    .Synopsis
+    Updates a File System Operation Assignment object in the WEM Database.
+
+    .Description
+    Updates a File System Operation Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMFileSystemOperationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "File System Operation"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+New-Alias -Name Set-WEMFileSystemOpAssignment -Value Set-WEMFileSystemOperationAssignment
+
+<#
+    .Synopsis
+    Updates a User DSN Assignment object in the WEM Database.
+
+    .Description
+    Updates a User DSN Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMUserDSNAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "User DSN"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+
+<#
+    .Synopsis
+    Updates a File Association Assignment object in the WEM Database.
+
+    .Description
+    Updates a File Association Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMFileAssociationAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "File Association"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}
+New-Alias -Name Set-WEMFileAssocAssignment -Value Set-WEMFileAssociationAssignment
+
+<#
+    .Synopsis
+    Updates a Action Group Assignment object in the WEM Database.
+
+    .Description
+    Updates a Action Group Assignment object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAdObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+function Set-WEMActionGroupAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False)]
+        [int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+
+        $AssignmentType = "Action Groups"
+
+        return Set-WEMAssignment -Connection $Connection -IdAssignment $IdAssignment -IdADObject $IdADObject -IdRule $IdRule -AssignmentType $AssignmentType
+    }
+}

@@ -116,9 +116,9 @@ function New-WEMApplication {
         [Parameter(Mandatory=$False)]
         [bool]$EnforceIconLocation = $false,
         [Parameter(Mandatory=$False)]
-        [int]$EnforceIconXLocation,
+        [int]$EnforceIconXValue = 0,
         [Parameter(Mandatory=$False)]
-        [int]$EnforceIconYLocation,
+        [int]$EnforceIconYValue = 0,
         [Parameter(Mandatory=$False)]
         [bool]$DoNotShowInSelfService = $false,
         [Parameter(Mandatory=$False)]
@@ -153,15 +153,6 @@ function New-WEMApplication {
 
         Write-Verbose "Name is unique: Continue"
 
-        # apply Advanced Option values
-        [xml]$actionReserved = $defaultVUEMAppReserved
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value                   = [string][int]$SelfHealingEnabled
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value                  = [string][int]$EnforceIconLocation
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforcedIconXValue"}).Value                   = [string]$EnforceIconXValue
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforcedIconYValue"}).Value                   = [string]$EnforceIconYValue
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value               = [string][int]$DoNotShowInSelfService
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value  = [string][int]$CreateShortcutInUserFavoritesFolder
-
         # build optional values
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'displayname')) { $DisplayName = $Name }
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'iconlocation')) { $IconLocation = $TargetPath }
@@ -170,6 +161,16 @@ function New-WEMApplication {
         if ($Type -like "URL") { $WorkingDirectory = "Url" }
         if ($Type -like "File / Folder") { $WorkingDirectory = "File" }
 
+        # apply Advanced Option values
+        [xml]$actionReserved = $defaultVUEMAppReserved
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'selfhealingenabled')) { ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "SelfHealingEnabled"}).Value                   = [string][int]$SelfHealingEnabled }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'enforceiconlocation')) { ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforceIconLocation"}).Value                  = [string][int]$EnforceIconLocation }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'enforcediconxvalue')) { ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforcedIconXValue"}).Value                   = [string]$EnforceIconXValue }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'enforcediconyvalue')) { ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "EnforcedIconYValue"}).Value                   = [string]$EnforceIconYValue }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'donotshowinselfservice')) { ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "DoNotShowInSelfService"}).Value               = [string][int]$DoNotShowInSelfService }
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'createshortcutinuserfavoritesfolder')) { ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "CreateShortcutInUserFavoritesFolder"}).Value  = [string][int]$CreateShortcutInUserFavoritesFolder }
+
+        
         # build the query to update the action
         $SQLQuery = "INSERT INTO VUEMApps (IdSite,Name,Description,State,AppType,ActionType,DisplayName,StartMenuTarget,TargetPath,Parameters,WorkingDirectory,WindowStyle,IconLocation,IconIndex,Hotkey,IconStream,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMAppType[$Type]),0,'$($DisplayName)','$($StartMenuTarget)','$($TargetPath)','$($Parameters)','$($WorkingDirectory)','$($WindowStyle)','$($IconLocation)',$($IconIndex),'$($HotKey)','$($IconStream)',1,'$($actionReserved.OuterXml)')"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
