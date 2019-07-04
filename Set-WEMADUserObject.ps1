@@ -32,7 +32,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMADObject {
+function Set-WEMADUserObject {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]

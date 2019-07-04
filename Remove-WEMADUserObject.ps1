@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Active Directory object from the WEM Database.
+    Removes a WEM Active Directory User or Group object from the WEM Database.
 
     .Description
-    Removes a WEM Active Directory object from the WEM Database.
+    Removes a WEM Active Directory User or Group object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,7 +20,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Remove-WEMADObject {
+function Remove-WEMADUserObject {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
@@ -34,7 +34,7 @@ function Remove-WEMADObject {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original object
-        $origObject = Get-WEMADObject -Connection $Connection -IdADObject $IdADObject
+        $origObject = Get-WEMADUserObject -Connection $Connection -IdADObject $IdADObject
 
         # only continue if the action was found
         if (-not $origObject) { 

@@ -400,29 +400,29 @@ $allActions = $conf | Get-WEMAction -Connection $db -Verbose
 
 #endregion
 
-#region WEMADObject
+#region WEMADUserObject
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
 
-# New-WEMADObject
-$conf | New-WEMADObject -Connection $db -Verbose -Name $SID1
-$conf | New-WEMADObject -Connection $db -Verbose -Name $SID2
-$conf | New-WEMADObject -Connection $db -Verbose -Name $SID3
-# Adding Domain Admins group as test for Remove-WEMADObject
-$conf | New-WEMADObject -Connection $db -Verbose -Name $SID4
+# New-WEMADUserObject
+$conf | New-WEMADUserObject -Connection $db -Verbose -Name $SID1
+$conf | New-WEMADUserObject -Connection $db -Verbose -Name $SID2
+$conf | New-WEMADUserObject -Connection $db -Verbose -Name $SID3
+# Adding Domain Admins group as test for Remove-WEMADUserObject
+$conf | New-WEMADUserObject -Connection $db -Verbose -Name $SID4
 
-# Get-WEMADObject
-# $conf | Get-WEMADObject -Connection $db -Verbose | Format-Table
-$allADObjects = $conf | Get-WEMADObject -Connection $db -Verbose
+# Get-WEMADUserObject
+# $conf | Get-WEMADUserObject -Connection $db -Verbose | Format-Table
+$allADObjects = $conf | Get-WEMADUserObject -Connection $db -Verbose
 $allADObjects | Select-Object IdSite, IdADObject, Name, Type
 
-# Set-WEMADObject
-$allADObjects | ForEach-Object { Set-WEMADObject -Connection $db -Verbose -IdADObject $_.IdADObject -Description "Set-WEMADObject" }
-Set-WEMADObject -Connection $db -Verbose -IdADObject (Get-WEMADObject -Connection $db -Verbose -Name $SID4).IdADObject -Name $SID5 -State "Disabled"
+# Set-WEMADUserObject
+$allADObjects | ForEach-Object { Set-WEMADUserObject -Connection $db -Verbose -IdADObject $_.IdADObject -Description "Set-WEMADUserObject" }
+Set-WEMADUserObject -Connection $db -Verbose -IdADObject (Get-WEMADUserObject -Connection $db -Verbose -Name $SID4).IdADObject -Name $SID5 -State "Disabled"
 
-# Remove-WEMADObject
-Remove-WEMADObject -Connection $db -Verbose -IdADObject (Get-WEMADObject -Connection $db -Verbose -Name $SID5).IdADObject
+# Remove-WEMADUserObject
+Remove-WEMADUserObject -Connection $db -Verbose -IdADObject (Get-WEMADUserObject -Connection $db -Verbose -Name $SID5).IdADObject
 
-$allADObjects = $conf | Get-WEMADObject -Connection $db -Verbose
+$allADObjects = $conf | Get-WEMADUserObject -Connection $db -Verbose
 
 #endregion
 
@@ -524,7 +524,7 @@ $allActionGroups = $conf | Get-WEMActionGroup -Connection $db -Verbose
 $conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
 
 # New-WEMApplicationAssignment
-$adobject = (Get-WEMADObject -Connection $db -Name $SID1).IdADObject
+$adobject = (Get-WEMADUserObject -Connection $db -Name $SID1).IdADObject
 $rule = (Get-WEMRule -Connection $db -Name "POSH Rule 1").IdRule
 $allApps[0] | New-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule
 $allApps[1] | New-WEMApplicationAssignment -Connection $db -Verbose -IdADObject $adobject -IdRule $rule -AssignmentProperties "CreateDesktopLink","AutoStart","PinToStartMenu"

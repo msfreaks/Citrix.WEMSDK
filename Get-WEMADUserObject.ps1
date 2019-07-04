@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM Active Directory objects from the WEM Database.
+    Returns one or more WEM Active Directory User or Group objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Active Directory objects from the WEM Database.
+    Returns one or more WEM Active Directory User or Group objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -11,7 +11,7 @@
     .Parameter IdSite
     ..
 
-    .Parameter IdAction
+    .Parameter IdADObject
     ..
 
     .Parameter Name
@@ -26,7 +26,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Get-WEMADObject {
+function Get-WEMADUserObject {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
@@ -58,9 +58,9 @@ function Get-WEMADObject {
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # build array of VUEMItems returned by the query
-        $vuemADObjects = @()
-        foreach ($row in $result.Tables.Rows) { $vuemADObjects += New-VUEMADObject -DataRow $row }
+        $vuemADUserObjects = @()
+        foreach ($row in $result.Tables.Rows) { $vuemADUserObjects += New-VUEMUserADObject -DataRow $row }
 
-        return $vuemADObjects
+        return $vuemADUserObjects
     }
 }

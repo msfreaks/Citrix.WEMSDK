@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Create a new Active Directory object in the WEM Database.
+    Create a new Active Directory User or Group object in the WEM Database.
 
     .Description
-    Create a new Active Directory object in the WEM Database.
+    Create a new Active Directory User or Group object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -32,7 +32,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function New-WEMADObject {
+function New-WEMADUserObject {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
@@ -85,7 +85,7 @@ function New-WEMADObject {
         }    
 
         # build the query to update the action
-        $SQLQuery = "INSERT INTO VUEMItems (IdSite,Name,DistinguishedName,Description,State,Type,Priority,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)',NULL,'$($Description)',$($tableVUEMState[$State]),$($tableVUEMAdObjectType[$Type]),$($Priority),1,NULL)"
+        $SQLQuery = "INSERT INTO VUEMItems (IdSite,Name,DistinguishedName,Description,State,Type,Priority,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)',NULL,'$($Description)',$($tableVUEMState[$State]),$($tableVUEMADObjectType[$Type]),$($Priority),1,NULL)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new action
@@ -98,7 +98,6 @@ function New-WEMADObject {
         New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        return New-VUEMADObject -DataRow $result.Tables.Rows
-        #Get-WEMADObject -Connection $Connection -IdADObject $IdObject
+        return New-VUEMADUserObject -DataRow $result.Tables.Rows
     }
 }

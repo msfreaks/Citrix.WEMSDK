@@ -450,7 +450,7 @@ Function New-VUEMAssignmentObject() {
         'AssignmentType'                      = $AssignmentType
         'IdAssignedObject'                    = [int]$DataRow.IdAssignedObject
         'AssignedObject'                      = $assignedObject
-        'ADObject'                            = Get-WEMADObject -Connection $Connection -IdSite $row.IdSite -IdADObject $row.Iditem
+        'ADObject'                            = Get-WEMADUserObject -Connection $Connection -IdSite $row.IdSite -IdADObject $row.Iditem
         'Rule'                                = Get-WEMRule -Connection $Connection -IdRule $row.IdFilterRule
         'Version'                             = [int]$DataRow.RevisionId
     }
@@ -1071,26 +1071,37 @@ Function New-VUEMFileAssocObject() {
 #>
 function Get-ActiveDirectoryName {
     param(
-        [string]$SID
+        [string]$SID,
+        [string]$GUID,
+        [string]$Name,
+        [int]$Type = -1
     )
 
     $account = $null
     try {
-        $account = [adsi]"LDAP://<SID=$($SID)>"
+        if ($Type -eq -1 -or $Type -eq 4) { $account = [adsi]"LDAP://<SID=$($SID)>" }
+        if ($Type -eq 8 -and $GUID)       { $account = [adsi]"LDAP://<Guid=$($GUID)>"}
+        if ($Type -eq 4 -and $Name)       { $account = ([adsisearcher]"(&(objectCategory=Computer)(name=ITWSH))").FindOne() }
+        if ($Type -eq 8 -and $Name)       { $account = [adsi]"LDAP://$($Name)>"}
 
         $type = "Group"
-        if ($account.objectClass -match "user") { $type = "User" } 
+        if ($account.objectClass -match "user")               { $type = "User" } 
+        if ($account.objectClass -match "computer")           { $type = "Computer" }
+        if ($account.objectClass -match "organizationalunit") { $type = "Organizational Unit"}
 
         $domain = ((($account.distinguishedName.ToLower().Split(",")) | Where-Object { $_ -match "dc="}).Replace("dc=","") -join ".")
 
         $ldapObject = [pscustomobject] @{
             'DistinguishedName' = $account.distinguishedName.ToString()
             'Type' = $type
-            'Account' = "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
-            'SID' = $SID
         }
-
         # override the default ToScript() method
+        if ($type -eq "Organizational Unit") {
+            $ldapObject | Add-Member -NotePropertyName "Guid" -NotePropertyValue $SID
+        } else {
+            $ldapObject | Add-Member -NotePropertyName "SID" -NotePropertyValue $SID
+            $ldapObject | Add-Member -NotePropertyName "Account" -NotePropertyValue "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
+        }
         $ldapObject | Add-Member ScriptMethod ToString { $this.DistinguishedName } -Force
 
         return $ldapObject
@@ -1102,10 +1113,10 @@ function Get-ActiveDirectoryName {
 
 <#
     .Synopsis
-    Converts SQL Data to an Active Directory object
+    Converts SQL Data to an Active Directory Agent or OU object
 
     .Description
-    Converts SQL Data to an Active Directory object
+    Converts SQL Data to an Active Directory Agent or OU object
 
     .Link
     https://msfreaks.wordpress.com
@@ -1119,12 +1130,63 @@ function Get-ActiveDirectoryName {
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-Function New-VUEMADObject() {
+Function New-VUEMADAgentObject() {
     param(
         [System.Data.DataRow]$DataRow
     )
 
-    Write-Verbose "Found Active Directory object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+    Write-Verbose "Found Active Directory Agent object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemObject = [pscustomobject] @{
+        'IdADObject'        = [int]$DataRow.IdADObject
+        'IdSite'            = [int]$DataRow.IdSite
+        'Name'              = [string]$DataRow.Name
+        'ADObjectId'        = [string]$DataRow.ADObjectId
+        'Description'       = [string]$DataRow.Description
+        'State'             = [string]$tableVUEMState[[int]$DataRow.State]
+        'Type'              = [string]$tableVUEMADObjectType[$DataRow.Type]
+        'Priority'          = [int]$DataRow.Priority
+        'Version'           = [int]$DataRow.RevisionId
+    }
+
+    # try and get LDAP properties for the SID
+    $ldapObject = Get-ActiveDirectoryName -SID $DataRow.ADObjectId -Type $DataRow.Type
+    if ($ldapObject) { $vuemObject | Add-Member -NotePropertyName "LDAPObject" -NotePropertyValue $ldapObject -Force }
+
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActiveDirectoryObject")
+
+    return $vuemObject
+}
+
+<#
+    .Synopsis
+    Converts SQL Data to an Active Directory User or Group object
+
+    .Description
+    Converts SQL Data to an Active Directory User or Group object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMADUserObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Active Directory User object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
 
     $Type = [int]$DataRow.Type
     if ($DataRow.Name -like "S-1-1-0" -or $DataRow.Name -like "S-1-5-32-544") { $Type = 3 }
@@ -1366,9 +1428,13 @@ $tableVUEMADObjectType = @{
     1 = "User"
     2 = "Group"
     3 = "BUILTIN"
-    "User" = 1
-    "Group" = 2
-    "BUILTIN" = 3
+    4 = "Computer"
+    8 = "Organizational Unit"
+    "User"                = 1
+    "Group"               = 2
+    "BUILTIN"             = 3
+    "Computer"            = 4
+    "Organizational Unit" = 8
 }
 $tableVUEMAppType = @{
     0 = "Installed application"
