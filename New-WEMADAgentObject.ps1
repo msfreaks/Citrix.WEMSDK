@@ -11,13 +11,13 @@
     .Parameter IdSite
     ..
 
-    .Parameter Type
-    ..
-
-    .Parameter Name
+    .Parameter Id
     ..
 
     .Parameter Description
+    ..
+
+    .Parameter Type
     ..
 
     .Parameter State
@@ -42,13 +42,13 @@ function New-WEMADAgentObject {
         [int]$IdSite,
 
         [Parameter(Mandatory=$True)]
-        [string]$Name,
+        [string]$Id,
         [Parameter(Mandatory=$False)]
         [string]$Description = "",
+        [Parameter(Mandatory=$False)][ValidateSet("Computer","Organizational Unit", $null)]
+        [string]$Type = $null,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
-        [Parameter(Mandatory=$True)][ValidateSet("Computer","Organizational Unit")]
-        [string]$Type,
         [Parameter(Mandatory=$False)]
         [int]$Priority = 100,
 
@@ -59,48 +59,73 @@ function New-WEMADAgentObject {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # define regexes
+        $regExSID = "^S-\d-(\d+-){1,14}\d+$"
+        $regExGUID = "^([0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12})$"
+
         # escape possible query breakers
-        $Name = ConvertTo-StringEscaped $Name
+        $Id = ConvertTo-StringEscaped $Id
         $Description = ConvertTo-StringEscaped $Description
 
-        # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMADObjects WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
-        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.ObjectCount) {
-            # name must be unique
-            Write-Error "There's already an Active Directory Agent or OU object named '$($Name)' in the Configuration"
+        # Id must match SID or GUID
+        if ($Id -notmatch $regExSID -and $Id -notmatch $regExGUID) {
+            Write-Error "Please privide a valid object GUID or SID."
             Break
         }
 
-        Write-Verbose "Name is unique: Continue"
+        # if type is Computer, Id must match SID
+        if ($Type -like "Computer" -and $Id -notmatch $regExSID) {
+            Write-Error "Please privide a valid object SID if you want to add an Agent Computer Object"
+            Break
+        }
+
+        # if type is Organizational Unit, Id must match GUID
+        if ($Type -like "Organizational Unit" -and $Id -notmatch $regExGUID) {
+            Write-Error "Please privide a valid object GUID if you want to add an Agent Organizational Unit Object"
+            Break
+        }
+        
+        # determine type if it was ommited
+        if (-not $Type -and $Id -match $regExSID) { $Type = "Computer" }
+        if (-not $Type -and $Id -match $regExGUID) { $Type = "Organizational Unit" }
+
+        # name is unique if it's not yet used in the same Action Type in the site 
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMADObjects WHERE ADObjectId LIKE '$($Id)' AND IdSite = $($IdSite)"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        if ($result.Tables.Rows.ObjectCount) {
+            # name must be unique
+            Write-Error "There's already a Computer or Organizational Unit Object with Id '$($Id)' in the Configuration"
+            Break
+        }
+
+        Write-Verbose "Id is unique: Continue"
 
         # build optional values
-        if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'type')) { 
-            $ADObject = Get-ActiveDirectoryName -SID "$($Name)"
-            if (-not $ADObject) {
-                Write-Error "Could not determine Active Directory object type. Please provide the Type manually"
-                Break
-            }
+        $ldapObject = $null
+        $ldapObject = Get-ActiveDirectoryName -SID $Id -GUID $Id -Type $tableVUEMADObjectType[$Type]
 
-            $Type = $ADObject.Type
+        if (-not $ldapObject) {
+            # something went wrong in AD lookup
+            Write-Error "Failed to retrieve required attributes for '$($Id)' from the Active Directory"
+            Break
+        }
 
-            Write-Verbose "Determined '$($Name)' ($($ADObject.DistinguishedName)) to be of type '$($Type)'"
-        }    
+        # grab Name from DistinguishedName
+        $Name = $ldapObject.DistinguishedName.Split(",")[0].Replace("OU=","").Replace("CN=","")
 
-        # build the query to update the action
-        $SQLQuery = "INSERT INTO VUEMItems (IdSite,Name,DistinguishedName,Description,State,Type,Priority,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)',NULL,'$($Description)',$($tableVUEMState[$State]),$($tableVUEMADObjectType[$Type]),$($Priority),1,NULL)"
+        # build the query to insert the Object
+        $SQLQuery = "INSERT INTO VUEMADObjects (IdSite,ADObjectId,Name,Description,State,Type,Priority,RevisionId,Reserved01) VALUES ($($IdSite),'$($Id)','$($Name)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMADObjectType[$Type]),$($Priority),1,NULL)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
-        # grab the new action
-        $SQLQuery = "SELECT * FROM VUEMItems WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
-        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        # grab the new Object
+        $vuemADAgentObject = Get-WEMADAgentObject -Connection $Connection -IdSite $IdSite -ADObjectId $Id
 
         # Updating the ChangeLog
-        Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $Name).Account)"
-        $IdObject = $result.Tables.Rows.IdItem
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        Write-Verbose "Using Object name: $($Name)"
+        $IdObject = $vuemADAgentObject.IdADObject
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName "$($Name) ($($Id))" -ObjectType "Active Directory Object\$($Type)" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        return New-VUEMADUserObject -DataRow $result.Tables.Rows
+        return $vuemADAgentObject
     }
 }

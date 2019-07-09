@@ -35,6 +35,8 @@ function Get-WEMADAgentObject {
         [int]$IdADObject,
         [Parameter(Mandatory=$False, ValueFromPipeline=$True)]
         [string]$Name,
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True)]
+        [string]$ADObjectId,
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
     )
@@ -44,8 +46,9 @@ function Get-WEMADAgentObject {
         # build query
         $SQLQuery = "SELECT * FROM VUEMADObjects WHERE "
         if ($IdSite) { $SQLQuery += "IdSite = $($IdSite) AND " }
-        if ($IdADObject) { $SQLQuery += "ADObjectId = $($IdADObject) AND " }
+        if ($IdADObject) { $SQLQuery += "IdADObject = $($IdADObject) AND " }
         if ($Name) { $SQLQuery += "Name LIKE '$($Name.Replace("*","%"))' AND " }
+        if ($ADObjectId) { $SQLQuery += "ADObjectId LIKE '$($ADObjectId.Replace("*","%"))' AND " }
         $SQLQuery += "(Type = 4 OR Type = 8)"
 
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery

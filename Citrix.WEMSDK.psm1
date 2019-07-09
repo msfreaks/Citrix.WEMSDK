@@ -1080,24 +1080,24 @@ function Get-ActiveDirectoryName {
     $account = $null
     try {
         if ($Type -eq -1 -or $Type -eq 4) { $account = [adsi]"LDAP://<SID=$($SID)>" }
-        if ($Type -eq 8 -and $GUID)       { $account = [adsi]"LDAP://<Guid=$($GUID)>"}
-        if ($Type -eq 4 -and $Name)       { $account = ([adsisearcher]"(&(objectCategory=Computer)(name=ITWSH))").FindOne() }
-        if ($Type -eq 8 -and $Name)       { $account = [adsi]"LDAP://$($Name)>"}
+        if ($Type -eq 8 -and $GUID)       { $account = [adsi]"LDAP://<Guid=$($GUID)>" }
+        if ($Type -eq 4 -and $Name)       { $account = ([adsisearcher]"(&(objectCategory=Computer)(name=$($Name)))").FindOne() }
+        if ($Type -eq 8 -and $Name)       { $account = [adsi]"LDAP://$($Name)" }
 
-        $type = "Group"
-        if ($account.objectClass -match "user")               { $type = "User" } 
-        if ($account.objectClass -match "computer")           { $type = "Computer" }
-        if ($account.objectClass -match "organizationalunit") { $type = "Organizational Unit"}
+        $objectType = "Group"
+        if ($account.objectClass -match "user")               { $objectType = "User" } 
+        if ($account.objectClass -match "computer")           { $objectType = "Computer" }
+        if ($account.objectClass -match "organizationalunit") { $objectType = "Organizational Unit"}
 
         $domain = ((($account.distinguishedName.ToLower().Split(",")) | Where-Object { $_ -match "dc="}).Replace("dc=","") -join ".")
 
         $ldapObject = [pscustomobject] @{
             'DistinguishedName' = $account.distinguishedName.ToString()
-            'Type' = $type
+            'Type' = $objectType
         }
         # override the default ToScript() method
-        if ($type -eq "Organizational Unit") {
-            $ldapObject | Add-Member -NotePropertyName "Guid" -NotePropertyValue $SID
+        if ($objectType -eq "Organizational Unit") {
+            $ldapObject | Add-Member -NotePropertyName "Guid" -NotePropertyValue $GUID
         } else {
             $ldapObject | Add-Member -NotePropertyName "SID" -NotePropertyValue $SID
             $ldapObject | Add-Member -NotePropertyName "Account" -NotePropertyValue "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"

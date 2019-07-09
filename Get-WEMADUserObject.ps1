@@ -59,7 +59,7 @@ function Get-WEMADUserObject {
 
         # build array of VUEMItems returned by the query
         $vuemADUserObjects = @()
-        foreach ($row in $result.Tables.Rows) { $vuemADUserObjects += New-VUEMUserADObject -DataRow $row }
+        foreach ($row in $result.Tables.Rows) { $vuemADUserObjects += New-VUEMADUserObject -DataRow $row }
 
         return $vuemADUserObjects
     }

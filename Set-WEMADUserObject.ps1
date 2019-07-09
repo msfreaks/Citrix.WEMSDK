@@ -57,7 +57,7 @@ function Set-WEMADUserObject {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab original object
-        $origADObject = Get-WEMADObject -Connection $Connection -IdADObject $IdADObject
+        $origADObject = Get-WEMADUserObject -Connection $Connection -IdADObject $IdADObject
 
         # only continue if the object was found
         if (-not $origADObject) { 

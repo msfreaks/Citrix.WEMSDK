@@ -84,20 +84,19 @@ function New-WEMADUserObject {
             Write-Verbose "Determined '$($Name)' ($($ADObject.DistinguishedName)) to be of type '$($Type)'"
         }    
 
-        # build the query to update the action
+        # build the query to insert the Object
         $SQLQuery = "INSERT INTO VUEMItems (IdSite,Name,DistinguishedName,Description,State,Type,Priority,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)',NULL,'$($Description)',$($tableVUEMState[$State]),$($tableVUEMADObjectType[$Type]),$($Priority),1,NULL)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
-        # grab the new action
-        $SQLQuery = "SELECT * FROM VUEMItems WHERE IdSite = $($IdSite) AND Name = '$($Name)'"
-        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        # grab the new Object
+        $vuemADUserObject = Get-WEMADUserObject -Connection $Connection -IdSite $IdSite -Name "$($Name)"
 
         # Updating the ChangeLog
         Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $Name).Account)"
-        $IdObject = $result.Tables.Rows.IdItem
+        $IdObject = $vuemADUserObject.IdADObject
         New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        return New-VUEMADUserObject -DataRow $result.Tables.Rows
+        return $vuemADUserObject
     }
 }
