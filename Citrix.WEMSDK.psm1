@@ -103,6 +103,88 @@ function ConvertTo-StringEscaped {
 }
 
 <#
+    Helper function to turn SID into an object with Name and Type
+#>
+function Get-ActiveDirectoryName {
+    param(
+        [string]$SID,
+        [string]$GUID,
+        [string]$Name,
+        [int]$Type = -1
+    )
+
+    $account = $null
+    try {
+        if ($Type -eq -1 -or $Type -eq 4) { $account = [adsi]"LDAP://<SID=$($SID)>" }
+        if ($Type -eq 8 -and $GUID)       { $account = [adsi]"LDAP://<Guid=$($GUID)>" }
+        if ($Type -eq 4 -and $Name)       { $account = ([adsisearcher]"(&(objectCategory=Computer)(name=$($Name)))").FindOne() }
+        if ($Type -eq 8 -and $Name)       { $account = [adsi]"LDAP://$($Name)" }
+
+        $objectType = "Group"
+        if ($account.objectClass -match "user")               { $objectType = "User" } 
+        if ($account.objectClass -match "computer")           { $objectType = "Computer" }
+        if ($account.objectClass -match "organizationalunit") { $objectType = "Organizational Unit"}
+
+        $domain = ((($account.distinguishedName.ToLower().Split(",")) | Where-Object { $_ -match "dc="}).Replace("dc=","") -join ".")
+
+        $ldapObject = [pscustomobject] @{
+            'DistinguishedName' = $account.distinguishedName.ToString()
+            'Type' = $objectType
+        }
+        # override the default ToScript() method
+        if ($objectType -eq "Organizational Unit") {
+            $ldapObject | Add-Member -NotePropertyName "Guid" -NotePropertyValue $GUID
+        } else {
+            $ldapObject | Add-Member -NotePropertyName "SID" -NotePropertyValue $SID
+            $ldapObject | Add-Member -NotePropertyName "Account" -NotePropertyValue "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
+        }
+        $ldapObject | Add-Member ScriptMethod ToString { $this.DistinguishedName } -Force
+
+        return $ldapObject
+    }
+    catch {
+        return $null
+    }
+}
+
+<#
+    Helper function for grabbing Administrator Permissions
+#>
+function Get-AdministratorPermissions {
+    param (
+        [xml]$Permissions,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    $permissionsArray=@()
+    foreach($permission in $Permissions.ArrayOfVUEMAdminPermission.VUEMAdminPermission) {
+
+        if ($permission.idSite -ge 1) {
+            $vuemObject = [pscustomobject] @{
+                'IdSite'      = [int]$permission.idSite
+                'Name'        = (Get-WEMConfiguration -Connection $Connection -IdSite $permission.idSite).Name
+                'Permission'  = [string]$permission.AuthorizationLevel
+            }
+        } else {
+            $vuemObject = [pscustomobject] @{
+                'IdSite'      = 0
+                'Name'        = "Global Admin"
+                'Permission'  = [string]$permission.AuthorizationLevel
+            }
+        }
+
+        # override the default ToScript() method
+        $vuemObject | Add-Member ScriptMethod ToString { "$($this.Name) ($($this.Permission))" } -Force
+        # set a custom type to the object
+        $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.AdminPermission")
+    
+        $permissionsArray += $vuemObject
+    }
+
+    return $permissionsArray
+}
+
+<#
     Helper function for grabbing IconStream data
 #>
 function Get-IconStream {
@@ -1067,51 +1149,6 @@ Function New-VUEMFileAssocObject() {
 }
 
 <#
-    Helper function to turn SID into an object with Name and Type
-#>
-function Get-ActiveDirectoryName {
-    param(
-        [string]$SID,
-        [string]$GUID,
-        [string]$Name,
-        [int]$Type = -1
-    )
-
-    $account = $null
-    try {
-        if ($Type -eq -1 -or $Type -eq 4) { $account = [adsi]"LDAP://<SID=$($SID)>" }
-        if ($Type -eq 8 -and $GUID)       { $account = [adsi]"LDAP://<Guid=$($GUID)>" }
-        if ($Type -eq 4 -and $Name)       { $account = ([adsisearcher]"(&(objectCategory=Computer)(name=$($Name)))").FindOne() }
-        if ($Type -eq 8 -and $Name)       { $account = [adsi]"LDAP://$($Name)" }
-
-        $objectType = "Group"
-        if ($account.objectClass -match "user")               { $objectType = "User" } 
-        if ($account.objectClass -match "computer")           { $objectType = "Computer" }
-        if ($account.objectClass -match "organizationalunit") { $objectType = "Organizational Unit"}
-
-        $domain = ((($account.distinguishedName.ToLower().Split(",")) | Where-Object { $_ -match "dc="}).Replace("dc=","") -join ".")
-
-        $ldapObject = [pscustomobject] @{
-            'DistinguishedName' = $account.distinguishedName.ToString()
-            'Type' = $objectType
-        }
-        # override the default ToScript() method
-        if ($objectType -eq "Organizational Unit") {
-            $ldapObject | Add-Member -NotePropertyName "Guid" -NotePropertyValue $GUID
-        } else {
-            $ldapObject | Add-Member -NotePropertyName "SID" -NotePropertyValue $SID
-            $ldapObject | Add-Member -NotePropertyName "Account" -NotePropertyValue "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
-        }
-        $ldapObject | Add-Member ScriptMethod ToString { $this.DistinguishedName } -Force
-
-        return $ldapObject
-    }
-    catch {
-        return $null
-    }
-}
-
-<#
     .Synopsis
     Converts SQL Data to an Active Directory Agent or OU object
 
@@ -1157,7 +1194,7 @@ Function New-VUEMADAgentObject() {
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
 
     # set a custom type to the object
-    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActiveDirectoryObject")
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.AgentObject")
 
     return $vuemObject
 }
@@ -1216,6 +1253,65 @@ Function New-VUEMADUserObject() {
 
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.ActiveDirectoryObject")
+
+    return $vuemObject
+}
+
+<#
+    .Synopsis
+    Converts SQL Data to an Administrator object
+
+    .Description
+    Converts SQL Data to an Administrator object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMAdminObject() {
+    param(
+        [System.Data.DataRow]$DataRow,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    Write-Verbose "Found Active Directory object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $Type = [int]$DataRow.Type
+    $vuemAdminReserved = $DataRow.Permissions
+    [xml]$vuemAdminXml = $vuemAdminReserved.Substring($vuemAdminReserved.ToLower().IndexOf("<array"))
+
+    $vuemObject = [pscustomobject] @{
+        'IdAdministrator'   = [int]$DataRow.IdAdmin
+        'IdSite'            = [int]$DataRow.IdSite
+        'Name'              = [string]$DataRow.Name
+        'SID'               = [string]$DataRow.Name
+        'Description'       = [string]$DataRow.Description
+        'State'             = [string]$tableVUEMState[[int]$DataRow.State]
+        'Type'              = [string]$tableVUEMADObjectType[$Type]
+        'Permissions'       = Get-AdministratorPermissions -Connection $Connection -Permissions $vuemAdminXml
+        'Version'           = [int]$DataRow.RevisionId
+    }
+
+    # try and get LDAP properties for the SID
+    $ldapObject = Get-ActiveDirectoryName -SID $DataRow.Name
+    if ($ldapObject) { 
+        $vuemObject | Add-Member -NotePropertyName "Name" -NotePropertyValue $ldapObject.Account -Force
+        $vuemObject | Add-Member -NotePropertyName "LDAPObject" -NotePropertyValue $ldapObject -Force
+     }
+
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.AdminObject")
 
     return $vuemObject
 }
@@ -1288,7 +1384,6 @@ Function New-VUEMRule() {
     param(
         [System.Data.DataRow]$DataRow,
         [System.Data.SqlClient.SqlConnection]$Connection
-
     )
 
     Write-Verbose "Found Rule object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"

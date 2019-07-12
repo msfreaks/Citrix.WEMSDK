@@ -37,7 +37,8 @@ function New-WEMDatabaseConnection {
         $ConnectionString = "Server=$Server;Database=$Database;User Id=$($Credential.UserName);Password=$($Credential.GetNetworkCredential().password);"
     } else {
         Write-Verbose "No credential provided. Setting up connection using Integrated Security."
-        $ConnectionString = "Data Source=$Server; Integrated Security=SSPI; Initial Catalog=$Database"
+        $ConnectionString = "Server=$($Server);Database=$($Database);Trusted_Connection=True"
+        #$ConnectionString = "Data Source=$Server; Integrated Security=SSPI; Initial Catalog=$Database"
     }
 
     Write-Verbose "Connection string: $($ConnectionString)"
@@ -46,7 +47,7 @@ function New-WEMDatabaseConnection {
 
     # grab database version
     $SQLQuery = "SELECT value FROM VUEMParameters WHERE IdSite = 1 AND Name = 'VersionInfo'"
-    $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+    $result = Invoke-SQL -Connection $connection -Query $SQLQuery
     $script:databaseVersion = $result.Tables.Rows.value
     $script:databaseSchema = $script:databaseVersion.Substring(0, $script:databaseVersion.IndexOf("."))
 

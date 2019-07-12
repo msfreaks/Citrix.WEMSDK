@@ -17,6 +17,9 @@
     .Parameter Name
     ..
 
+    .Parameter ADObjectId
+    ..
+
     .Parameter Connection
     ..
     
