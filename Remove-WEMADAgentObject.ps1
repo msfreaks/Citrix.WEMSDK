@@ -39,13 +39,13 @@ function Remove-WEMADAgentObject {
         # only continue if the action was found
         if (-not $origObject) { 
             Write-Warning "No Active Directory Object found for Id $($IdADObject)"
-            Break
+            Return
         }
         
         # don't remove Default Active Directory Objects
         if ($origObject.Type -notlike "Computer" -and $origObject.Type -notlike "Organizational Unit") {
             Write-Warning "You can not delete this type of object ($($origObject.Type))"
-            Break
+            Return
         }
 
         # build query
@@ -54,6 +54,6 @@ function Remove-WEMADAgentObject {
 
         # Updating the ChangeLog
         Write-Verbose "Using Account name: $($origObject.Name)"
-        New-ChangesLogEntry -Connection $Connection -IdSite $origObject.IdSite -IdElement $IdADObject -ChangeType "Delete" -ObjectName $origObject.Name -ObjectType "Active Directory Object\$($origObject.Type)" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        New-ChangesLogEntry -Connection $Connection -IdSite $origObject.IdSite -IdElement $IdADObject -ChangeType "Delete" -ObjectName $origObject.Name -ObjectType "Active Directory Object" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }

@@ -122,7 +122,7 @@ function New-WEMADAgentObject {
         # Updating the ChangeLog
         Write-Verbose "Using Object name: $($Name)"
         $IdObject = $vuemADAgentObject.IdADObject
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName "$($Name) ($($Id))" -ObjectType "Active Directory Object\$($Type)" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName "$($Name) ($($Id))" -ObjectType "Active Directory Object\$($Type.Replace(' ',''))" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
         return $vuemADAgentObject

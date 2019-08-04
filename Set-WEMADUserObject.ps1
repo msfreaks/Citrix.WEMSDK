@@ -72,7 +72,7 @@ function Set-WEMADUserObject {
         }
         
         # if a new name for the object is entered, check if it's unique
-        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and $Name.Replace("'", "''") -notlike $origADObject.Name ) {
+        if ([bool]($MyInvocation.BoundParameters.Keys -match 'name') -and (ConvertTo-StringEscaped $Name) -notlike $origADObject.Name ) {
             $SQLQuery = "SELECT COUNT(*) AS ADObject FROM VUEMItems WHERE Name LIKE '$($Name.Replace("'", "''"))' AND IdSite = $($origADObject.IdSite)"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows.ADObject) {
@@ -109,7 +109,7 @@ function Set-WEMADUserObject {
                     continue
                 }
                 "Description" {
-                    $updateFields += "Description = '$($Description.Replace("'", "''"))'"
+                    $updateFields += "Description = '$(ConvertTo-StringEscaped $Description)'"
                     continue
                 }
                 "State" {

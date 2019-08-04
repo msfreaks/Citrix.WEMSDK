@@ -59,9 +59,8 @@ function New-WEMConfiguration {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the ID from the newly created record
-        $SQLQuery = "SELECT * FROM VUEMSites WHERE Name = '$($Name)'"
-        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        $IdSite = $result.Tables.Rows.IdSite
+        $objectSite = Get-WEMConfiguration -Connection $Connection -Name "$($Name)"
+        $IdSite = $objectSite.IdSite
 
         # fill other tables with defaults after adding the Site record
         # VUEMParameters
