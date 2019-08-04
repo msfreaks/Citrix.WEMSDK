@@ -19,10 +19,10 @@ $share4         = "\\$($fileServer)\test"       # used for DriveShare 4 -> Test 
 
 # this only works if the ActiveDirectory Module is present
 $SID1 = (Get-ADUser "amensc").SID.ToString()                # used for ADObjects creation and assignment tests
-$SID2 = (Get-ADUser "adm_amensc").SID.ToString()            # used for ADObjects creation
+$SID2 = (Get-ADUser "adm_amensc").SID.ToString()            # used for ADObjects creation and administrator tests
 $SID3 = (Get-ADGroup "Domain Users").SID.ToString()         # used for ADObjects creation and to modify assignments
 $SID4 = (Get-ADGroup "Domain Admins").SID.ToString()        # used for ADObjects tests
-$SID5 = (Get-ADGroup "Enterprise Admins").SID.ToString()    # used for ADObjects tests
+$SID5 = (Get-ADGroup "Enterprise Admins").SID.ToString()    # used for ADObjects tests and administrator tests
 
 $AgentOU = (Get-ADOrganizationalUnit "OU=Computer Workstations,DC=ctac,DC=local").ObjectGUID.Guid
 
@@ -931,6 +931,35 @@ $allAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose
 
 #endregion
 
+#region WEMAdministrator
+$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+
+# New-WEMAdministrator
+$wemAdmin = New-WEMAdministrator -Connection $db -Verbose -Id $SID5 -State Enabled -Permission "Full Access"
+$wemAdmin = New-WEMAdministrator -Connection $db -Verbose -Id $SID2
+
+# Get-WEMAdministrator
+$allAdministrators = Get-WEMAdministrator -Connection $db -Verbose
+$allAdministrators | Format-Table
+
+# Set-WEMAdministrator
+$allAdministrators | Set-WEMAdministrator -Connection $db -Verbose -Description "Set-WEMAdministrator"
+
+$adminPermissions = New-WEMAdministratorPermissionObject -IdSite 1 -Permission "Read Only"
+Set-WEMAdministrator -Connection $db -Verbose -Permissions $adminPermissions -IdAdministrator $wemAdmin.IdAdministrator
+$wemAdmin = Get-WEMAdministrator -Connection $db -Verbose -IdAdministrator $wemAdmin.IdAdministrator
+$adminPermissions = @()
+$adminPermissions += $wemAdmin.Permissions
+$adminPermissions += New-WEMAdministratorPermissionObject -IdSite $conf.IdSite -Permission "Full Access"
+Set-WEMAdministrator -Connection $db -Verbose -Permissions $adminPermissions -IdAdministrator $wemAdmin.IdAdministrator
+
+# Remove-WEMAdministrator
+Remove-WEMAdministrator -Connection $db -Verbose -IdAdministrator $wemAdmin.IdAdministrator
+
+$allAdministrators = Get-WEMAdministrator -Connection $db -Verbose
+
+#end region
+
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
 
 $allADObjects | Where-Object { $_.Type -notlike "BUILTIN" } | Select-Object IdADObject, IdSite, Name, Description, State, Type, Priority | Format-Table
@@ -942,6 +971,8 @@ $allRules | Select-Object IdSite, IdRule, Name, Conditions | Format-Table
 $allActionGroups | Format-Table
 
 $allAssignments | Format-Table
+
+$allAdministrators | Format-Table
 
 # Cleanup
 $db.Dispose()

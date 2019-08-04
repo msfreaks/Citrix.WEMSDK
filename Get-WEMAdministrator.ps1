@@ -46,7 +46,7 @@ function Get-WEMAdministrator {
         if ($IdSite -or $Name -or $IdAdministrator) {
             $SQLQuery += " WHERE "
             if ($IdSite) { 
-                $SQLQuery += "IdSite = $($IdSite)"
+                $SQLQuery += "Permissions LIKE '%<idSite>$($IdSite)</idSite>%'"
                 if ($Name -or $IdAdministrator) { $SQLQuery += " AND " }
             }
             if ($IdAdministrator) { 

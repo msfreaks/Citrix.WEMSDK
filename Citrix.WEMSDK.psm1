@@ -163,13 +163,13 @@ function Get-AdministratorPermissions {
             $vuemObject = [pscustomobject] @{
                 'IdSite'      = [int]$permission.idSite
                 'Name'        = (Get-WEMConfiguration -Connection $Connection -IdSite $permission.idSite).Name
-                'Permission'  = [string]$permission.AuthorizationLevel
+                'Permission'  = [string]$tableVUEMAdminPermissions[$permission.AuthorizationLevel]
             }
         } else {
             $vuemObject = [pscustomobject] @{
                 'IdSite'      = 0
                 'Name'        = "Global Admin"
-                'Permission'  = [string]$permission.AuthorizationLevel
+                'Permission'  = [string]$tableVUEMAdminPermissions[$permission.AuthorizationLevel]
             }
         }
 
@@ -1282,7 +1282,7 @@ Function New-VUEMAdminObject() {
         [System.Data.SqlClient.SqlConnection]$Connection
     )
 
-    Write-Verbose "Found Active Directory object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+    Write-Verbose "Found Administrator object '$($DataRow.Name)'"
 
     $Type = [int]$DataRow.Type
     $vuemAdminReserved = $DataRow.Permissions
@@ -1290,7 +1290,6 @@ Function New-VUEMAdminObject() {
 
     $vuemObject = [pscustomobject] @{
         'IdAdministrator'   = [int]$DataRow.IdAdmin
-        'IdSite'            = [int]$DataRow.IdSite
         'Name'              = [string]$DataRow.Name
         'SID'               = [string]$DataRow.Name
         'Description'       = [string]$DataRow.Description
@@ -1508,6 +1507,7 @@ $defaultVUEMVirtualDriveReserved         = $XmlHeader + '<VUEMActionAdvancedOpti
 $defaultVUEMEnvironmentVariableReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
 $defaultVUEMExternalTaskReserved         = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecuteOnlyAtLogon</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
 $defaultVUEMFileSystemOperationReserved  = $XmlHeader + '<VUEMActionAdvancedOption><Name>ExecOrder</Name><Value>0</Value></VUEMActionAdvancedOption>' + $XmlFooter
+$defaultVUEMAdministratorPermissions     = '<?xml version="1.0" encoding="utf-8"?><ArrayOfVUEMAdminPermission xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><VUEMAdminPermission><idSite>0</idSite><AuthorizationLevel>ReadOnly</AuthorizationLevel></VUEMAdminPermission></ArrayOfVUEMAdminPermission>'
 
 $defaultIconStream = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEaSURBVFhH7ZTbCoJAEIaFCCKCCKJnLTpQVBdB14HQ00T0CqUP4AN41puJAVe92F3HRZegHfgQFvH7/1nQMmPmZ+Z8uYJOCm01vJe64PF8cZ+Ftho89DxPC8IAeZ73QpZlJWmattsAfsBavsk0yRsD3Ox7ST3A4uTC/OjC7ODCdO/AZOfAeOvAaPOB4foDg1UVwLZtIUmSqG2AIq9vgNcc5coBKHIWgNec0RhAdAUUOSJrjsRxrLYBihxBMa85QzkARY7ImjOkAURXQJEjKOY1Z0RRpLYBihyRNUe5cgCKHEEprzmjMYDoCqjImiNhGKptgApvA3V57wFkzbUGEMmDIGgfAKH84ShypQBdyn3fFwfQSaE1Y+bvx7K+efsbU5+Ow3MAAAAASUVORK5CYII="
 
@@ -1786,6 +1786,34 @@ $tableVUEMActionType = @{
     "File System Operation" = 9
     "User DSN"              = 10
     "File Association"      = 11
+}
+$tableVUEMAdminPermissions = @{
+    "FullAccess"                    = "Full Access"
+    "ReadOnly"                      = "Read Only"
+    "ActionsCreator"                = "Actions Creator"
+    "ActionsManager"                = "Actions Manager"
+    "FiltersManager"                = "Filters Manager"
+    "AssigmentsManager"             = "Assigments Manager"
+    "SystemUtilitiesManager"        = "System Utilities Manager"
+    "SystemMonitoringManager"       = "System Monitoring Manager"
+    "PoliciesAndProfilesManager"    = "Policies and Profiles Manager"
+    "ConfiguredUserManager"         = "Configured User Manager"
+    "TransformerManager"            = "Transformer Manager"
+    "AdvancedSettingsManager"       = "Advanced Settings Manager"
+    "SecurityManager"               = "Security Manager"
+    "Full Access"                   = "FullAccess"
+    "Read Only"                     = "ReadOnly"
+    "Actions Creator"               = "ActionsCreator"
+    "Actions Manager"               = "ActionsManager"
+    "Filters Manager"               = "FiltersManager"
+    "Assigments Manager"            = "AssigmentsManager"
+    "System Utilities Manager"      = "SystemUtilitiesManager"
+    "System Monitoring Manager"     = "SystemMonitoringManager"
+    "Policies and Profiles Manager" = "PoliciesAndProfilesManager"
+    "Configured User Manager"       = "ConfiguredUserManager"
+    "Transformer Manager"           = "TransformerManager"
+    "Advanced Settings Manager"     = "AdvancedSettingsManager"
+    "Security Manager"              = "SecurityManager"
 }
 
 $databaseVersion = ""

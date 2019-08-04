@@ -8,19 +8,22 @@
     .Link
     https://msfreaks.wordpress.com
 
-    .Parameter IdSite
-    ..
-
-    .Parameter Name
+    .Parameter Id
     ..
 
     .Parameter Description
     ..
 
+    .Parameter Type
+    ..
+
     .Parameter State
     ..
 
-    .Parameter Priority
+    .Parameter Permission
+    ..
+
+    .Parameter IdSite
     ..
 
     .Parameter Connection
@@ -36,18 +39,17 @@ function New-WEMAdministrator {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
-        [int]$IdSite,
-
-        [Parameter(Mandatory=$True)]
         [string]$Id,
         [Parameter(Mandatory=$False)]
         [string]$Description = "",
+        [Parameter(Mandatory=$False)][ValidateSet("Group","User")]
+        [string]$Type,
         [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
-        [string]$State = "Enabled",
-        [Parameter(Mandatory=$False)][ValidateSet("Full Access","Read Only","Actions Creator","Actions Manager","Filters Manager","Assigments Manager","System Utilities Manager","System Monitoring Manager","Policies and Profile Manager","Configured User Manager","Transformer Manager","Advanced Settings Manager","Security Manager")]
+        [string]$State = "Disabled",
+        [Parameter(Mandatory=$False)][ValidateSet("Full Access","Read Only","Actions Creator","Actions Manager","Filters Manager","Assigments Manager","System Utilities Manager","System Monitoring Manager","Policies and Profiles Manager","Configured User Manager","Transformer Manager","Advanced Settings Manager","Security Manager")]
         [string]$Permission = "",
         [Parameter(Mandatory=$False)]
-        [int]$Priority = 100,
+        [int]$IdSite = 0,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
@@ -56,24 +58,46 @@ function New-WEMAdministrator {
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
+        # define regexes
+        $regExSID = "^S-\d-(\d+-){1,14}\d+$"
+
         # escape possible query breakers
-        $Name = ConvertTo-StringEscaped $Name
+        $Id = ConvertTo-StringEscaped $Id
         $Description = ConvertTo-StringEscaped $Description
 
-        # name is unique if it's not yet used in the same Action Type in the site 
-        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMItems WHERE Name LIKE '$($Name)' AND IdSite = $($IdSite)"
-        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-        if ($result.Tables.Rows.ObjectCount) {
-            # name must be unique
-            Write-Error "There's already an Active Directory object named '$($Name)' in the Configuration"
+        # Id must match SID
+        if ($Id -notmatch $regExSID) {
+            Write-Error "Please privide a valid object SID."
             Break
         }
 
-        Write-Verbose "Name is unique: Continue"
+        # name is unique if it's not yet used in the same Action Type in the site 
+        $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMAdministrators WHERE Name LIKE '$($Id)'"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        if ($result.Tables.Rows.ObjectCount) {
+            # name must be unique
+            Write-Error "There's already an Administrator object named '$($Id)' in the Configuration"
+            Break
+        }
+
+        Write-Verbose "Id is unique: Continue"
+
+        # check IdSite if one was provided
+        if($IdSite -ge 1) {
+            if(-not (Get-WEMConfiguration -Connection $Connection -IdSite $IdSite)) {
+                Write-Error "Configuration not found. Please provide a valid Site Id"
+                Break
+            }
+        }
+
+        # check permissions
+        $xmlPermission = [xml]$defaultVUEMAdministratorPermissions
+        if ($Permission) { $xmlPermission.ArrayOfVUEMAdminPermission.VUEMAdminPermission.AuthorizationLevel = $tableVUEMAdminPermissions[$Permission] }
+        $xmlPermission.ArrayOfVUEMAdminPermission.VUEMAdminPermission.idSite = [string]$IdSite
 
         # build optional values
         if ([bool]($MyInvocation.BoundParameters.Keys -notmatch 'type')) { 
-            $ADObject = Get-ActiveDirectoryName -SID "$($Name)"
+            $ADObject = Get-ActiveDirectoryName -SID "$($Id)"
             if (-not $ADObject) {
                 Write-Error "Could not determine Active Directory object type. Please provide the Type manually"
                 Break
@@ -85,18 +109,18 @@ function New-WEMAdministrator {
         }    
 
         # build the query to insert the Object
-        $SQLQuery = "INSERT INTO VUEMItems (IdSite,Name,DistinguishedName,Description,State,Type,Priority,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)',NULL,'$($Description)',$($tableVUEMState[$State]),$($tableVUEMADObjectType[$Type]),$($Priority),1,NULL)"
+        $SQLQuery = "INSERT INTO VUEMAdministrators (Name,Description,State,Type,Permissions,RevisionId,Reserved01) VALUES ('$($Id)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMADObjectType[$Type]),'$($xmlPermission.InnerXml)',1,NULL)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new Object
-        $vuemADUserObject = Get-WEMADUserObject -Connection $Connection -IdSite $IdSite -Name "$($Name)"
+        $vuemAdministratorObject = Get-WEMAdministrator -Connection $Connection -Name $id
 
         # Updating the ChangeLog
-        Write-Verbose "Using Account name: $((Get-ActiveDirectoryName $Name).Account)"
-        $IdObject = $vuemADUserObject.IdADObject
-        New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Name).Account -ObjectType "Users\User" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        Write-Verbose "Using Object name: $($Id)"
+        $IdObject = $vuemAdministratorObject.IdAdministrator
+        New-ChangesLogEntry -Connection $Connection -IdSite -1 -IdElement $IdObject -ChangeType "Create" -ObjectName (Get-ActiveDirectoryName $Id).Account -ObjectType "Administration\Administrators" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
 
         # Return the new object
-        return $vuemADUserObject
+        return $vuemAdministratorObject
     }
 }

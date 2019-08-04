@@ -40,7 +40,6 @@ function New-WEMADAgentObject {
     param (
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
-
         [Parameter(Mandatory=$True)]
         [string]$Id,
         [Parameter(Mandatory=$False)]
