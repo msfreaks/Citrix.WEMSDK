@@ -1,4 +1,4 @@
-$name       = "POSH 1906 v2"
+$configname = "POSH 1906 v2"
 $database   = "CitrixWEM1906"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
@@ -60,18 +60,18 @@ $AgentOU = (Get-ADOrganizationalUnit "OU=Servers RDS,OU=IT-WorXX,DC=it-worxx,DC=
 
 #region WEMConfiguration
 # New-WEMConfiguration
-$conf = New-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = New-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 New-WEMConfiguration -Connection $db -Verbose -Name "POSH Test"
 
 # Get-WEMConfiguration
 Get-WEMConfiguration -Connection $db -Verbose | Format-Table
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 $conf | Format-Table
 
 # Set-WEMConfiguration
 Get-WEMConfiguration -Connection $db -Verbose -IdSite $conf.IdSite | Set-WEMConfiguration -Connection $db -Verbose -Description "Test Description"
-Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)" | Set-WEMConfiguration -Connection $db -Verbose -Name "New Name" -Description "Set-WEMConfiguration"
-Set-WEMConfiguration -Connection $db -Verbose -IdSite $conf.IdSite -Name "$($Name)" -Description "Set-WEMConfiguration"
+Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)" | Set-WEMConfiguration -Connection $db -Verbose -Name "New Name" -Description "Set-WEMConfiguration"
+Set-WEMConfiguration -Connection $db -Verbose -IdSite $conf.IdSite -Name "$($configname)" -Description "Set-WEMConfiguration"
 
 # Remove-WEMConfiguration
 Get-WEMConfiguration -Connection $db -Verbose -Name "Posh Test" | Remove-WEMConfiguration -Connection $db -Verbose
@@ -81,7 +81,7 @@ Get-WEMConfiguration -Connection $db -Verbose -Name "Posh Test" | Remove-WEMConf
 #region WEMActions
 
 #region WEMApplication
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMApplication
 $conf | New-WEMApplication -Connection $db -Verbose -Name "POSH Notepad" -TargetPath "C:\Windows\notepad.exe"
@@ -110,7 +110,7 @@ $allApps = $conf | Get-WEMApplication -Connection $db -Verbose
 #endregion
 
 #region WEMPrinter
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMPrinter
 $conf | New-WEMPrinter -Connection $db -Verbose -Name "POSH Printer 1" -TargetPath "$($printer1)"
@@ -136,7 +136,7 @@ $allPrinters = $conf | Get-WEMPrinter -Connection $db -Verbose
 #endregion
 
 #region WEMNetworkDrive
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMNetworkDrive
 $conf | New-WEMNetworkDrive -Connection $db -Verbose -Name "POSH Network Drive 1" -TargetPath "$($share1)"
@@ -165,7 +165,7 @@ $allDrives = $conf | Get-WEMNetworkDrive -Connection $db -Verbose
 #endregion
 
 #region WEMVirtualDrive
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMVirtualDrive
 $conf | New-WEMVirtualDrive -Connection $db -Verbose -Name "POSH Virtual Drive 1" -TargetPath "D:\vdisks\posh1folder"
@@ -194,7 +194,7 @@ $allVDrives = $conf | Get-WEMVirtualDrive -Connection $db -Verbose
 #endregion
 
 #region WEMRegistryEntry
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMRegistryEntry
 $conf | New-WEMRegistryEntry -Connection $db -Verbose -Name "POSH Registry Entry 1" -TargetPath "Citrix.WEMSDK\POSH" -TargetName "REG_SZ test" -TargetType "REG_SZ" -TargetValue "This is a string value"
@@ -222,7 +222,7 @@ $allRegistryEntries = $conf | Get-WEMRegistryEntry -Connection $db -Verbose
 #endregion
 
 #region WEMEnvironmentVariable
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMEnvironmentVariable
 $conf | New-WEMEnvironmentVariable -Connection $db -Verbose -Name "POSH Environment Variable 1" -VariableName "POSHModule" -VariableValue "Citrix.WEMSDK"
@@ -250,7 +250,7 @@ $allEnvironmentVariables = $conf | Get-WEMEnvironmentVariable -Connection $db -V
 #endregion
 
 #region WEMPort
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMPort
 $conf | New-WEMPort -Connection $db -Verbose -Name "POSH Port COM1:" -PortName "COM1:" -TargetPath "Unknown COM port"
@@ -279,7 +279,7 @@ $allPorts = $conf | Get-WEMPort -Connection $db -Verbose
 #endregion
 
 #region WEMIniFileOperation
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMIniFileOperation
 $conf | New-WEMIniFileOperation -Connection $db -Verbose -Name "POSH Ini File Op 1" -TargetPath "C:\Windows\Citrix.WEMSDK.ini" -TargetSectionName "Citrix.WEMSDK" -TargetValueName "init" -TargetValue "None"
@@ -308,7 +308,7 @@ $allIniFileOps = $conf | Get-WEMIniFileOperation -Connection $db -Verbose
 #endregion
 
 #region WEMExternalTask
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMExternalTask
 $conf | New-WEMExternalTask -Connection $db -Verbose -Name "POSH External Task 1" -TargetPath "C:\Windows\SetScreensaver.exe" -TargetArguments "-Seconds 600" -RunHidden $true
@@ -337,7 +337,7 @@ $allExternalTasks = $conf | Get-WEMExternalTask -Connection $db -Verbose
 #endregion
 
 #region WEMFileSystemOperation
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMFileSystemOperation
 $conf | New-WEMFileSystemOperation -Connection $db -Verbose -Name "POSH File System Operation 1" -SourcePath "$($share1)\file.ini" -TargetPath "C:\Temp\file.tst"
@@ -366,7 +366,7 @@ $allFileSystemOps = $conf | Get-WEMFileSystemOperation -Connection $db -Verbose
 #endregion
 
 #region WEMUserDSN
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMUserDSN
 $conf | New-WEMUserDSN -Connection $db -Verbose -Name "POSH User DSN 1" -TargetName "POSH DSN 1" -TargetDriverName "SQL Server" -TargetServer "ITWSQL" -TargetDatabaseName "CitrixWEM" -RunOnce $false
@@ -395,7 +395,7 @@ $allUserDSNs = $conf | Get-WEMUserDSN -Connection $db -Verbose
 #endregion
 
 #region WEMFileAssociation
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMFileAssociation
 $conf | New-WEMFileAssociation -Connection $db -Verbose -Name "POSH File Association 1" -FileExtension "txt" -ProgramId "666" -Action "open" -IsDefault $true -TargetPath "c:\notepad++\notepad++.exe" -TargetCommand "%1"
@@ -428,7 +428,7 @@ $allActions = $conf | Get-WEMAction -Connection $db -Verbose
 #endregion
 
 #region WEMADUserObject
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMADUserObject
 $conf | New-WEMADUserObject -Connection $db -Verbose -Name $SID1
@@ -454,7 +454,7 @@ $allADObjects = $conf | Get-WEMADUserObject -Connection $db -Verbose
 #endregion
 
 #region WEMCondition
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMCondition
 $conf | New-WEMCondition -Connection $db -Verbose -Name "POSH Condition 1" -Type "Client OS" -TestResult "Windows 10"
@@ -480,7 +480,7 @@ $allConditions = $conf | Get-WEMCondition -Connection $db -Verbose
 #endregion
 
 #region WEMRule
-$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($name)"
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMRule
 $conf | New-WEMRule -Connection $db -Verbose -Name "POSH Rule 1" -Conditions (Get-WEMCondition -Connection $db -Verbose -Name "POSH Condition 1")
@@ -516,7 +516,7 @@ $allRules = $conf | Get-WEMRule -Connection $db -Verbose
 #endregion
 
 #region WEMActionGroup
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMActionGroup
 $conf | New-WEMActionGroup -Connection $db -Verbose -Name "POSH Action Group 1"
@@ -548,7 +548,7 @@ $allActionGroups = $conf | Get-WEMActionGroup -Connection $db -Verbose
 #region WEMAssignments
 
 #region WEMApplicationAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMApplicationAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -579,7 +579,7 @@ $testAssignment | Remove-WEMApplicationAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMPrinterAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMPrinterAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -609,7 +609,7 @@ $testAssignment | Remove-WEMPrinterAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMNetworkDrivesAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMNetworkDriveAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -641,7 +641,7 @@ $testAssignment | Remove-WEMNetworkDriveAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMVirtualDrivesAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMVirtualDriveAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -673,7 +673,7 @@ $testAssignment | Remove-WEMVirtualDriveAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMRegistryEntryAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMRegistryEntryAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -701,7 +701,7 @@ $testAssignment | Remove-WEMRegistryEntryAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMEnvironmentVariableAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMEnvironmentVariableAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -729,7 +729,7 @@ $testAssignment | Remove-WEMEnvironmentVariableAssignment -Connection $db -Verbo
 #endregion
 
 #region WEMPortAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMPortAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -757,7 +757,7 @@ $testAssignment | Remove-WEMPortAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMIniFileOperationAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMIniFileOperationAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -785,7 +785,7 @@ $testAssignment | Remove-WEMIniFileOperationAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMWEMExternalTaskAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMExternalTaskAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -813,7 +813,7 @@ $testAssignment | Remove-WEMExternalTaskAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMFileSystemOperationAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMFileSystemOperationAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -841,7 +841,7 @@ $testAssignment | Remove-WEMFileSystemOperationAssignment -Connection $db -Verbo
 #endregion
 
 #region WEMUserDSNAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMUserDSNAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -869,7 +869,7 @@ $testAssignment | Remove-WEMUserDSNAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMFileAssociationAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMFileAssociationAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -897,7 +897,7 @@ $testAssignment | Remove-WEMFileAssociationAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMActionGroupAssignments
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMActionGroupAssignment
 $adobject = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
@@ -933,7 +933,7 @@ $allAssignments = $conf | Get-WEMAssignment -Connection $db -Verbose
 #endregion
 
 #region WEMADAgentObject
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMADAgentObject
 $conf | New-WEMADAgentObject -Connection $db -Verbose -Id $AgentOU
@@ -953,7 +953,7 @@ $allAgentObjects = $conf | Get-WEMADAgentObject -Connection $db -Verbose
 #endregion
 
 #region WEMAdministrator
-$conf = Get-WEMConfiguration -Connection $db -Name "$($name)" -Verbose
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # New-WEMAdministrator
 $wemAdmin = New-WEMAdministrator -Connection $db -Verbose -Id $SID5 -State Enabled -Permission "Full Access"
@@ -978,6 +978,76 @@ Set-WEMAdministrator -Connection $db -Verbose -Permissions $adminPermissions -Id
 Remove-WEMAdministrator -Connection $db -Verbose -IdAdministrator $wemAdmin.IdAdministrator
 
 $allAdministrators = Get-WEMAdministrator -Connection $db -Verbose
+
+#endregion
+
+#region Configuration Settings
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
+
+# Set-WEMSystemOptimization
+$configSystemOptimization  = @{
+    EnableFastLogoff            = $true
+    ExcludeGroupsFromFastLogoff = $true
+    FastLogoffExcludedGroups    = "$($SID4);$($SID5)"
+    Test = "dummy"
+}
+Set-WEMSystemOptimization -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configSystemOptimization
+
+# Get-WEMSystemOptimization
+$configSystemOptimization = Get-WEMSystemOptimization -Connection $db -Verbose -IdSite $conf.IdSite
+$configSystemOptimization | Format-Table -AutoSize
+
+# Set-WEMEnvironmentalSettings
+$configEnvironmentalSettings  = @{
+    NoPropertiesMyComputer = $true
+    NoTrayContextMenu      = $true
+    Wallpaper              = "\\SERVER\SHARE\bitmapfile.png"
+    Test = "dummy"
+}
+Set-WEMEnvironmentalSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configEnvironmentalSettings
+
+# Get-WEMEnvironmentalSettings
+$configEnvironmentalSettings = Get-WEMEnvironmentalSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configEnvironmentalSettings | Format-Table -AutoSize
+
+# Set-WEMUSVSettings
+$configUSVSettings  = @{
+    processUSVConfiguration          = $true
+    processUSVConfigurationForAdmins = $true
+    RDSHomeDriveLetter               = "R:"
+    Test = "dummy"
+}
+Set-WEMUSVSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configUSVSettings
+
+# Get-WEMUSVSettings
+$configUSVSettings = Get-WEMUSVSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configUSVSettings | Format-Table -AutoSize
+
+# Set-WEMUPMSettings
+$configUPMSettings  = @{
+    LoggingEnabled  = $true
+    CEIPENabled     = $false
+    PathToUserStore = "Windows"
+    Test = "dummy"
+}
+Set-WEMUPMSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configUPMSettings
+
+# Get-WEMUPMSettings
+$configUPMSettings = Get-WEMUPMSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configUPMSettings | Format-Table -AutoSize
+
+# Set-WEMPersonaSettings
+$configPersonaSettings  = @{
+    HideFileCopyProgress = $true
+    DebugError           = $true
+    LogPath              = "C:\Logs"
+    Test = "dummy"
+}
+Set-WEMPersonaSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configPersonaSettings
+
+# Get-WEMPersonaSettings
+$configPersonaSettings = Get-WEMPersonaSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configPersonaSettings | Format-Table -AutoSize
 
 #endregion
 

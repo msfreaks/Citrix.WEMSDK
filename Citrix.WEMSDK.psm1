@@ -138,6 +138,8 @@ function Get-ActiveDirectoryName {
             $ldapObject | Add-Member -NotePropertyName "SID" -NotePropertyValue $SID
             $ldapObject | Add-Member -NotePropertyName "Account" -NotePropertyValue "$(([adsi]"LDAP://$domain").dc.ToUpper())\$($account.samAccountName)"
         }
+
+        $ldapObject.pstypenames.insert(0, "Citrix.WEMSDK.LDAPObject")
         $ldapObject | Add-Member ScriptMethod ToString { $this.DistinguishedName } -Force
 
         return $ldapObject

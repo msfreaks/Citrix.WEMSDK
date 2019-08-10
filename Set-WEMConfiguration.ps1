@@ -64,7 +64,7 @@ function Set-WEMConfiguration {
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
             if ($result.Tables.Rows) {
                 # name must be unique
-                Write-Error "There's already an application named '$($Name.Replace("'", "''"))'"
+                Write-Error "There's already a site named '$($Name.Replace("'", "''"))'"
                 Break
             }
     

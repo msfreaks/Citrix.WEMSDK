@@ -37,6 +37,7 @@ function Get-WEMConfiguration {
     process {
 
         Write-Verbose "Working with database version $($script:databaseVersion)"
+        Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
 
         # build query
         $SQLQuery = "SELECT * FROM VUEMSites"
