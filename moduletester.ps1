@@ -25,9 +25,9 @@ $SID4 = (Get-ADGroup "Domain Admins").SID.ToString()        # used for ADObjects
 $SID5 = (Get-ADGroup "Enterprise Admins").SID.ToString()    # used for ADObjects tests and administrator tests
 
 $AgentOU = (Get-ADOrganizationalUnit "OU=Computer Workstations,DC=ctac,DC=local").ObjectGUID.Guid
-$AgentComputer = (Get-ADComputer cA002511).SID
+$AgentComputer = (Get-ADComputer CA002511).SID
 
-# START IT-WORXX:
+<# START IT-WORXX:
 # variables used in Action
 $printServer    = "ITWMASTER"                      # used for Printer mappings
 $fileServer     = "ITWMASTER"                      # used for Network Drive mappings
@@ -49,7 +49,7 @@ $SID4 = (Get-ADGroup "Domain Admins").SID.ToString()        # used for ADObjects
 $SID5 = (Get-ADGroup "Enterprise Admins").SID.ToString()    # used for ADObjects tests
 
 $AgentOU = (Get-ADOrganizationalUnit "OU=Servers RDS,OU=IT-WorXX,DC=it-worxx,DC=local").ObjectGUID.Guid
-# END IT-WORXX
+# END IT-WORXX #>
 
 # uncomment this if ActiveDirectory Module is not to be used
 #$SID1 = "S-1-5-21-1644858761-3736240991-3467507639-1299"   # used for ADObjects creation and assignment tests
