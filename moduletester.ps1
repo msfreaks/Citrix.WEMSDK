@@ -1080,6 +1080,22 @@ Reset-WEMTransformerSettings -Connection $db -Verbose -IdSite $conf.IdSite
 $configTransformerSettings = Get-WEMTransformerSettings -Connection $db -Verbose -IdSite $conf.IdSite
 $configTransformerSettings | Format-Table -AutoSize
 
+# Set-WEMAgentSettings
+$configAgentSettings  = @{
+    processVUEMUserDSNs                = 1
+    AgentDirectoryServiceTimeoutValue  = 30000
+    AgentLogFile                       = "C:\Logs\%USERNAME% Agent Log.log"
+    Test = "dummy"
+}
+Set-WEMAgentSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configAgentSettings
+
+# Reset-WEMAgentSettings
+Reset-WEMAgentSettings -Connection $db -Verbose -IdSite $conf.IdSite
+
+# Get-WEMAgentSettings
+$configAgentSettings = Get-WEMAgentSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configAgentSettings | Format-Table -AutoSize
+
 #endregion
 
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table
