@@ -986,12 +986,15 @@ $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
 # Set-WEMSystemOptimization
 $configSystemOptimization  = @{
-    EnableFastLogoff            = $true
-    ExcludeGroupsFromFastLogoff = $true
+    EnableFastLogoff            = 1
+    ExcludeGroupsFromFastLogoff = 1
     FastLogoffExcludedGroups    = "$($SID4);$($SID5)"
     Test = "dummy"
 }
 Set-WEMSystemOptimization -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configSystemOptimization
+
+# Reset-WEMSystemOptimization
+Reset-WEMSystemOptimization -Connection $db -Verbose -IdSite $conf.IdSite
 
 # Get-WEMSystemOptimization
 $configSystemOptimization = Get-WEMSystemOptimization -Connection $db -Verbose -IdSite $conf.IdSite
@@ -999,12 +1002,15 @@ $configSystemOptimization | Format-Table -AutoSize
 
 # Set-WEMEnvironmentalSettings
 $configEnvironmentalSettings  = @{
-    NoPropertiesMyComputer = $true
-    NoTrayContextMenu      = $true
+    NoPropertiesMyComputer = 1
+    NoTrayContextMenu      = 1
     Wallpaper              = "\\SERVER\SHARE\bitmapfile.png"
     Test = "dummy"
 }
 Set-WEMEnvironmentalSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configEnvironmentalSettings
+
+# Reset-WEMEnvironmentalSettings
+Reset-WEMEnvironmentalSettings -Connection $db -Verbose -IdSite $conf.IdSite
 
 # Get-WEMEnvironmentalSettings
 $configEnvironmentalSettings = Get-WEMEnvironmentalSettings -Connection $db -Verbose -IdSite $conf.IdSite
@@ -1012,12 +1018,15 @@ $configEnvironmentalSettings | Format-Table -AutoSize
 
 # Set-WEMUSVSettings
 $configUSVSettings  = @{
-    processUSVConfiguration          = $true
-    processUSVConfigurationForAdmins = $true
+    processUSVConfiguration          = 1
+    processUSVConfigurationForAdmins = 1
     RDSHomeDriveLetter               = "R:"
     Test = "dummy"
 }
 Set-WEMUSVSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configUSVSettings
+
+# Reset-WEMUSVSettings
+Reset-WEMUSVSettings -Connection $db -Verbose -IdSite $conf.IdSite
 
 # Get-WEMUSVSettings
 $configUSVSettings = Get-WEMUSVSettings -Connection $db -Verbose -IdSite $conf.IdSite
@@ -1025,12 +1034,15 @@ $configUSVSettings | Format-Table -AutoSize
 
 # Set-WEMUPMSettings
 $configUPMSettings  = @{
-    LoggingEnabled  = $true
-    CEIPENabled     = $false
+    LoggingEnabled  = 1
+    CEIPENabled     = 0
     PathToUserStore = "Windows"
     Test = "dummy"
 }
 Set-WEMUPMSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configUPMSettings
+
+# Reset-WEMUPMSettings
+Reset-WEMUPMSettings -Connection $db -Verbose -IdSite $conf.IdSite
 
 # Get-WEMUPMSettings
 $configUPMSettings = Get-WEMUPMSettings -Connection $db -Verbose -IdSite $conf.IdSite
@@ -1038,16 +1050,35 @@ $configUPMSettings | Format-Table -AutoSize
 
 # Set-WEMPersonaSettings
 $configPersonaSettings  = @{
-    HideFileCopyProgress = $true
-    DebugError           = $true
+    HideFileCopyProgress = 1
+    DebugError           = 1
     LogPath              = "C:\Logs"
     Test = "dummy"
 }
 Set-WEMPersonaSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configPersonaSettings
 
+# Reset-WEMPersonaSettings
+Reset-WEMPersonaSettings -Connection $db -Verbose -IdSite $conf.IdSite
+
 # Get-WEMPersonaSettings
 $configPersonaSettings = Get-WEMPersonaSettings -Connection $db -Verbose -IdSite $conf.IdSite
 $configPersonaSettings | Format-Table -AutoSize
+
+# Set-WEMTransformerSettings
+$configTransformerSettings  = @{
+    GeneralEnableLanguageSelect = 1
+    PowerShutdownAfterIdleTime  = 900
+    AutologonDomain             = "it-worxx.local"
+    Test = "dummy"
+}
+Set-WEMTransformerSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configTransformerSettings
+
+# Reset-WEMTransformerSettings
+Reset-WEMTransformerSettings -Connection $db -Verbose -IdSite $conf.IdSite
+
+# Get-WEMTransformerSettings
+$configTransformerSettings = Get-WEMTransformerSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configTransformerSettings | Format-Table -AutoSize
 
 #endregion
 

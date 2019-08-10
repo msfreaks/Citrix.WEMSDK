@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM USV Settings object in the WEM Database.
+    Updates a WEM Transformer Settings object in the WEM Database.
 
     .Description
-    Updates a WEM USV Settings object in the WEM Database.
+    Updates a WEM Transformer Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -23,7 +23,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMUSVSettings {
+function Set-WEMTransformerSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
@@ -48,7 +48,7 @@ function Set-WEMUSVSettings {
 
         # if a Parameters object was passed, set variables and MyInvocation to these values
         $Parameters.Keys | ForEach-Object {
-            if ($configurationSettings[$script:databaseSchema].USVValues -match "'$($_)'") {
+            if ($configurationSettings[$script:databaseSchema].KioskValues -match "'$($_)'") {
                 if(Get-Variable -Name $_ -ErrorAction SilentlyContinue) { 
                     Write-Verbose "Setting $($_) variable using $($_) value from parameter object to override single parameter"
                     Set-Variable -Name $_ -Value $Parameters.$_
@@ -63,33 +63,34 @@ function Set-WEMUSVSettings {
         }
 
         # process all parameters
-        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $configurationSettings[$script:databaseSchema].USVValues -match "'$($_)'" }
+        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $configurationSettings[$script:databaseSchema].KioskValues -match "'$($_)'" }
 
         foreach($key in $keys) {
             # build query for each valid parameter
             $value = (Get-Variable -Name $key).Value
-            $SQLQuery = "UPDATE VUEMUSVSettings SET Value = '$($value)', RevisionId = RevisionId + 1 WHERE Name = '$($key)' AND IdSite = $($IdSite)"
+            $SQLQuery = "UPDATE VUEMKioskSettings SET Value = '$($value)', RevisionId = RevisionId + 1 WHERE Name = '$($key)' AND IdSite = $($IdSite)"
 
             # execute the query
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # grab the updated object
-            $SQLQuery = "SELECT * FROM VUEMUSVSettings WHERE IdSite = $($IdSite) AND Name = '$($key)'"
+            $SQLQuery = "SELECT * FROM VUEMKioskSettings WHERE IdSite = $($IdSite) AND Name = '$($key)'"
             $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
             $IdObject = $result.Tables.Rows.IdItem
-            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Update" -ObjectName $key -ObjectType "Policies and Profiles\Microsoft USV Settings" -NewValue $value -ChangeDescription $null -Reserved01 $null 
+            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Update" -ObjectName $key -ObjectType "Transformer Settings\Setting" -NewValue $value -ChangeDescription $null -Reserved01 $null 
         }
     }
 }
+New-Alias -Name Set-WEMKioskSettings -Value Set-WEMTransformerSettings
 
 <#
     .Synopsis
-    Resets a WEM USV Settings object in the WEM Database.
+    Resets a WEM Transformer Settings object in the WEM Database.
 
     .Description
-    Resets a WEM USV Settings object in the WEM Database.
+    Resets a WEM Transformer Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -106,7 +107,7 @@ function Set-WEMUSVSettings {
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Reset-WEMUSVSettings {
+function Reset-WEMTransformerSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
@@ -122,12 +123,13 @@ function Reset-WEMUSVSettings {
 
         # create a settings object and fill it using defaults
         $parameterObject = @{}
-        foreach($key in $configurationSettings[$script:databaseSchema].USVValues) {
+        foreach($key in $configurationSettings[$script:databaseSchema].KioskValues) {
             $fields = $key.Split(",")
             $parameterObject.($fields[1].Substring(1,$fields[1].Length-2)) = $fields[3].Substring(1,$fields[3].Length-2)
         }
 
         # use the Set- function and pass the complete default settings object
-        Set-WEMUSVSettings -Connection $Connection -IdSite $IdSite -Parameters $parameterObject
+        Set-WEMTransformerSettings -Connection $Connection -IdSite $IdSite -Parameters $parameterObject
     }
 }
+New-Alias -Name Reset-WEMKioskSettings -Value Reset-WEMTransformerSettings

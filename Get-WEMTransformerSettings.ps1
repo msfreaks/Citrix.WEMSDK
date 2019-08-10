@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns a WEM Persona Settings object from the WEM Database.
+    Returns a WEM Transformer Settings object from the WEM Database.
 
     .Description
-    Returns a WEM Persona Settings object from the WEM Database.
+    Returns a WEM Transformer Settings object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,7 +20,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Get-WEMPersonaSettings {
+function Get-WEMTransformerSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
@@ -44,7 +44,7 @@ function Get-WEMPersonaSettings {
         $configObject = @{}
 
         # grab the updated object
-        $SQLQuery = "SELECT * FROM VUEMPersonaSettings WHERE IdSite = $($IdSite) ORDER BY IdItem"
+        $SQLQuery = "SELECT * FROM VUEMKioskSettings WHERE IdSite = $($IdSite) ORDER BY IdItem"
         $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # cycle through all the properties
@@ -56,3 +56,4 @@ function Get-WEMPersonaSettings {
         return $configObject 
     }
 }
+New-Alias -Name Get-WEMKioskSettings -Value Get-WEMTransformerSettings
