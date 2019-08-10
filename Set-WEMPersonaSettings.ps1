@@ -40,6 +40,12 @@ function Set-WEMPersonaSettings {
         Write-Verbose "Working with database version $($script:databaseVersion)"
         Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
 
+        # don't update the Default Configuration
+        if ($IdSite -eq 1) {
+            Write-Warning "You cannot update settings for the Default Configuration"
+            Break
+        }
+
         # only continue if a valid IdSite was passed
         if(-not (Get-WEMConfiguration -Connection $Connection -IdSite $IdSite)) {
             Write-Warning "No site found with IdSite $($IdSite)"
@@ -123,7 +129,7 @@ function Reset-WEMPersonaSettings {
         # create a settings object and fill it using defaults
         $parameterObject = @{}
         foreach($key in $configurationSettings[$script:databaseSchema].PersonaValues) {
-            $fields = $key.Split(",")
+            $fields = $key.Replace("(","").Replace(")","").Replace(" ","").Split(",")
             $parameterObject.($fields[1].Substring(1,$fields[1].Length-2)) = $fields[2].Substring(1,$fields[2].Length-2)
         }
 

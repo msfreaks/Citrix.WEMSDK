@@ -1096,6 +1096,65 @@ Reset-WEMAgentSettings -Connection $db -Verbose -IdSite $conf.IdSite
 $configAgentSettings = Get-WEMAgentSettings -Connection $db -Verbose -IdSite $conf.IdSite
 $configAgentSettings | Format-Table -AutoSize
 
+# Set-WEMAppLockerSettings
+$configAppLockerSettings  = @{
+    EnableDLLRuleCollection  = 1
+    EnableProcessesAppLocker = 1
+    Test = "dummy"
+}
+Set-WEMAppLockerSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configAppLockerSettings
+
+# Reset-WEMAgentSettings
+Reset-WEMAppLockerSettings -Connection $db -Verbose -IdSite $conf.IdSite
+
+# Get-WEMAgentSettings
+$configAppLockerSettings = Get-WEMAppLockerSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configAppLockerSettings | Format-Table -AutoSize
+
+# Set-WEMGroupPolicyGlobalSettings -> CAREFUL! These are not visible in WEM Admin Console 1906. I don't know where they are used
+$configGroupPolicyGlobalSettings  = @{
+    EnableGroupPolicyEnforcement  = 1
+    Test = "dummy"
+}
+Set-WEMGroupPolicyGlobalSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configGroupPolicyGlobalSettings
+
+# Reset-WEMGroupPolicyGlobalSettings -> CAREFUL! These are not visible in WEM Admin Console 1906. I don't know where they are used 
+Reset-WEMGroupPolicyGlobalSettings -Connection $db -Verbose -IdSite $conf.IdSite
+
+# Get-WEMGroupPolicyGlobalSettings -> CAREFUL! These are not visible in WEM Admin Console 1906. I don't know where they are used
+$configGroupPolicyGlobalSettings = Get-WEMGroupPolicyGlobalSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configGroupPolicyGlobalSettings | Format-Table -AutoSize
+
+# Set-WEMParameters
+$configParameters  = @{
+    AllowDriveLetterReuse  = 1
+    excludedDriveletters   = "A;B;C;D;E;F"
+    Test = "dummy"
+}
+Set-WEMParameters -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configParameters
+
+# Reset-WEMParameters
+Reset-WEMParameters -Connection $db -Verbose -IdSite $conf.IdSite
+
+# Get-WEMParameters
+$configParameters = Get-WEMParameters -Connection $db -Verbose -IdSite $conf.IdSite
+$configParameters | Format-Table -AutoSize
+
+# Set-WEMSystemMonitoringSettings
+$configSystemMonitoringSettings  = @{
+    EnableWorkDaysFiltering  = 0
+    WorkDaysFilter   = "0;0;0;0;0;1;1"
+    Test = "dummy"
+}
+Set-WEMSystemMonitoringSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configSystemMonitoringSettings
+
+# Reset-WEMSystemMonitoringSettings
+Reset-WEMSystemMonitoringSettings -Connection $db -Verbose -IdSite $conf.IdSite
+
+# Get-WEMSystemMonitoringSettings
+$configSystemMonitoringSettings = Get-WEMSystemMonitoringSettings -Connection $db -Verbose -IdSite $conf.IdSite
+$configSystemMonitoringSettings | Format-Table -AutoSize
+
 #endregion
 
 $allActions | Select-Object IdAction, IdSite, Category, Name, DisplayName, Description, State, Type, ActionType | Format-Table

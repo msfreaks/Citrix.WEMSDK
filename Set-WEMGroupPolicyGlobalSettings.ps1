@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM UPM Settings object in the WEM Database.
+    Updates a WEM GroupPolicy Global Settings object in the WEM Database.
 
     .Description
-    Updates a WEM UPM Settings object in the WEM Database.
+    Updates a WEM GroupPolicy Global Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -23,7 +23,7 @@
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Set-WEMUPMSettings {
+function Set-WEMGroupPolicyGlobalSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
@@ -54,7 +54,7 @@ function Set-WEMUPMSettings {
 
         # if a Parameters object was passed, set variables and MyInvocation to these values
         $Parameters.Keys | ForEach-Object {
-            if ($configurationSettings[$script:databaseSchema].UPMValues -match "'$($_)'") {
+            if ($configurationSettings[$script:databaseSchema].GroupPolicyGlobalSettingsValues -match "'$($_)'") {
                 if(Get-Variable -Name $_ -ErrorAction SilentlyContinue) { 
                     Write-Verbose "Setting $($_) variable using $($_) value from parameter object to override single parameter"
                     Set-Variable -Name $_ -Value $Parameters.$_
@@ -69,33 +69,35 @@ function Set-WEMUPMSettings {
         }
 
         # process all parameters
-        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $configurationSettings[$script:databaseSchema].UPMValues -match "'$($_)'" }
+        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $configurationSettings[$script:databaseSchema].GroupPolicyGlobalSettingsValues -match "'$($_)'" }
 
         foreach($key in $keys) {
             # build query for each valid parameter
             $value = (Get-Variable -Name $key).Value
-            $SQLQuery = "UPDATE VUEMUPMSettings SET Value = '$($value)', RevisionId = RevisionId + 1 WHERE Name = '$($key)' AND IdSite = $($IdSite)"
+            $SQLQuery = "UPDATE GroupPolicyGlobalSettings SET Value = $($value), RevisionId = RevisionId + 1 WHERE Name = '$($key)' AND IdSite = $($IdSite)"
 
             # execute the query
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
+            # 1906 has no ChangeLogging on GroupPolicyGlobal settings!
+
             # grab the updated object
-            $SQLQuery = "SELECT * FROM VUEMUPMSettings WHERE IdSite = $($IdSite) AND Name = '$($key)'"
-            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+            #$SQLQuery = "SELECT * FROM GroupPolicyGlobalSettings WHERE IdSite = $($IdSite) AND Name = '$($key)'"
+            #$result = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
             # Updating the ChangeLog
-            $IdObject = $result.Tables.Rows.IdItem
-            New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Update" -ObjectName $key -ObjectType "Policies and Profiles\Citrix UPM Settings" -NewValue $value -ChangeDescription $null -Reserved01 $null 
+            #$IdObject = $result.Tables.Rows.IdSetting
+            #New-ChangesLogEntry -Connection $Connection -IdSite $IdSite -IdElement $IdObject -ChangeType "Update" -ObjectName $key -ObjectType "Advanced Settings\Setting" -NewValue $value -ChangeDescription $null -Reserved01 $null 
         }
     }
 }
 
 <#
     .Synopsis
-    Resets a WEM UPM Settings object in the WEM Database.
+    Resets a WEM AppLocker Settings object in the WEM Database.
 
     .Description
-    Resets a WEM UPM Settings object in the WEM Database.
+    Resets a WEM AppLocker Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -112,7 +114,7 @@ function Set-WEMUPMSettings {
     Author:  Arjan Mensch
     Version: 0.9.0
 #>
-function Reset-WEMUPMSettings {
+function Reset-WEMGroupPolicyGlobalSettings {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
@@ -128,12 +130,12 @@ function Reset-WEMUPMSettings {
 
         # create a settings object and fill it using defaults
         $parameterObject = @{}
-        foreach($key in $configurationSettings[$script:databaseSchema].UPMValues) {
+        foreach($key in $configurationSettings[$script:databaseSchema].GroupPolicyGlobalSettingsValues) {
             $fields = $key.Replace("(","").Replace(")","").Replace(" ","").Split(",")
-            $parameterObject.($fields[1].Substring(1,$fields[1].Length-2)) = $fields[2].Substring(1,$fields[2].Length-2)
+            $parameterObject.($fields[1].Substring(1,$fields[1].Length-2)) = $fields[2]
         }
 
         # use the Set- function and pass the complete default settings object
-        Set-WEMUPMSettings -Connection $Connection -IdSite $IdSite -Parameters $parameterObject
+        Set-WEMGroupPolicyGlobalSettings -Connection $Connection -IdSite $IdSite -Parameters $parameterObject
     }
 }
