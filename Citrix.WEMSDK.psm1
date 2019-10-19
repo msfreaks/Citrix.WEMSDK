@@ -1048,6 +1048,48 @@ Function New-VUEMFileSystemOpObject() {
 
 <#
     .Synopsis
+    Converts SQL Data to a Filter Condition object
+
+    .Description
+    Converts SQL Data to a Filter Condition object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMStorefrontSettingObject() {
+    param(
+        [System.Data.DataRow]$DataRow
+    )
+
+    Write-Verbose "Found Storefront Setting object '$($DataRow.Url)' in IdSite $($DataRow.IdSite)"
+
+    $vuemObject = [pscustomobject] @{
+        'IdStorefrontSetting' = [int]$DataRow.IdItem
+        'IdSite'              = [int]$DataRow.IdSite
+        'StorefrontUrl'       = [string]$DataRow.Url
+        'Description'         = [string]$DataRow.Description
+        'State'               = [string]$tableVUEMState[[int]$DataRow.State]
+        'Version'             = [int]$DataRow.RevisionId
+    }
+    # override the default ToScript() method
+    Add-Member -InputObject $vuemObject ScriptMethod ToString { $this.StorefrontUrl } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.StorefrontSetting")
+
+    return $vuemObject
+}
+
+<#
+    .Synopsis
     Converts SQL Data to a User DSN Action object
 
     .Description

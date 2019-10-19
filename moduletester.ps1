@@ -952,6 +952,27 @@ $allAgentObjects | Where-Object { $_.Type -eq "Computer" } | Remove-WEMADAgentOb
 $allAgentObjects = $conf | Get-WEMADAgentObject -Connection $db -Verbose
 #endregion
 
+#region WEMStorefrontSetting
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
+
+# New-WEMStorefrontSetting
+$conf | New-WEMStorefrontSetting -Connection $db -Verbose -StorefrontUrl "https://store-internal.it-worxx.local/"
+$conf | New-WEMStorefrontSetting -Connection $db -Verbose -StorefrontUrl "https://store-external.it-worxx.nl/"
+$conf | New-WEMStorefrontSetting -Connection $db -Verbose -StorefrontUrl "dummy url" -State Disabled
+
+# Get-WEMStorefrontSetting
+$allStorefrontSettings = $conf | Get-WEMStorefrontSetting -Connection $db -Verbose
+$allStorefrontSettings | Format-Table
+
+# Set-WEMStorefrontSetting
+$allStorefrontSettings | Set-WEMStorefrontSetting -Connection $db -Verbose -Description "Set-WEMStorefrontSetting"
+
+# Remove-WEMStorefrontSetting
+$allStorefrontSettings | Where-Object { $_.StorefrontUrl -like "dummy*" } | Remove-WEMStorefrontSetting -Connection $db -Verbose
+
+$allStorefrontSettings = $conf | Get-WEMStorefrontSetting -Connection $db -Verbose
+#endregion
+
 #region WEMAdministrator
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
