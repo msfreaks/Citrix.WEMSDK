@@ -34,6 +34,7 @@ Get-WEMPrinterAssignment
 Get-WEMRegistryEntry
 Get-WEMRegistryEntryAssignment
 Get-WEMRule
+Get-WEMStorefrontSetting
 Get-WEMSystemMonitoringSettings
 Get-WEMSystemOptimization
 Get-WEMTransformerSettings
@@ -73,6 +74,7 @@ New-WEMPrinterAssignment
 New-WEMRegistryEntry
 New-WEMRegistryEntryAssignment
 New-WEMRule
+New-WEMStorefrontSetting
 New-WEMUserDSN
 New-WEMUserDSNAssignment
 New-WEMVirtualDrive
@@ -107,6 +109,7 @@ Remove-WEMPrinterAssignment
 Remove-WEMRegistryEntry
 Remove-WEMRegistryEntryAssignment
 Remove-WEMRule
+Remove-WEMStorefrontSetting
 Remove-WEMUserDSN
 Remove-WEMUserDSNAssignment
 Remove-WEMVirtualDrive
@@ -148,6 +151,7 @@ Set-WEMNetworkDrive
 Set-WEMNetworkDriveAssignment
 Set-WEMParameters
 Set-WEMPersonaSettings
+Set-WEMStorefrontSetting
 Set-WEMPort
 Set-WEMPortAssignment
 Set-WEMPrinter
