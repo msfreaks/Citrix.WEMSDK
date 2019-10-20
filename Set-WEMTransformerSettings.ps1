@@ -131,7 +131,7 @@ function Reset-WEMTransformerSettings {
         $parameterObject = @{}
         foreach($key in $configurationSettings[$script:databaseSchema].KioskValues) {
             $fields = $key.Replace("(","").Replace(")","").Replace(" ","").Split(",")
-            $parameterObject.($fields[1].Substring(1,$fields[1].Length-2)) = $fields[3].Substring(1,$fields[3].Length-2)
+            $parameterObject.($fields[1].Replace("'","")) = $fields[3].Replace("'","")
         }
 
         # use the Set- function and pass the complete default settings object

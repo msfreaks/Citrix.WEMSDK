@@ -132,7 +132,7 @@ function Reset-WEMAppLockerSettings {
         $parameterObject = @{}
         foreach($key in $configurationSettings[$script:databaseSchema].ApplockerValues) {
             $fields = $key.Replace("(","").Replace(")","").Replace(" ","").Split(",")
-            $parameterObject.($fields[4].Substring(1,$fields[4].Length-2)) = $fields[3]
+            $parameterObject.($fields[4].Replace("'","")) = $fields[3]
         }
 
         # use the Set- function and pass the complete default settings object

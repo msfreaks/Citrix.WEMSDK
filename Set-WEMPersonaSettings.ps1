@@ -130,7 +130,7 @@ function Reset-WEMPersonaSettings {
         $parameterObject = @{}
         foreach($key in $configurationSettings[$script:databaseSchema].PersonaValues) {
             $fields = $key.Replace("(","").Replace(")","").Replace(" ","").Split(",")
-            $parameterObject.($fields[1].Substring(1,$fields[1].Length-2)) = $fields[2].Substring(1,$fields[2].Length-2)
+            $parameterObject.($fields[1].Replace("'","")) = $fields[2].Replace("'","")
         }
 
         # use the Set- function and pass the complete default settings object

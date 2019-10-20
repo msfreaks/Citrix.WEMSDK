@@ -1788,7 +1788,7 @@ $tableVUEMActionCategory = @{
     "File System Operation" = "FileSystemOps"
     "User DSN"              = "UserDSNs"
     "File Association"      = "FileAssocs"
-    "Action Groups"          = "ActionGroups"
+    "Action Groups"         = "ActionGroups"
 }
 $tableVUEMActionCategoryId = @{
     "Application"           = "IdApplication"
@@ -1803,7 +1803,7 @@ $tableVUEMActionCategoryId = @{
     "File System Operation" = "IdFileSystemOp"
     "User DSN"              = "IdUserDSN"
     "File Association"      = "IdFileAssoc"
-    "Action Groups"          = "IdActionGroup"
+    "Action Groups"         = "IdActionGroup"
 }
 $tableVUEMActionType = @{
     0  = "Application"
