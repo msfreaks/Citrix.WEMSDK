@@ -42,8 +42,8 @@ $share3         = "\\$($fileServer)\home"       # used for DriveShare 3 -> HomeD
 $share4         = "\\$($fileServer)\test"       # used for DriveShare 4 -> Test Share which gets deleted
 
 # this only works if the ActiveDirectory Module is present
-$SID1 = (Get-ADUser "arjan").SID.ToString()                # used for ADObjects creation and assignment tests
-$SID2 = (Get-ADUser "itwadmin").SID.ToString()            # used for ADObjects creation
+$SID1 = (Get-ADUser "arjan").SID.ToString()                 # used for ADObjects creation and assignment tests
+$SID2 = (Get-ADUser "itwadmin").SID.ToString()              # used for ADObjects creation
 $SID3 = (Get-ADGroup "Domain Users").SID.ToString()         # used for ADObjects creation and to modify assignments
 $SID4 = (Get-ADGroup "Domain Admins").SID.ToString()        # used for ADObjects tests
 $SID5 = (Get-ADGroup "Enterprise Admins").SID.ToString()    # used for ADObjects tests
@@ -1002,6 +1002,48 @@ $allAdministrators = Get-WEMAdministrator -Connection $db -Verbose
 
 #endregion
 
+#region WEMApplockerRule
+$conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
+
+$conditionFile = "C:\windows\explorer.exe"
+$conditionFileInfo = Get-ChildItem -Path $conditionFile
+$conditionFileAuthentiCode = Get-AuthenticodeSignature -FilePath $conditionFile
+$exceptionFile = "C:\windows\notepad.exe"
+$exceptionFileInfo = Get-ChildItem -Path $exceptionFile
+$exceptionFileAuthentiCode = Get-AuthenticodeSignature -FilePath $exceptionFile
+
+$adobjectid = (Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID1).IdADObject
+$adobjectids = @($adobjectid)
+
+# New-WEMAppLockerRuleConditionObject
+$conditionHash = New-WEMAppLockerRuleConditionObject -Verbose -Path "c:\windows" -HashCondition -ConditionPurpose "Executable"
+$conditionPath = New-WEMAppLockerRuleConditionObject -Verbose -Path "c:\windows" -PathCondition
+$conditionPublisher = New-WEMAppLockerRuleConditionObject -Verbose -Path $conditionFile -PublisherCondition -Publisher $conditionFileAuthentiCode.SignerCertificate.Subject -Product $conditionFileInfo.VersionInfo.ProductName -LowSection $conditionFileInfo.VersionInfo.ProductVersion
+$conditionHashException = New-WEMAppLockerRuleConditionObject -Verbose -Path $exceptionFile -HashCondition -ConditionPurpose "Executable"
+$conditionPathException = New-WEMAppLockerRuleConditionObject -Verbose -Path $exceptionFile -PathCondition
+$conditionPublisherException = New-WEMAppLockerRuleConditionObject -Verbose -Path $exceptionFile -PublisherCondition -Publisher $exceptionFileAuthentiCode.SignerCertificate.Subject -Product $exceptionFileInfo.VersionInfo.ProductName -LowSection $exceptionFileInfo.VersionInfo.ProductVersion
+
+# New-WEMAppLockerRule
+New-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule 1" -Type "Executable" -ConditionObject $conditionHash -IdADObjects $adobjectids -Permission "Allow"
+New-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule 2" -Type "Executable" -ConditionObject $conditionPath -IdADObjects $adobjectids -Permission "Allow"
+New-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule 3" -Type "Executable" -ConditionObject $conditionPublisher -IdADObjects $adobjectids -Permission "Allow"
+New-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule 4" -Type "Executable" -ConditionObject $conditionPath -IdADObjects $adobjectids -Permission "Deny" -ExceptionObjects @($conditionHashException, $conditionPathException, $conditionPublisherException)
+New-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule Test" -Type "Executable" -ConditionObject $conditionPath -IdADObjects $adobjectids -Permission "Deny" -ExceptionObjects @($conditionHashException, $conditionPathException, $conditionPublisherException)
+
+# Get-WEMAppLockerRule
+$allAppLockerRules = $conf | Get-WEMAppLockerRule -Connection $db -Verbose
+$allAppLockerRules | Format-Table
+
+# Set-WEMAppLockerRule
+
+# Remove-WEMAppLockerRule
+$ruleToRemove = Get-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule Test"
+Remove-WEMAppLockerRule -Connection $db -Verbose -IdAppLockerRule $ruleToRemove.IdRule
+
+$allAppLockerRules = $conf | Get-WEMAppLockerRule -Connection $db -Verbose
+
+#endregion
+
 #region Configuration Settings
 $conf = Get-WEMConfiguration -Connection $db -Verbose -Name "$($configname)"
 
@@ -1193,6 +1235,8 @@ $allAssignments | Format-Table
 $allAgentObjects | Format-Table
 
 $allAdministrators | Format-Table
+
+$allAppLockerRules | Format-Table
 
 # Cleanup
 $db.Dispose()

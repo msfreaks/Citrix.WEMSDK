@@ -68,6 +68,12 @@ function Invoke-SQL {
                 Write-Verbose "Updated"
                 continue
             }
+            "EXEC" {
+                $rowsAffected = $Command.ExecuteNonQuery()
+
+                Write-Verbose "Executed"
+                continue
+            }
         }
 
         $Command.Dispose()
@@ -484,6 +490,154 @@ Function New-VUEMApplicationObject() {
     $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
     # set a custom type to the object
     $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.Application")
+
+    return $vuemObject
+}
+
+<#
+    .Synopsis
+    Converts SQL Data to an AppLocker Rule object
+
+    .Description
+    Converts SQL Data to an AppLocker Rule object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMAppLockerRule() {
+    param(
+        [System.Data.DataRow]$DataRow,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    Write-Verbose "Found AppLocker Rule object '$($DataRow.Name)' in IdSite $($DataRow.IdSite)"
+
+    $vuemAppLockerRuleConditions = @()
+    $vuemAppLockerRuleConditions = Get-WEMAppLockerRuleConditionObject -Connection $Connection -IdRule $DataRow.IdRule
+    $vuemAppLockerRuleAssignments = @()
+    $vuemAppLockerRuleAssignments = Get-WEMAppLockerRuleAssignment -Connection $Connection -IdRule $DataRow.IdRule
+
+    $vuemObject = [pscustomobject] @{
+        'IdRule'         = [int]$DataRow.IdRule
+        'IdSite'         = [int]$DataRow.IdSite
+        'Name'           = [string]$DataRow.Name
+        'Description'    = [string]$DataRow.Description
+        'CollectionType' = [string]$tableVUEMAppLockerCollectionType[[int]$DataRow.CollectionType]
+        'RuleType'       = [string]$tableVUEMAppLockerRuleType[[int]$DataRow.RuleType]
+        'Permission'     = [string]$tableVUEMAppLockerRulePermission[[int]$DataRow.State]
+        'Condition'      = $vuemAppLockerRuleConditions | Where-Object {-not ($_.IsException)}
+        'Exceptions'     = $vuemAppLockerRuleConditions | Where-Object { $_.IsException }
+        'Assignments'    = $vuemAppLockerRuleAssignments
+        'Version'        = [int]$DataRow.RevisionId
+    }
+    foreach($condition in $vuemObject.Condition) { $condition.PSObject.Properties.Remove('IsException') }
+    foreach($condition in $vuemObject.Exceptions) { $condition.PSObject.Properties.Remove('IsException') }
+
+    # override the default ToScript() method
+    $vuemObject | Add-Member ScriptMethod ToString { $this.Name } -Force
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.AppLockerRule")
+
+    return $vuemObject
+}
+
+<#
+    .Synopsis
+    Converts SQL Data to a AppLocker Rule Condition object
+
+    .Description
+    Converts SQL Data to a AppLocker Rule Condition object
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter DataRow
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author:  Arjan Mensch
+    Version: 0.9.0
+#>
+Function New-VUEMAppLockerRuleCondition() {
+    param(
+        [string]$Type,
+        [System.Data.DataRow]$DataRow,
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    Write-Verbose "Found Condition object '$($DataRow.IdCondition)' for IdRule $($DataRow.IdRule)"
+
+    $vuemObject = [pscustomobject] @{
+        'IdCondition' = [int]$DataRow.IdCondition
+        'Type'        = $Type
+        'Version'     = [int]$DataRow.RevisionId
+        'IsException' = [bool]$DataRow.IsException
+    }
+
+    switch ($Type) {
+        "PathCondition" {
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "Path" -Value $DataRow.Path
+        }
+        "PublisherCondition" {
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "FilePath" -Value $DataRow.FilePath
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "FileName" -Value $DataRow.FileName
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "Publisher" -Value $DataRow.Publisher
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "Product" -Value $DataRow.Product
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "HighSection" -Value $DataRow.HighSection
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "LowSection" -Value $DataRow.LowSection
+        }
+        "HashCondition" {
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "Hashes" -Value @()
+
+            # grab hashes associated with this condition
+            $SQLQuery = "SELECT * FROM AppLockerRuleFileHashes WHERE IdCondition = $($DataRow.IdCondition)"
+            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+            foreach ($row in $result.Tables.Rows) { 
+                $hashObject = [pscustomobject]@{
+                    HashAlgorithm = $row.HashAlgorithm
+                    Hash          = "0x$(($row.Hash | ForEach-Object ToString X2) -join '')"
+                    FileLength    = $row.FileLength
+                    FileName      = $row.FileName
+                    Extension     = ([System.IO.Path]::GetExtension($row.FileName)).ToLower()
+                }
+                $hashObject | Add-Member scriptmethod ToString { $this.FileName } -Force
+                $hashObject.pstypenames.insert(0, "Citrix.WEMSDK.AppLockerRuleHashObject")
+
+                $vuemObject.Hashes += $hashObject
+            }
+            $conditionPurpose = $null
+            if ($vuemObject.Hashes -and @(".exe",".com") -contains $vuemObject.Hashes[0].Extension) { $conditionPublisherException = "Executable" }
+            if ($vuemObject.Hashes -and @(".msi",".msp",".mst") -contains $vuemObject.Hashes[0].Extension) { $conditionPublisherException = "Windows Installer" }
+            if ($vuemObject.Hashes -and @(".ps1",".bat",".cmd",".vbs",".js") -contains $vuemObject.Hashes[0].Extension) { $conditionPublisherException = "Scripts" }
+            if ($vuemObject.Hashes -and @(".dll",".ocx") -contains $vuemObject.Hashes[0].Extension) { $conditionPublisherException = "DLL" }
+
+            $vuemObject | Add-Member -MemberType NoteProperty -Name "Purpose" -Value $conditionPurpose
+        }
+        Default {}
+    }
+
+    # override the default ToScript() method
+    $vuemObject | Add-Member scriptmethod ToString { $this.Type } -Force
+    
+    # set a custom type to the object
+    $vuemObject.pstypenames.insert(0, "Citrix.WEMSDK.AppLockerRule$($Type)")
 
     return $vuemObject
 }
@@ -1456,8 +1610,8 @@ Function New-VUEMRule() {
 #region Module Global variables
 $configurationSettings = @{
     "4" = @{
-        "ApplockerFields"                 = "IdSite, State, RevisionId, Value, Setting"
-        "ApplockerValues"                 = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
+        "AppLockerFields"                 = "IdSite, State, RevisionId, Value, Setting"
+        "AppLockerValues"                 = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
         "AgentSettingsFields"             = "IdSite,Name,Value,State,RevisionId"
         "AgentSettingsValues"             = @("({0},'OfflineModeEnabled','0',1,1)", "({0},'UseCacheEvenIfOnline','0',1,1)", "({0},'processVUEMApps','0',1,1)", "({0},'processVUEMPrinters','0',1,1)", "({0},'processVUEMNetDrives','0',1,1)", "({0},'processVUEMVirtualDrives','0',1,1)", "({0},'processVUEMRegValues','0',1,1)", "({0},'processVUEMEnvVariables','0',1,1)", "({0},'processVUEMPorts','0',1,1)", "({0},'processVUEMIniFilesOps','0',1,1)", "({0},'processVUEMExtTasks','0',1,1)", "({0},'processVUEMFileSystemOps','0',1,1)", "({0},'processVUEMUserDSNs','0',1,1)", "({0},'processVUEMFileAssocs','0',1,1)", "({0},'UIAgentSplashScreenBackGround','',1,1)", "({0},'UIAgentLoadingCircleColor','',1,1)", "({0},'UIAgentLbl1TextColor','',1,1)", "({0},'UIAgentHelpLink','',1,1)", "({0},'AgentServiceDebugMode','0',1,1)", "({0},'LaunchVUEMAgentOnLogon','0',1,1)", "({0},'ProcessVUEMAgentLaunchForAdmins','0',1,1)", "({0},'LaunchVUEMAgentOnReconnect','0',1,1)", "({0},'EnableVirtualDesktopCompatibility','0',1,1)", "({0},'VUEMAgentType','UI',1,1)", "({0},'VUEMAgentDesktopsExtraLaunchDelay','0',1,1)", "({0},'VUEMAgentCacheRefreshDelay','30',1,1)", "({0},'VUEMAgentSQLSettingsRefreshDelay','15',1,1)", "({0},'DeleteDesktopShortcuts','0',1,1)", "({0},'DeleteStartMenuShortcuts','0',1,1)", "({0},'DeleteQuickLaunchShortcuts','0',1,1)", "({0},'DeleteNetworkDrives','0',1,1)", "({0},'DeleteNetworkPrinters','0',1,1)", "({0},'PreserveAutocreatedPrinters','0',1,1)", "({0},'PreserveSpecificPrinters','0',1,1)", "({0},'SpecificPreservedPrinters','PDFCreator;PDFMail;Acrobat Distiller;Amyuni',1,1)", "({0},'EnableAgentLogging','1',1,1)", "({0},'AgentLogFile','%USERPROFILE%\Citrix WEM Agent.log',1,1)", "({0},'AgentDebugMode','0',1,1)", "({0},'RefreshEnvironmentSettings','0',1,1)", "({0},'RefreshSystemSettings','0',1,1)", "({0},'RefreshDesktop','0',1,1)", "({0},'RefreshAppearance','0',1,1)", "({0},'AgentExitForAdminsOnly','1',1,1)", "({0},'AgentAllowUsersToManagePrinters','0',1,1)", "({0},'DeleteTaskBarPinnedShortcuts','0',1,1)", "({0},'DeleteStartMenuPinnedShortcuts','0',1,1)", "({0},'InitialEnvironmentCleanUp','0',1,1)", "({0},'aSyncVUEMAppsProcessing','0',1,1)", "({0},'aSyncVUEMPrintersProcessing','0',1,1)", "({0},'aSyncVUEMNetDrivesProcessing','0',1,1)", "({0},'aSyncVUEMVirtualDrivesProcessing','0',1,1)", "({0},'aSyncVUEMRegValuesProcessing','0',1,1)", "({0},'aSyncVUEMEnvVariablesProcessing','0',1,1)", "({0},'aSyncVUEMPortsProcessing','0',1,1)", "({0},'aSyncVUEMIniFilesOpsProcessing','0',1,1)", "({0},'aSyncVUEMExtTasksProcessing','0',1,1)", "({0},'aSyncVUEMFileSystemOpsProcessing','0',1,1)", "({0},'aSyncVUEMUserDSNsProcessing','0',1,1)", "({0},'aSyncVUEMFileAssocsProcessing','0',1,1)", "({0},'byPassie4uinitCheck','0',1,1)", "({0},'UIAgentCustomLink','',1,1)", "({0},'enforceProcessVUEMApps','0',1,1)", "({0},'enforceProcessVUEMPrinters','0',1,1)", "({0},'enforceProcessVUEMNetDrives','0',1,1)", "({0},'enforceProcessVUEMVirtualDrives','0',1,1)", "({0},'enforceProcessVUEMRegValues','0',1,1)", "({0},'enforceProcessVUEMEnvVariables','0',1,1)", "({0},'enforceProcessVUEMPorts','0',1,1)", "({0},'enforceProcessVUEMIniFilesOps','0',1,1)", "({0},'enforceProcessVUEMExtTasks','0',1,1)", "({0},'enforceProcessVUEMFileSystemOps','0',1,1)", "({0},'enforceProcessVUEMUserDSNs','0',1,1)", "({0},'enforceProcessVUEMFileAssocs','0',1,1)", "({0},'revertUnassignedVUEMApps','0',1,1)", "({0},'revertUnassignedVUEMPrinters','0',1,1)", "({0},'revertUnassignedVUEMNetDrives','0',1,1)", "({0},'revertUnassignedVUEMVirtualDrives','0',1,1)", "({0},'revertUnassignedVUEMRegValues','0',1,1)", "({0},'revertUnassignedVUEMEnvVariables','0',1,1)", "({0},'revertUnassignedVUEMPorts','0',1,1)", "({0},'revertUnassignedVUEMIniFilesOps','0',1,1)", "({0},'revertUnassignedVUEMExtTasks','0',1,1)", "({0},'revertUnassignedVUEMFileSystemOps','0',1,1)", "({0},'revertUnassignedVUEMUserDSNs','0',1,1)", "({0},'revertUnassignedVUEMFileAssocs','0',1,1)", "({0},'AgentLaunchExcludeGroups','0',1,1)", "({0},'AgentLaunchExcludedGroups','',1,1)", "({0},'InitialDesktopUICleaning','0',1,1)", "({0},'EnableUIAgentAutomaticRefresh','0',1,1)", "({0},'UIAgentAutomaticRefreshDelay','30',1,1)", "({0},'AgentAllowUsersToManageApplications','0',1,1)", "({0},'HideUIAgentIconInPublishedApplications','0',1,1)", "({0},'ExecuteOnlyCmdAgentInPublishedApplications','0',1,1)", "({0},'enforceVUEMAppsFiltersProcessing','0',1,1)", "({0},'enforceVUEMPrintersFiltersProcessing','0',1,1)", "({0},'enforceVUEMNetDrivesFiltersProcessing','0',1,1)", "({0},'enforceVUEMVirtualDrivesFiltersProcessing','0',1,1)", "({0},'enforceVUEMRegValuesFiltersProcessing','0',1,1)", "({0},'enforceVUEMEnvVariablesFiltersProcessing','0',1,1)", "({0},'enforceVUEMPortsFiltersProcessing','0',1,1)", "({0},'enforceVUEMIniFilesOpsFiltersProcessing','0',1,1)", "({0},'enforceVUEMExtTasksFiltersProcessing','0',1,1)", "({0},'enforceVUEMFileSystemOpsFiltersProcessing','0',1,1)", "({0},'enforceVUEMUserDSNsFiltersProcessing','0',1,1)", "({0},'enforceVUEMFileAssocsFiltersProcessing','0',1,1)", "({0},'checkAppShortcutExistence','0',1,1)", "({0},'appShortcutExpandEnvironmentVariables','0',1,1)", "({0},'RefreshOnEnvironmentalSettingChange','1',1,1)", "({0},'HideUIAgentSplashScreen','0',1,1)", "({0},'processVUEMAppsOnReconnect','0',1,1)", "({0},'processVUEMPrintersOnReconnect','0',1,1)", "({0},'processVUEMNetDrivesOnReconnect','0',1,1)", "({0},'processVUEMVirtualDrivesOnReconnect','0',1,1)", "({0},'processVUEMRegValuesOnReconnect','0',1,1)", "({0},'processVUEMEnvVariablesOnReconnect','0',1,1)", "({0},'processVUEMPortsOnReconnect','0',1,1)", "({0},'processVUEMIniFilesOpsOnReconnect','0',1,1)", "({0},'processVUEMExtTasksOnReconnect','0',1,1)", "({0},'processVUEMFileSystemOpsOnReconnect','0',1,1)", "({0},'processVUEMUserDSNsOnReconnect','0',1,1)", "({0},'processVUEMFileAssocsOnReconnect','0',1,1)", "({0},'AgentAllowScreenCapture','0',1,1)", "({0},'AgentScreenCaptureEnableSendSupportEmail','0',1,1)", "({0},'AgentScreenCaptureSupportEmailAddress','',1,1)", "({0},'AgentScreenCaptureSupportEmailTemplate','',1,1)", "({0},'AgentEnableApplicationsShortcuts','0',1,1)", "({0},'UIAgentSkinName','Seven',1,1)", "({0},'HideUIAgentSplashScreenInPublishedApplications','0',1,1)", "({0},'MailCustomSubject',NULL,1,1)", "({0},'MailEnableUseSMTP','0',1,1)", "({0},'MailEnableSMTPSSL','0',1,1)", "({0},'MailSMTPPort','0',1,1)", "({0},'MailSMTPServer','',1,1)", "({0},'MailSMTPFromAddress','',1,1)", "({0},'MailSMTPToAddress','',1,1)", "({0},'MailEnableUseSMTPCredentials','0',1,1)", "({0},'MailSMTPUser','',1,1)", "({0},'MailSMTPPassword','',1,1)", "({0},'HideUIAgentSplashScreenOnReconnect','0',1,1)", "({0},'AgentDirectoryServiceTimeoutValue','15000',1,1)", "({0},'AgentBrokerServiceTimeoutValue','15000',1,1)", "({0},'AgentMaxDegreeOfParallelism','0',1,1)", "({0},'AgentPreventExitForAdmins','0',1,1)", "({0},'AgentNetworkResourceCheckTimeoutValue','500',1,1)", "({0},'AgentEnableCrossDomainsUserGroupsSearch','0',1,1)", "({0},'AgentShutdownAfterIdleEnabled','0',1,1)", "({0},'AgentShutdownAfterIdleTime','1800',1,1)", "({0},'AgentShutdownAfterEnabled','0',1,1)", "({0},'AgentShutdownAfter','02:00',1,1)", "({0},'AgentSuspendInsteadOfShutdown','0',1,1)", "({0},'AgentLaunchIncludeGroups','0',1,1)", "({0},'AgentLaunchIncludedGroups','',1,1)", "({0},'DisableAdministrativeRefreshFeedback','0',1,1)")
         "EnvironmentalFields"             = "IdSite,Name,Type,Value,State,RevisionId"
@@ -1482,8 +1636,8 @@ $configurationSettings = @{
         "CleanupTables"                   = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","VUEMSites")
     }
     "1903" = @{ 
-        "ApplockerFields"                 = "IdSite, State, RevisionId, Value, Setting"
-        "ApplockerFieldsValues"           = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
+        "AppLockerFields"                 = "IdSite, State, RevisionId, Value, Setting"
+        "AppLockerFieldsValues"           = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
         "GroupPolicyGlobalSettingsFields" = "IdSite, Name, Value"
         "GroupPolicyGlobalSettingsValues" = @("({0}, 'EnableGroupPolicyEnforcement', '0')")
         "AgentSettingsFields"             = "IdSite,Name,Value,State,RevisionId"
@@ -1510,8 +1664,8 @@ $configurationSettings = @{
         "CleanupTables"                   = @("VUEMApps","VUEMPrinters","VUEMNetDrives","VUEMVirtualDrives","VUEMRegValues","VUEMEnvVariables","VUEMPorts","VUEMIniFilesOps","VUEMExtTasks","VUEMFileSystemOps","VUEMUserDSNs","VUEMFileAssocs","VUEMActionsGroups","VUEMFiltersRules","VUEMFiltersConditions","VUEMItems","VUEMUserStatistics","VUEMAgentStatistics","VUEMSystemMonitoringData","VUEMActivityMonitoringData","VUEMUserExperienceMonitoringData","VUEMResourcesOptimizationData","VUEMParameters","VUEMAgentSettings","VUEMSystemUtilities","VUEMEnvironmentalSettings","VUEMUPMSettings","VUEMPersonaSettings","VUEMUSVSettings","VUEMKioskSettings","VUEMSystemMonitoringSettings","VUEMTasks","VUEMStorefrontSettings","VUEMChangesLog","VUEMAgentsLog","VUEMADObjects","AppLockerSettings","GroupPolicyObjects","GroupPolicyGlobalSettings","VUEMSites")
     }
     "1906" = @{ 
-        "ApplockerFields"                 = "IdSite, State, RevisionId, Value, Setting"
-        "ApplockerValues"                 = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
+        "AppLockerFields"                 = "IdSite, State, RevisionId, Value, Setting"
+        "AppLockerValues"                 = @("({0}, 1, 1, 0, 'EnableProcessesAppLocker')", "({0}, 1, 1, 0, 'EnableDLLRuleCollection')", "({0}, 1, 1, 0, 'CollectionExeEnforcementState')", "({0}, 1, 1, 0, 'CollectionMsiEnforcementState')", "({0}, 1, 1, 0, 'CollectionScriptEnforcementState')", "({0}, 1, 1, 0, 'CollectionAppxEnforcementState')", "({0}, 1, 1, 0, 'CollectionDllEnforcementState')")
         "GroupPolicyGlobalSettingsFields" = "IdSite, Name, Value"
         "GroupPolicyGlobalSettingsValues" = @("({0}, 'EnableGroupPolicyEnforcement', '0')")
         "AgentSettingsFields"             = "IdSite,Name,Value,State,RevisionId"
@@ -1859,7 +2013,47 @@ $tableVUEMAdminPermissions = @{
     "Advanced Settings Manager"     = "AdvancedSettingsManager"
     "Security Manager"              = "SecurityManager"
 }
-
+$tableVUEMAppLockerChangeLogType = @{
+    "1.0" = "Exe - File"
+    "1.1" = "Exe - Publisher"
+    "1.2" = "Exe - Hash"
+    "2.0" = "Msi - File"
+    "2.1" = "Msi - Publisher"
+    "2.2" = "Msi - Hash"
+    "3.0" = "Scripts - File"
+    "3.1" = "Scripts - Publisher"
+    "3.2" = "Scripts - Hash"
+    "4.1" = "Appx - Publisher"
+    "5.0" = "Dll - File"
+    "5.1" = "Dll - Publisher"
+    "5.2" = "Dll - Hash"
+}
+$tableVUEMAppLockerCollectionType = @{
+    1 = "Executable"
+    2 = "Windows Installer"
+    3 = "Scripts"
+    4 = "Packaged"
+    5 = "DLL"
+    "Executable" = 1
+    "Windows Installer" = 2
+    "Scripts" = 3
+    "Packaged" = 4
+    "DLL" = 5
+}
+$tableVUEMAppLockerRuleType = @{
+    0 = "PathCondition"
+    1 = "PublisherCondition"
+    2 = "HashCondition"
+    "PathCondition" = 0
+    "PublisherCondition" = 1
+    "HashCondition" = 2
+}
+$tableVUEMAppLockerRulePermission = @{
+    0 = "Allow"
+    1 = "Deny"
+    "Allow" = 0
+    "Deny" = 1
+}
 $databaseVersion = ""
 $databaseSchema  = ""
 

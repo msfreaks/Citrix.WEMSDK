@@ -54,7 +54,7 @@ function Set-WEMAppLockerSettings {
 
         # if a Parameters object was passed, set variables and MyInvocation to these values
         $Parameters.Keys | ForEach-Object {
-            if ($configurationSettings[$script:databaseSchema].ApplockerValues -match "'$($_)'") {
+            if ($configurationSettings[$script:databaseSchema].AppLockerValues -match "'$($_)'") {
                 if(Get-Variable -Name $_ -ErrorAction SilentlyContinue) { 
                     Write-Verbose "Setting $($_) variable using $($_) value from parameter object to override single parameter"
                     Set-Variable -Name $_ -Value $Parameters.$_
@@ -69,7 +69,7 @@ function Set-WEMAppLockerSettings {
         }
 
         # process all parameters
-        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $configurationSettings[$script:databaseSchema].ApplockerValues -match "'$($_)'" }
+        $keys = $MyInvocation.BoundParameters.Keys | Where-Object { $configurationSettings[$script:databaseSchema].AppLockerValues -match "'$($_)'" }
 
         foreach($key in $keys) {
             # build query for each valid parameter
@@ -130,7 +130,7 @@ function Reset-WEMAppLockerSettings {
 
         # create a settings object and fill it using defaults
         $parameterObject = @{}
-        foreach($key in $configurationSettings[$script:databaseSchema].ApplockerValues) {
+        foreach($key in $configurationSettings[$script:databaseSchema].AppLockerValues) {
             $fields = $key.Replace("(","").Replace(")","").Replace(" ","").Split(",")
             $parameterObject.($fields[4].Replace("'","")) = $fields[3]
         }

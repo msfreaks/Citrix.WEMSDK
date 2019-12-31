@@ -100,8 +100,8 @@ function New-WEMConfiguration {
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # AppLockerSettings
-        if ($configurationSettings[$script:databaseSchema].ApplockerFields) {
-            $SQLQuery = ("INSERT INTO AppLockerSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].ApplockerFields, ($configurationSettings[$script:databaseSchema].ApplockerValues -join ", ")) -f $IdSite
+        if ($configurationSettings[$script:databaseSchema].AppLockerFields) {
+            $SQLQuery = ("INSERT INTO AppLockerSettings ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].AppLockerFields, ($configurationSettings[$script:databaseSchema].AppLockerValues -join ", ")) -f $IdSite
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
         }
 

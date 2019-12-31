@@ -94,10 +94,10 @@ function Set-WEMGroupPolicyGlobalSettings {
 
 <#
     .Synopsis
-    Resets a WEM AppLocker Settings object in the WEM Database.
+    Resets a WEM GroupPolicy Global Settings object in the WEM Database.
 
     .Description
-    Resets a WEM AppLocker Settings object in the WEM Database.
+    Resets a WEM GroupPolicy Global Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
