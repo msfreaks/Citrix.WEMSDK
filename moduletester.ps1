@@ -1,5 +1,5 @@
-$configname = "POSH 1909"
-$database   = "CitrixWEM1909"
+$configname = "POSH 1912"
+$database   = "CitrixWEM1912"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
 $db     = New-WEMDatabaseConnection -Server "ca002511\WEMLab" -Database "$($database)" -Verbose

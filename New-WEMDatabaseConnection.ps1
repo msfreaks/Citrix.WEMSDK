@@ -51,8 +51,11 @@ function New-WEMDatabaseConnection {
     $script:databaseVersion = $result.Tables.Rows.value
     $script:databaseSchema = $script:databaseVersion.Substring(0, $script:databaseVersion.IndexOf("."))
 
-    # 4.4.0.0, 1808.0.1.1, 1903.0.1.1, 1906.0.1.1, 1909.1.0.1
+    # 1903.0.1.1, 1906.0.1.1, 1909.1.0.1, 1912.1.0.1
     Write-Verbose "Database version $($script:databaseVersion) detected (schema $($script:databaseSchema))"
-    
+    if (-not $configurationSettings[$script:databaseSchema]) {
+        Write-Error "Connected to a database version with unsupported schema: $($script:databaseVersion) (schema $($script:databaseSchema))`nLatest supported schema version for this module: $($configurationSettings.Keys | Sort-Object -Descending | Select-Object -First 1)"
+        break
+    }
     return $connection
 }
