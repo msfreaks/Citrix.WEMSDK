@@ -26,7 +26,10 @@ function New-WEMAdministratorPermissionObject {
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
         [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)][ValidateSet("Full Access","Read Only","Actions Creator","Actions Manager","Filters Manager","Assigments Manager","System Utilities Manager","System Monitoring Manager","Policies and Profiles Manager","Configured User Manager","Transformer Manager","Advanced Settings Manager","Security Manager")]
-        [string]$Permission
+        [string]$Permission,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
     )
 
     process {

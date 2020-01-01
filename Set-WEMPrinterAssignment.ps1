@@ -68,9 +68,6 @@ function Set-WEMPrinterAssignment {
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'idrule') -and $IdRule -ne $origObject.Rule.IdRule) { $checkRule = $IdRule }
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'setasdefault') -and $SetAsDefault -ne ($origObject.AssignmentProperties -like "SetAsDefault")) { $checkProperties = $true }
 
-        $SetAsDefault
-        [bool]($origObject.AssignmentProperties -like "SetAsDefault")
-        $checkProperties
         # if a new ADObject or RuleObject for the object is entered, check if it's unique
         if ($checkADObject -or $checkRule) {
             $SQLQuery = "SELECT COUNT(*) AS ObjectCount FROM VUEMAssignedPrinters WHERE IdSite = $($origObject.IdSite) AND IdPrinter = $($origObject.IdAssignedObject)"

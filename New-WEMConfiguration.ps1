@@ -33,9 +33,6 @@ function New-WEMConfiguration {
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
     )
-    ### TODO
-    ### create new config based on template config?
-
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
@@ -55,7 +52,7 @@ function New-WEMConfiguration {
         Write-Verbose "Name is unique: Continue"
 
         # build and execute Insert query
-        $SQLQuery = "INSERT INTO VUEMSites (Name, Description, State, RevisionId) VALUES ('$($Name)', '$($Description)', 1, 1)"
+        $SQLQuery = "INSERT INTO VUEMSites ({0}) VALUES ({1})" -f $configurationSettings[$script:databaseSchema].SiteFields, ($configurationSettings[$script:databaseSchema].SiteValues -f $Name, $Description)
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the ID from the newly created record

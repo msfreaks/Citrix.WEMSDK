@@ -1,5 +1,5 @@
-$configname = "POSH 1906 v2"
-$database   = "CitrixWEM1906"
+$configname = "POSH 1909"
+$database   = "CitrixWEM1909"
 Remove-Module Citrix.WEMSDK -ErrorAction SilentlyContinue
 Import-Module .\Citrix.WEMSDK.psd1
 $db     = New-WEMDatabaseConnection -Server "ca002511\WEMLab" -Database "$($database)" -Verbose
@@ -987,12 +987,12 @@ $allAdministrators | Format-Table
 # Set-WEMAdministrator
 $allAdministrators | Set-WEMAdministrator -Connection $db -Verbose -Description "Set-WEMAdministrator"
 
-$adminPermissions = New-WEMAdministratorPermissionObject -IdSite 1 -Permission "Read Only"
+$adminPermissions = New-WEMAdministratorPermissionObject -Connection $db -Verbose -IdSite 1 -Permission "Read Only"
 Set-WEMAdministrator -Connection $db -Verbose -Permissions $adminPermissions -IdAdministrator $wemAdmin.IdAdministrator
 $wemAdmin = Get-WEMAdministrator -Connection $db -Verbose -IdAdministrator $wemAdmin.IdAdministrator
 $adminPermissions = @()
 $adminPermissions += $wemAdmin.Permissions
-$adminPermissions += New-WEMAdministratorPermissionObject -IdSite $conf.IdSite -Permission "Full Access"
+$adminPermissions += New-WEMAdministratorPermissionObject -Connection $db -Verbose -IdSite $conf.IdSite -Permission "Full Access"
 Set-WEMAdministrator -Connection $db -Verbose -Permissions $adminPermissions -IdAdministrator $wemAdmin.IdAdministrator
 
 # Remove-WEMAdministrator
@@ -1180,10 +1180,10 @@ $configAppLockerSettings  = @{
 }
 Set-WEMAppLockerSettings -Connection $db -Verbose -IdSite $conf.IdSite -Parameters $configAppLockerSettings
 
-# Reset-WEMAgentSettings
+# Reset-WEMAppLockerSettings
 Reset-WEMAppLockerSettings -Connection $db -Verbose -IdSite $conf.IdSite
 
-# Get-WEMAgentSettings
+# Get-WEMLockerSettings
 $configAppLockerSettings = Get-WEMAppLockerSettings -Connection $db -Verbose -IdSite $conf.IdSite
 $configAppLockerSettings | Format-Table -AutoSize
 
