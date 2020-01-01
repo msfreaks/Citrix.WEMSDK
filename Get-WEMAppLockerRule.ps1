@@ -8,7 +8,7 @@ Long description
 .PARAMETER IdSite
 Parameter description
 
-.PARAMETER IdAppLockerRule
+.PARAMETER IdRule
 Parameter description
 
 .PARAMETER AppLockerRuleGuid
@@ -33,7 +33,7 @@ function Get-WEMAppLockerRule {
         [int]$IdSite,
 
         [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
-        [int]$IdAppLockerRule,
+        [int]$IdRule,
         [Parameter(Mandatory=$False,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
         [string]$AppLockerRuleGuid,
         [Parameter(Mandatory=$False, ValueFromPipeline=$True)]
@@ -47,14 +47,14 @@ function Get-WEMAppLockerRule {
 
         # build query
         $SQLQuery = "SELECT * FROM AppLockerRules"
-        if ($IdSite -or $Name -or $IdAppLockerRule) {
+        if ($IdSite -or $Name -or $IdRule) {
             $SQLQuery += " WHERE "
             if ($IdSite) { 
                 $SQLQuery += "IdSite = $($IdSite)"
-                if ($IdAppLockerRule -or $AppLockerRuleGuid -or $Name) { $SQLQuery += " AND " }
+                if ($IdRule -or $AppLockerRuleGuid -or $Name) { $SQLQuery += " AND " }
             }
-            if ($IdAppLockerRule) {
-                $SQLQuery += "IdRule = $($IdAppLockerRule)"
+            if ($IdRule) {
+                $SQLQuery += "IdRule = $($IdRule)"
                 if ($AppLockerRuleGuid -or $Name) { $SQLQuery += " AND " }
             }
             if ($AppLockerRuleGuid) { 

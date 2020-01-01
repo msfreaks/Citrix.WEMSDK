@@ -1035,10 +1035,23 @@ $allAppLockerRules = $conf | Get-WEMAppLockerRule -Connection $db -Verbose
 $allAppLockerRules | Format-Table
 
 # Set-WEMAppLockerRule
+$appLockerRule = Get-WEMAppLockerRule -Connection $db -Verbose -Name "POSH Rule Test"
+# rename and permission change
+$appLockerRule | Set-WEMAppLockerRule -Connection $db -Verbose -Name "POSH Rule Test renamed" -Permission "Allow"
+# update exceptions
+$appLockerRuleExceptions = $appLockerRule.Exceptions | Where-Object { $_.Type -ne "PublisherCondition" }
+$appLockerRule | Set-WEMAppLockerRule -Connection $db -Verbose -ExceptionObjects $appLockerRuleExceptions
+# remove exceptions
+$appLockerRule | Set-WEMAppLockerRule -Connection $db -Verbose -ExceptionObjects $null
+# update condition
+$appLockerRule | Set-WEMAppLockerRule -Connection $db -Verbose -ConditionObject $conditionPathException
+# update assignments
+$adobjectids = @((Get-WEMADUserObject -Connection $db -IdSite $conf.IdSite -Name $SID3).IdADObject)
+$appLockerRule | Set-WEMAppLockerRule -Connection $db -Verbose -IdADObjects $adobjectids
 
 # Remove-WEMAppLockerRule
-$ruleToRemove = Get-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule Test"
-Remove-WEMAppLockerRule -Connection $db -Verbose -IdAppLockerRule $ruleToRemove.IdRule
+$ruleToRemove = Get-WEMAppLockerRule -Connection $db -Verbose -IdSite $conf.IdSite -Name "POSH Rule Test renamed"
+Remove-WEMAppLockerRule -Connection $db -Verbose -IdRule $ruleToRemove.IdRule
 
 $allAppLockerRules = $conf | Get-WEMAppLockerRule -Connection $db -Verbose
 

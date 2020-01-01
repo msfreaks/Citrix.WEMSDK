@@ -8,7 +8,7 @@ Long description
 .PARAMETER IdSite
 Parameter description
 
-.PARAMETER IdAppLockerRule
+.PARAMETER IdRule
 Parameter description
 
 .PARAMETER Connection
@@ -24,7 +24,7 @@ function Remove-WEMAppLockerRule {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
-        [int]$IdAppLockerRule,
+        [int]$IdRule,
 
         [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
@@ -33,13 +33,13 @@ function Remove-WEMAppLockerRule {
         Write-Verbose "Working with database version $($script:databaseVersion)"
 
         # grab the object to delete
-        $rule = Get-WEMAppLockerRule -Connection $Connection -IdAppLockerRule $IdAppLockerRule
+        $rule = Get-WEMAppLockerRule -Connection $Connection -IdRule $IdRule
 
         # build query
-        $SQLQuery = "EXEC DeleteAppLockerRule @IdRule=$($IdAppLockerRule)"
+        $SQLQuery = "EXEC DeleteAppLockerRule @IdRule=$($IdRule)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # Updating the ChangeLog
-        New-ChangesLogEntry -Connection $Connection -IdSite $rule.IdSite -IdElement $IdAppLockerRule -ChangeType "Delete" -ObjectName $vuemAppLockerRule.Name -ObjectType "AppLocker Rule" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+        New-ChangesLogEntry -Connection $Connection -IdSite $rule.IdSite -IdElement $IdRule -ChangeType "Delete" -ObjectName $vuemAppLockerRule.Name -ObjectType "AppLocker Rule" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
     }
 }
