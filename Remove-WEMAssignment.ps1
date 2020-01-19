@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Assignment object from the WEM Database.
+    Removes a Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Assignment object from the WEM Database.
+    Removes a Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMAssignment {
     [CmdletBinding()]
@@ -61,10 +60,10 @@ function Remove-WEMAssignment {
 
 <#
     .Synopsis
-    Removes a WEM Action Group Assignment object from the WEM Database.
+    Removes a Action Group Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Action Group Assignment object from the WEM Database.
+    Removes a Action Group Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -78,8 +77,7 @@ function Remove-WEMAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMActionGroupAssignment {
     [CmdletBinding()]
@@ -99,10 +97,10 @@ function Remove-WEMActionGroupAssignment {
 
 <#
     .Synopsis
-    Removes a WEM Application Assignment object from the WEM Database.
+    Removes a Application Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Application Assignment object from the WEM Database.
+    Removes a Application Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -116,8 +114,7 @@ function Remove-WEMActionGroupAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMApplicationAssignment {
     [CmdletBinding()]
@@ -138,10 +135,10 @@ New-Alias -Name Remove-WEMAppAssignment -Value Remove-WEMApplicationAssignment
 
 <#
     .Synopsis
-    Removes a WEM Printer Assignment object from the WEM Database.
+    Removes a Printer Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Printer Assignment object from the WEM Database.
+    Removes a Printer Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -155,8 +152,7 @@ New-Alias -Name Remove-WEMAppAssignment -Value Remove-WEMApplicationAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMPrinterAssignment {
     [CmdletBinding()]
@@ -176,10 +172,10 @@ function Remove-WEMPrinterAssignment {
 
 <#
     .Synopsis
-    Removes a WEM Network Drive Assignment object from the WEM Database.
+    Removes a Network Drive Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Network Drive Assignment object from the WEM Database.
+    Removes a Network Drive Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -193,8 +189,7 @@ function Remove-WEMPrinterAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMNetworkDriveAssignment {
     [CmdletBinding()]
@@ -215,10 +210,10 @@ New-Alias -Name Remove-WEMNetDriveAssignment -Value Remove-WEMNetworkDriveAssign
 
 <#
     .Synopsis
-    Removes a WEM Virtual Drive Assignment object from the WEM Database.
+    Removes a Virtual Drive Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Virtual Drive Assignment object from the WEM Database.
+    Removes a Virtual Drive Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -232,8 +227,7 @@ New-Alias -Name Remove-WEMNetDriveAssignment -Value Remove-WEMNetworkDriveAssign
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMVirtualDriveAssignment {
     [CmdletBinding()]
@@ -253,10 +247,10 @@ function Remove-WEMVirtualDriveAssignment {
 
 <#
     .Synopsis
-    Removes a WEM Registry Entry Assignment object from the WEM Database.
+    Removes a Registry Entry Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Registry Entry Assignment object from the WEM Database.
+    Removes a Registry Entry Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -270,8 +264,7 @@ function Remove-WEMVirtualDriveAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMRegistryEntryAssignment {
     [CmdletBinding()]
@@ -292,10 +285,10 @@ New-Alias -Name Remove-WEMRegValueAssignment -Value Remove-WEMRegistryEntryAssig
 
 <#
     .Synopsis
-    Removes a WEM Environment Variable Assignment object from the WEM Database.
+    Removes a Environment Variable Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Environment Variable Assignment object from the WEM Database.
+    Removes a Environment Variable Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -309,8 +302,7 @@ New-Alias -Name Remove-WEMRegValueAssignment -Value Remove-WEMRegistryEntryAssig
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMEnvironmentVariableAssignment {
     [CmdletBinding()]
@@ -331,10 +323,10 @@ New-Alias -Name Remove-WEMEnvVariableAssignment -Value Remove-WEMEnvironmentVari
 
 <#
     .Synopsis
-    Removes a WEM Port Assignment object from the WEM Database.
+    Removes a Port Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Port Assignment object from the WEM Database.
+    Removes a Port Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -348,8 +340,7 @@ New-Alias -Name Remove-WEMEnvVariableAssignment -Value Remove-WEMEnvironmentVari
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMPortAssignment {
     [CmdletBinding()]
@@ -369,10 +360,10 @@ function Remove-WEMPortAssignment {
 
 <#
     .Synopsis
-    Removes a WEM Ini File Operation Assignment object from the WEM Database.
+    Removes a Ini File Operation Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM Ini File Operation Assignment object from the WEM Database.
+    Removes a Ini File Operation Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -385,9 +376,6 @@ function Remove-WEMPortAssignment {
     
     .Example
 
-    .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
 #>
 function Remove-WEMIniFileOperationAssignment {
     [CmdletBinding()]
@@ -408,10 +396,10 @@ New-Alias -Name Remove-WEMIniFilesOpAssignment -Value Remove-WEMIniFileOperation
 
 <#
     .Synopsis
-    Removes a WEM External Task Assignment object from the WEM Database.
+    Removes a External Task Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM External Task Assignment object from the WEM Database.
+    Removes a External Task Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -425,8 +413,7 @@ New-Alias -Name Remove-WEMIniFilesOpAssignment -Value Remove-WEMIniFileOperation
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMExternalTaskAssignment {
     [CmdletBinding()]
@@ -447,10 +434,10 @@ New-Alias -Name Remove-WEMExtTaskAssignment -Value Remove-WEMExternalTaskAssignm
 
 <#
     .Synopsis
-    Removes a WEM File System Operation Assignment object from the WEM Database.
+    Removes a File System Operation Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM File System Operation Assignment object from the WEM Database.
+    Removes a File System Operation Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -464,8 +451,7 @@ New-Alias -Name Remove-WEMExtTaskAssignment -Value Remove-WEMExternalTaskAssignm
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMFileSystemOperationAssignment {
     [CmdletBinding()]
@@ -486,10 +472,10 @@ New-Alias -Name Remove-WEMFileSystemOpAssignment -Value Remove-WEMFileSystemOper
 
 <#
     .Synopsis
-    Removes a WEM User DSN Assignment object from the WEM Database.
+    Removes a User DSN Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM User DSN Assignment object from the WEM Database.
+    Removes a User DSN Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -503,8 +489,7 @@ New-Alias -Name Remove-WEMFileSystemOpAssignment -Value Remove-WEMFileSystemOper
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMUserDSNAssignment {
     [CmdletBinding()]
@@ -524,10 +509,10 @@ function Remove-WEMUserDSNAssignment {
 
 <#
     .Synopsis
-    Removes a WEM File Association Assignment object from the WEM Database.
+    Removes a File Association Assignment object from the WEM Database.
 
     .Description
-    Removes a WEM File Association Assignment object from the WEM Database.
+    Removes a File Association Assignment object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -541,8 +526,7 @@ function Remove-WEMUserDSNAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMFileAssociationAssignment {
     [CmdletBinding()]

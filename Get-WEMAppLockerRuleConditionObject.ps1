@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM AppLocker Rule Condition objects from the WEM Database.
+    Returns one or more AppLocker Rule Condition objects from the WEM Database.
 
     .Description
-    Returns one or more WEM AppLocker Rule Condition objects from the WEM Database.
+    Returns one or more AppLocker Rule Condition objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -14,14 +14,16 @@
     .Parameter IdCondition
     ..
 
+    .Parameter Type
+    ..
+
     .Parameter Connection
     ..
     
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMAppLockerRuleConditionObject {
     [CmdletBinding()]
@@ -55,6 +57,33 @@ function Get-WEMAppLockerRuleConditionObject {
     }
 }
 
+<#
+    .Synopsis
+    Helper function that returns one or more AppLocker Rule Condition objects from the WEM Database.
+
+    .Description
+    Helper function that returns one or more AppLocker Rule Condition objects from the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdRule
+    ..
+
+    .Parameter IdCondition
+    ..
+
+    .Parameter Type
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author: Arjan Mensch
+#>
 function Get-WEMAppLockerRuleConditionObjectByType {
     param (
         [int]$IdRule,

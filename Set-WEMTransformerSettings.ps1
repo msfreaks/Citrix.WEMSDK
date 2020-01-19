@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Transformer Settings object in the WEM Database.
+    Updates a Transformer Settings object in the WEM Database.
 
     .Description
-    Updates a WEM Transformer Settings object in the WEM Database.
+    Updates a Transformer Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMTransformerSettings {
     [CmdletBinding()]
@@ -93,10 +92,10 @@ New-Alias -Name Set-WEMKioskSettings -Value Set-WEMTransformerSettings
 
 <#
     .Synopsis
-    Resets a WEM Transformer Settings object in the WEM Database.
+    Resets a Transformer Settings object in the WEM Database.
 
     .Description
-    Resets a WEM Transformer Settings object in the WEM Database.
+    Resets a Transformer Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -110,8 +109,7 @@ New-Alias -Name Set-WEMKioskSettings -Value Set-WEMTransformerSettings
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMTransformerSettings {
     [CmdletBinding()]

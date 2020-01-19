@@ -1,24 +1,26 @@
 <#
-.SYNOPSIS
-Short description
+    .Synopsis
+    Removes a AppLocker Rule object from the WEM Database.
 
-.DESCRIPTION
-Long description
+    .Description
+    Removes a AppLocker Rule object from the WEM Database.
 
-.PARAMETER IdSite
-Parameter description
+    .Link
+    https://msfreaks.wordpress.com
 
-.PARAMETER IdRule
-Parameter description
+    .Parameter IdSite
+    ..
 
-.PARAMETER Connection
-Parameter description
+    .Parameter IdRule
+    ..
 
-.EXAMPLE
-An example
+    .Parameter Connection
+    ..
+    
+    .Example
 
-.NOTES
-General notes
+    .Notes
+    Author: Arjan Mensch
 #>
 function Remove-WEMAppLockerRule {
     [CmdletBinding()]

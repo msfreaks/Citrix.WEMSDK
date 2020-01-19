@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns a WEM Environmental Settings object from the WEM Database.
+    Returns a Environmental Settings object from the WEM Database.
 
     .Description
-    Returns a WEM Environmental Settings object from the WEM Database.
+    Returns a Environmental Settings object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -17,8 +17,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMEnvironmentalSettings {
     [CmdletBinding()]

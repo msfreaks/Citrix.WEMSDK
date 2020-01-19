@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM Storefront Setting objects from the WEM Database.
+    Returns one or more Storefront Setting objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Storefront Setting objects from the WEM Database.
+    Returns one or more Storefront Setting objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMStorefrontSetting {
     [CmdletBinding()]

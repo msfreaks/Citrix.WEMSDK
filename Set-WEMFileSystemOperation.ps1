@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM File System Operation Action object in the WEM Database.
+    Updates a File System Operation Action object in the WEM Database.
 
     .Description
-    Updates a WEM File System Operation object in the WEM Database.
+    Updates a File System Operation object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -41,8 +41,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMFileSystemOperation {
     [CmdletBinding()]

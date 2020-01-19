@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM Assignment objects from the WEM Database.
+    Returns one or more Assignment objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Assignment objects from the WEM Database.
+    Returns one or more Assignment objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -32,8 +32,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMAssignment {
     [CmdletBinding(DefaultParameterSetName="None")]
@@ -80,10 +79,10 @@ function Get-WEMAssignment {
 
 <#
     .Synopsis
-    Helper function that returns one or more WEM Action objects from the WEM Database.
+    Helper function that returns one or more Action objects from the WEM Database.
 
     .Description
-    Helper function that returns one or more WEM Action objects from the WEM Database.
+    Helper function that returns one or more Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -112,8 +111,7 @@ function Get-WEMAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMAssignmentsByType {
     param(
@@ -151,10 +149,10 @@ function Get-WEMAssignmentsByType {
 
 <#
     .Synopsis
-    Returns one or more WEM Action Group Assignment objects from the WEM Database based on Category.
+    Returns one or more Action Group Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Action Group Assignment objects from the WEM Database based on Category.
+    Returns one or more Action Group Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -177,8 +175,7 @@ function Get-WEMAssignmentsByType {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMActionGroupAssignment {
     [CmdletBinding()]
@@ -205,10 +202,10 @@ function Get-WEMActionGroupAssignment {
 
 <#
     .Synopsis
-    Returns one or more WEM Application Assignment objects from the WEM Database based on Category.
+    Returns one or more Application Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Application Assignment objects from the WEM Database based on Category.
+    Returns one or more Application Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -231,8 +228,7 @@ function Get-WEMActionGroupAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMApplicationAssignment {
     [CmdletBinding()]
@@ -260,10 +256,10 @@ New-Alias -Name Get-WEMAppAssignment -Value Get-WEMApplicationAssignment
 
 <#
     .Synopsis
-    Returns one or more WEM Printer Assignment objects from the WEM Database based on Category.
+    Returns one or more Printer Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Printer Assignment objects from the WEM Database based on Category.
+    Returns one or more Printer Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -286,8 +282,7 @@ New-Alias -Name Get-WEMAppAssignment -Value Get-WEMApplicationAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMPrinterAssignment {
     [CmdletBinding()]
@@ -314,10 +309,10 @@ function Get-WEMPrinterAssignment {
 
 <#
     .Synopsis
-    Returns one or more WEM Network Drive Assignment objects from the WEM Database based on Category.
+    Returns one or more Network Drive Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Network Drive Assignment objects from the WEM Database based on Category.
+    Returns one or more Network Drive Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -340,8 +335,7 @@ function Get-WEMPrinterAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMNetworkDriveAssignment {
     [CmdletBinding()]
@@ -369,10 +363,10 @@ New-Alias -Name Get-WEMNetDriveAssignment -Value Get-WEMNetworkDriveAssignment
 
 <#
     .Synopsis
-    Returns one or more WEM Virtual Drive Assignment objects from the WEM Database based on Category.
+    Returns one or more Virtual Drive Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Virtual Drive Assignment objects from the WEM Database based on Category.
+    Returns one or more Virtual Drive Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -395,8 +389,7 @@ New-Alias -Name Get-WEMNetDriveAssignment -Value Get-WEMNetworkDriveAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMVirtualDriveAssignment {
     [CmdletBinding()]
@@ -423,10 +416,10 @@ function Get-WEMVirtualDriveAssignment {
 
 <#
     .Synopsis
-    Returns one or more WEM Registry Entry Assignment objects from the WEM Database based on Category.
+    Returns one or more Registry Entry Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Registry Entry Assignment objects from the WEM Database based on Category.
+    Returns one or more Registry Entry Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -449,8 +442,7 @@ function Get-WEMVirtualDriveAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMRegistryEntryAssignment {
     [CmdletBinding()]
@@ -478,10 +470,10 @@ New-Alias -Name Get-WEMRegValueAssignment -Value Get-WEMRegistryEntryAssignment
 
 <#
     .Synopsis
-    Returns one or more WEM Environment Variable Assignment objects from the WEM Database based on Category.
+    Returns one or more Environment Variable Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Environment Variable Assignment objects from the WEM Database based on Category.
+    Returns one or more Environment Variable Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -504,8 +496,7 @@ New-Alias -Name Get-WEMRegValueAssignment -Value Get-WEMRegistryEntryAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMEnvironmentVariableAssignment {
     [CmdletBinding()]
@@ -533,10 +524,10 @@ New-Alias -Name Get-WEMEnvVariableAssignment -Value Get-WEMEnvironmentVariableAs
 
 <#
     .Synopsis
-    Returns one or more WEM Port Assignment objects from the WEM Database based on Category.
+    Returns one or more Port Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Port Assignment objects from the WEM Database based on Category.
+    Returns one or more Port Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -559,8 +550,7 @@ New-Alias -Name Get-WEMEnvVariableAssignment -Value Get-WEMEnvironmentVariableAs
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMPortAssignment {
     [CmdletBinding()]
@@ -587,10 +577,10 @@ function Get-WEMPortAssignment {
 
 <#
     .Synopsis
-    Returns one or more WEM Ini File Operation Assignment objects from the WEM Database based on Category.
+    Returns one or more Ini File Operation Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Ini File Operation Assignment objects from the WEM Database based on Category.
+    Returns one or more Ini File Operation Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -613,8 +603,7 @@ function Get-WEMPortAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMIniFileOperationAssignment {
     [CmdletBinding()]
@@ -642,10 +631,10 @@ New-Alias -Name Get-WEMIniFilesOpAssignment -Value Get-WEMIniFileOperationAssign
 
 <#
     .Synopsis
-    Returns one or more WEM External Task Assignment objects from the WEM Database based on Category.
+    Returns one or more External Task Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM External Task Assignment objects from the WEM Database based on Category.
+    Returns one or more External Task Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -668,8 +657,7 @@ New-Alias -Name Get-WEMIniFilesOpAssignment -Value Get-WEMIniFileOperationAssign
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMExternalTaskAssignment {
     [CmdletBinding()]
@@ -697,10 +685,10 @@ New-Alias -Name Get-WEMExtTaskAssignment -Value Get-WEMExternalTaskAssignment
 
 <#
     .Synopsis
-    Returns one or more WEM File System Operation Assignment objects from the WEM Database based on Category.
+    Returns one or more File System Operation Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM File System Operation Assignment objects from the WEM Database based on Category.
+    Returns one or more File System Operation Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -723,8 +711,7 @@ New-Alias -Name Get-WEMExtTaskAssignment -Value Get-WEMExternalTaskAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMFileSystemOperationAssignment {
     [CmdletBinding()]
@@ -752,10 +739,10 @@ New-Alias -Name Get-WEMFileSystemOpAssignment -Value Get-WEMFileSystemOperationA
 
 <#
     .Synopsis
-    Returns one or more WEM User DSN Assignment objects from the WEM Database based on Category.
+    Returns one or more User DSN Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM User DSN Assignment objects from the WEM Database based on Category.
+    Returns one or more User DSN Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -778,8 +765,7 @@ New-Alias -Name Get-WEMFileSystemOpAssignment -Value Get-WEMFileSystemOperationA
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMUserDSNAssignment {
     [CmdletBinding()]
@@ -806,10 +792,10 @@ function Get-WEMUserDSNAssignment {
 
 <#
     .Synopsis
-    Returns one or more WEM File Association Assignment objects from the WEM Database based on Category.
+    Returns one or more File Association Assignment objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM File Association Assignment objects from the WEM Database based on Category.
+    Returns one or more File Association Assignment objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -832,8 +818,7 @@ function Get-WEMUserDSNAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMFileAssociationAssignment {
     [CmdletBinding()]

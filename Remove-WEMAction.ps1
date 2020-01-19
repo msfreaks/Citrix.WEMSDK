@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Action object from the WEM Database.
+    Removes a Action object from the WEM Database.
 
     .Description
-    Removes a WEM Action object from the WEM Database.
+    Removes a Action object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMAction {
     [CmdletBinding()]
@@ -57,10 +56,10 @@ function Remove-WEMAction {
 
 <#
     .Synopsis
-    Removes a WEM Application object from the WEM Database.
+    Removes a Application object from the WEM Database.
 
     .Description
-    Removes a WEM Application object from the WEM Database.
+    Removes a Application object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -74,8 +73,7 @@ function Remove-WEMAction {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMApplication {
     [CmdletBinding()]
@@ -96,10 +94,10 @@ New-Alias -Name Remove-WEMApp -Value Remove-WEMApplication
 
 <#
     .Synopsis
-    Removes a WEM Printer object from the WEM Database.
+    Removes a Printer object from the WEM Database.
 
     .Description
-    Removes a WEM Printer object from the WEM Database.
+    Removes a Printer object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -113,8 +111,7 @@ New-Alias -Name Remove-WEMApp -Value Remove-WEMApplication
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMPrinter {
     [CmdletBinding()]
@@ -134,10 +131,10 @@ function Remove-WEMPrinter {
 
 <#
     .Synopsis
-    Removes a WEM Network Drive object from the WEM Database.
+    Removes a Network Drive object from the WEM Database.
 
     .Description
-    Removes a WEM Network Drive object from the WEM Database.
+    Removes a Network Drive object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -151,8 +148,7 @@ function Remove-WEMPrinter {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMNetworkDrive {
     [CmdletBinding()]
@@ -173,10 +169,10 @@ New-Alias -Name Remove-WEMNetDrive -Value Remove-WEMNetworkDrive
 
 <#
     .Synopsis
-    Removes a WEM Virtual Drive object from the WEM Database.
+    Removes a Virtual Drive object from the WEM Database.
 
     .Description
-    Removes a WEM Virtual Drive object from the WEM Database.
+    Removes a Virtual Drive object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -190,8 +186,7 @@ New-Alias -Name Remove-WEMNetDrive -Value Remove-WEMNetworkDrive
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMVirtualDrive {
     [CmdletBinding()]
@@ -211,10 +206,10 @@ function Remove-WEMVirtualDrive {
 
 <#
     .Synopsis
-    Removes a WEM Registry Entry object from the WEM Database.
+    Removes a Registry Entry object from the WEM Database.
 
     .Description
-    Removes a WEM Registry Entry object from the WEM Database.
+    Removes a Registry Entry object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -228,8 +223,7 @@ function Remove-WEMVirtualDrive {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMRegistryEntry {
     [CmdletBinding()]
@@ -250,10 +244,10 @@ New-Alias -Name Remove-WEMRegValue -Value Remove-WEMRegistryEntry
 
 <#
     .Synopsis
-    Removes a WEM Environmental Variable object from the WEM Database.
+    Removes a Environmental Variable object from the WEM Database.
 
     .Description
-    Removes a WEM Environmental Variable object from the WEM Database.
+    Removes a Environmental Variable object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -267,8 +261,7 @@ New-Alias -Name Remove-WEMRegValue -Value Remove-WEMRegistryEntry
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMEnvironmentVariable {
     [CmdletBinding()]
@@ -289,10 +282,10 @@ New-Alias -Name Remove-WEMEnvVariable -Value Remove-WEMEnvironmentVariable
 
 <#
     .Synopsis
-    Removes a WEM Port object from the WEM Database.
+    Removes a Port object from the WEM Database.
 
     .Description
-    Removes a WEM Port object from the WEM Database.
+    Removes a Port object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -306,8 +299,7 @@ New-Alias -Name Remove-WEMEnvVariable -Value Remove-WEMEnvironmentVariable
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMPort {
     [CmdletBinding()]
@@ -327,10 +319,10 @@ function Remove-WEMPort {
 
 <#
     .Synopsis
-    Removes a WEM Ini File Operation object from the WEM Database.
+    Removes a Ini File Operation object from the WEM Database.
 
     .Description
-    Removes a WEM Ini File Operation object from the WEM Database.
+    Removes a Ini File Operation object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -344,8 +336,7 @@ function Remove-WEMPort {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMIniFileOperation {
     [CmdletBinding()]
@@ -366,10 +357,10 @@ New-Alias -Name Remove-WEMIniFilesOp -Value Remove-WEMIniFileOperation
 
 <#
     .Synopsis
-    Removes a WEM External Task object from the WEM Database.
+    Removes a External Task object from the WEM Database.
 
     .Description
-    Removes a WEM External Task object from the WEM Database.
+    Removes a External Task object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -383,8 +374,7 @@ New-Alias -Name Remove-WEMIniFilesOp -Value Remove-WEMIniFileOperation
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMExternalTask {
     [CmdletBinding()]
@@ -405,10 +395,10 @@ New-Alias -Name Remove-WEMExtTask -Value Remove-WEMExternalTask
 
 <#
     .Synopsis
-    Removes a WEM File System Operation object from the WEM Database.
+    Removes a File System Operation object from the WEM Database.
 
     .Description
-    Removes a WEM File System Operation object from the WEM Database.
+    Removes a File System Operation object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -422,8 +412,7 @@ New-Alias -Name Remove-WEMExtTask -Value Remove-WEMExternalTask
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMFileSystemOperation {
     [CmdletBinding()]
@@ -444,10 +433,10 @@ New-Alias -Name Remove-WEMFileSystemOp -Value Remove-WEMFileSystemOperation
 
 <#
     .Synopsis
-    Removes a WEM User DSN object from the WEM Database.
+    Removes a User DSN object from the WEM Database.
 
     .Description
-    Removes a WEM User DSN object from the WEM Database.
+    Removes a User DSN object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -461,8 +450,7 @@ New-Alias -Name Remove-WEMFileSystemOp -Value Remove-WEMFileSystemOperation
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMUserDSN {
     [CmdletBinding()]
@@ -482,10 +470,10 @@ function Remove-WEMUserDSN {
 
 <#
     .Synopsis
-    Removes a WEM File Association object from the WEM Database.
+    Removes a File Association object from the WEM Database.
 
     .Description
-    Removes a WEM File Association object from the WEM Database.
+    Removes a File Association object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -499,8 +487,7 @@ function Remove-WEMUserDSN {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMFileAssociation {
     [CmdletBinding()]
@@ -518,5 +505,3 @@ function Remove-WEMFileAssociation {
     }
 }
 New-Alias -Name Remove-WEMFileAssoc -Value Remove-WEMFileAssociation
-
-

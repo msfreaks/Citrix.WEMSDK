@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM System Optimization object in the WEM Database.
+    Updates a System Optimization object in the WEM Database.
 
     .Description
-    Updates a WEM System Optimization object in the WEM Database.
+    Updates a System Optimization object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMSystemOptimization {
     [CmdletBinding()]
@@ -92,10 +91,10 @@ function Set-WEMSystemOptimization {
 
 <#
     .Synopsis
-    Resets a WEM System Optimization object in the WEM Database.
+    Resets a System Optimization object in the WEM Database.
 
     .Description
-    Resets a WEM System Optimization object in the WEM Database.
+    Resets a System Optimization object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -109,8 +108,7 @@ function Set-WEMSystemOptimization {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMSystemOptimization {
     [CmdletBinding()]

@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Environmental Settings object in the WEM Database.
+    Updates a Environmental Settings object in the WEM Database.
 
     .Description
-    Updates a WEM Environmental Settings object in the WEM Database.
+    Updates a Environmental Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMEnvironmentalSettings {
     [CmdletBinding()]
@@ -92,10 +91,10 @@ function Set-WEMEnvironmentalSettings {
 
 <#
     .Synopsis
-    Resets a WEM Environmental Settings object in the WEM Database.
+    Resets a Environmental Settings object in the WEM Database.
 
     .Description
-    Resets a WEM Environmental Settings object in the WEM Database.
+    Resets a Environmental Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -109,8 +108,7 @@ function Set-WEMEnvironmentalSettings {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMEnvironmentalSettings {
     [CmdletBinding()]

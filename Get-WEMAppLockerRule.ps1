@@ -1,30 +1,32 @@
 <#
-.SYNOPSIS
-Short description
+    .Synopsis
+    Returns one or more AppLocker Rule objects from the WEM Database.
 
-.DESCRIPTION
-Long description
+    .Description
+    Returns one or more AppLocker Rule objects from the WEM Database.
 
-.PARAMETER IdSite
-Parameter description
+    .Link
+    https://msfreaks.wordpress.com
 
-.PARAMETER IdRule
-Parameter description
+    .Parameter IdSite
+    ..
 
-.PARAMETER AppLockerRuleGuid
-Parameter description
+    .Parameter IdRule
+    ..
 
-.PARAMETER Name
-Parameter description
+    .Parameter AppLockerRuleGuid
+    ..
 
-.PARAMETER Connection
-Parameter description
+    .Parameter Name
+    ..
 
-.EXAMPLE
-An example
+    .Parameter Connection
+    ..
 
-.NOTES
-General notes
+    .Example
+
+    .Notes
+    Author: Arjan Mensch
 #>
 function Get-WEMAppLockerRule {
     [CmdletBinding()]

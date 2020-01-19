@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Persona Settings object in the WEM Database.
+    Updates a Persona Settings object in the WEM Database.
 
     .Description
-    Updates a WEM Persona Settings object in the WEM Database.
+    Updates a Persona Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMPersonaSettings {
     [CmdletBinding()]
@@ -92,10 +91,10 @@ function Set-WEMPersonaSettings {
 
 <#
     .Synopsis
-    Resets a WEM Persona Settings object in the WEM Database.
+    Resets a Persona Settings object in the WEM Database.
 
     .Description
-    Resets a WEM Persona Settings object in the WEM Database.
+    Resets a Persona Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -109,8 +108,7 @@ function Set-WEMPersonaSettings {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMPersonaSettings {
     [CmdletBinding()]

@@ -1,42 +1,44 @@
 <#
-.SYNOPSIS
-Short description
+    .Synopsis
+    Create a new AppLocker Rule object in the WEM Database.
 
-.DESCRIPTION
-Long description
+    .Description
+    Create a new AppLocker Rule object in the WEM Database.
 
-.PARAMETER IdSite
-Parameter description
+    .Link
+    https://msfreaks.wordpress.com
 
-.PARAMETER Name
-Parameter description
+    .Parameter IdSite
+    ..
 
-.PARAMETER Description
-Parameter description
+    .Parameter Name
+    ..
 
-.PARAMETER Type
-Parameter description
+    .Parameter Description
+    ..
 
-.PARAMETER Permission
-Parameter description
+    .Parameter Type
+    ..
 
-.PARAMETER IdADObjects
-Parameter description
+    .Parameter Permission
+    ..
 
-.PARAMETER ConditionObject
-Parameter description
+    .Parameter IdADObjects
+    ..
 
-.PARAMETER ExceptionObjects
-Parameter description
+    .Parameter ConditionObject
+    ..
 
-.PARAMETER Connection
-Parameter description
+    .Parameter ExceptionObjects
+    ..
 
-.EXAMPLE
-An example
+    .Parameter Connection
+    ..
 
-.NOTES
-General notes
+    .Example
+
+    .Notes
+    Author: Arjan Mensch
 #>
 function New-WEMAppLockerRule {
     [CmdletBinding()]

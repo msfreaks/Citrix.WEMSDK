@@ -53,8 +53,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function New-WEMUserDSN {
     [CmdletBinding()]

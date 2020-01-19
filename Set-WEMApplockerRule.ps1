@@ -1,3 +1,42 @@
+<#
+    .Synopsis
+    Updates a AppLocker Rule object in the WEM Database.
+
+    .Description
+    Updates a AppLocker Rule object in the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Name
+    ..
+
+    .Parameter Description
+    ..
+
+    .Parameter Permission
+    ..
+
+    .Parameter IdADObjects
+    ..
+
+    .Parameter ConditionObject
+    ..
+
+    .Parameter ExceptionObjects
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author: Arjan Mensch
+#>
 function Set-WEMAppLockerRule {
     [CmdletBinding()]
     param(

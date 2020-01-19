@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM USV Settings object in the WEM Database.
+    Updates a USV Settings object in the WEM Database.
 
     .Description
-    Updates a WEM USV Settings object in the WEM Database.
+    Updates a USV Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMUSVSettings {
     [CmdletBinding()]
@@ -92,10 +91,10 @@ function Set-WEMUSVSettings {
 
 <#
     .Synopsis
-    Resets a WEM USV Settings object in the WEM Database.
+    Resets a USV Settings object in the WEM Database.
 
     .Description
-    Resets a WEM USV Settings object in the WEM Database.
+    Resets a USV Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -109,8 +108,7 @@ function Set-WEMUSVSettings {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMUSVSettings {
     [CmdletBinding()]

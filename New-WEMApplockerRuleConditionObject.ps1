@@ -1,43 +1,42 @@
 <#
-    .SYNOPSIS
-    Short description
+    .Synopsis
+    Create a new AppLocker Rule Condition object.
 
-    .DESCRIPTION
-    Long description
+    .Description
+    Create a new AppLocker Rule Condition object.
 
     .Link
     https://msfreaks.wordpress.com
 
-    .PARAMETER Path
-    Parameter description
+    .Parameter Path
+    ..
 
-    .PARAMETER HashCondition
-    Parameter description
+    .Parameter HashCondition
+    ..
 
-    .PARAMETER PathCondition
-    Parameter description
+    .Parameter PathCondition
+    ..
 
-    .PARAMETER PublisherCondition
-    Parameter description
+    .Parameter PublisherCondition
+    ..
 
-    .PARAMETER Publisher
-    Parameter description
+    .Parameter Publisher
+    ..
 
-    .PARAMETER Product
-    Parameter description
+    .Parameter Product
+    ..
 
-    .PARAMETER HighSection
-    Parameter description
+    .Parameter HighSection
+    ..
 
-    .PARAMETER LowSection
-    Parameter description
+    .Parameter LowSection
+    ..
 
-    .EXAMPLE
-    An example
+    .Example
+    ..
 
-    .NOTES
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    .Notes
+    Author: Arjan Mensch
 #>
 function New-WEMAppLockerRuleConditionObject {
     [CmdletBinding(DefaultParameterSetName="None")]
@@ -189,6 +188,9 @@ function New-WEMAppLockerRuleConditionObject {
     }
 }
 
+<#
+    Helper function to replace path sections with known environment variables
+#>
 function Set-EnvVariablesInPath {
     param(
         [string]$Path

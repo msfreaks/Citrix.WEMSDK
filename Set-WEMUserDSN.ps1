@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM User DSN Action object in the WEM Database.
+    Updates a User DSN Action object in the WEM Database.
 
     .Description
-    Updates a WEM User DSN Action object in the WEM Database.
+    Updates a User DSN Action object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -50,8 +50,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMUserDSN {
     [CmdletBinding()]

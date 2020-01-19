@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM Action Group objects from the WEM Database.
+    Returns one or more Action Group objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Action Group objects from the WEM Database.
+    Returns one or more Action Group objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -23,8 +23,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMActionGroup {
     [CmdletBinding()]

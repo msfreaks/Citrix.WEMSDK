@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Parameters object in the WEM Database.
+    Updates a Parameters object in the WEM Database.
 
     .Description
-    Updates a WEM Parameters object in the WEM Database.
+    Updates a Parameters object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMParameters {
     [CmdletBinding()]
@@ -92,10 +91,10 @@ function Set-WEMParameters {
 
 <#
     .Synopsis
-    Resets a WEM Parameters object in the WEM Database.
+    Resets a Parameters object in the WEM Database.
 
     .Description
-    Resets a WEM Parameters object in the WEM Database.
+    Resets a Parameters object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -109,8 +108,7 @@ function Set-WEMParameters {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMParameters {
     [CmdletBinding()]

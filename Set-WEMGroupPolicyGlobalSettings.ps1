@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM GroupPolicy Global Settings object in the WEM Database.
+    Updates a GroupPolicy Global Settings object in the WEM Database.
 
     .Description
-    Updates a WEM GroupPolicy Global Settings object in the WEM Database.
+    Updates a GroupPolicy Global Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMGroupPolicyGlobalSettings {
     [CmdletBinding()]
@@ -94,10 +93,10 @@ function Set-WEMGroupPolicyGlobalSettings {
 
 <#
     .Synopsis
-    Resets a WEM GroupPolicy Global Settings object in the WEM Database.
+    Resets a GroupPolicy Global Settings object in the WEM Database.
 
     .Description
-    Resets a WEM GroupPolicy Global Settings object in the WEM Database.
+    Resets a GroupPolicy Global Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -111,8 +110,7 @@ function Set-WEMGroupPolicyGlobalSettings {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMGroupPolicyGlobalSettings {
     [CmdletBinding()]

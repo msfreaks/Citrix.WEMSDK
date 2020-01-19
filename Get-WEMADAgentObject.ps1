@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM Active Directory Agent or OU objects from the WEM Database.
+    Returns one or more Active Directory Agent or OU objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Active Directory Agent or OU objects from the WEM Database.
+    Returns one or more Active Directory Agent or OU objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -26,8 +26,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMADAgentObject {
     [CmdletBinding()]

@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Action Group object from the WEM Database.
+    Removes a Action Group object from the WEM Database.
 
     .Description
-    Removes a WEM Action Group object from the WEM Database.
+    Removes a Action Group object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -17,8 +17,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMActionGroup {
     [CmdletBinding()]

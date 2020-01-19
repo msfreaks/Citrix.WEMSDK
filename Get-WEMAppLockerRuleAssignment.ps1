@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM AppLocker Rule Assignment objects from the WEM Database.
+    Returns one or more AppLocker Rule Assignment objects from the WEM Database.
 
     .Description
-    Returns one or more WEM AppLocker Rule Assignment objects from the WEM Database.
+    Returns one or more AppLocker Rule Assignment objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -26,15 +26,20 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMAppLockerRuleAssignment {
     param(
+        [Parameter(Mandatory=$False,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdSite = $null,
+        [Parameter(Mandatory=$False,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
         [int]$IdAssigedAppLockerRule = $null,
+        [Parameter(Mandatory=$False,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
 		[int]$IdADObject = $null,
+        [Parameter(Mandatory=$False,ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
 		[int]$IdRule = $null,
+
+        [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
     )
 

@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns a WEM USV Settings object from the WEM Database.
+    Returns a USV Settings object from the WEM Database.
 
     .Description
-    Returns a WEM USV Settings object from the WEM Database.
+    Returns a USV Settings object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -17,8 +17,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMUSVSettings {
     [CmdletBinding()]

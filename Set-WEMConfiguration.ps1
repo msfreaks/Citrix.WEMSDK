@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Configuration object in the WEM Database.
+    Updates a Configuration object in the WEM Database.
 
     .Description
-    Updates a WEM Configuration object in the WEM Database.
+    Updates a Configuration object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -23,8 +23,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMConfiguration {
     [CmdletBinding()]

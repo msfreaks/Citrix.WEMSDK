@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Administrator object in the WEM Database.
+    Updates a Administrator object in the WEM Database.
 
     .Description
-    Updates a WEM Administrator object in the WEM Database.
+    Updates a Administrator object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -29,8 +29,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMAdministrator {
     [CmdletBinding()]

@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Assignment object in the WEM Database.
+    Updates a Assignment object in the WEM Database.
 
     .Description
-    Updates a WEM Assignment object in the WEM Database.
+    Updates a Assignment object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -29,8 +29,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMAssignment {
     [CmdletBinding()]
@@ -148,8 +147,7 @@ function Set-WEMAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMRegistryEntryAssignment {
     [CmdletBinding()]
@@ -200,8 +198,7 @@ New-Alias -Name Set-WEMRegValueAssignment -Value Set-WEMRegistryEntryAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMEnvironmentVariableAssignment {
     [CmdletBinding()]
@@ -252,8 +249,7 @@ New-Alias -Name Set-WEMEnvVariableAssignment -Value Set-WEMEnvironmentVariableAs
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMPortAssignment {
     [CmdletBinding()]
@@ -303,8 +299,7 @@ function Set-WEMPortAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMIniFileOperationAssignment {
     [CmdletBinding()]
@@ -355,8 +350,7 @@ New-Alias -Name Set-WEMIniFilesOpAssignment -Value Set-WEMIniFileOperationAssign
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMExternalTaskAssignment {
     [CmdletBinding()]
@@ -407,8 +401,7 @@ New-Alias -Name Set-WEMExtTaskAssignment -Value Set-WEMExternalTaskAssignment
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMFileSystemOperationAssignment {
     [CmdletBinding()]
@@ -459,8 +452,7 @@ New-Alias -Name Set-WEMFileSystemOpAssignment -Value Set-WEMFileSystemOperationA
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMUserDSNAssignment {
     [CmdletBinding()]
@@ -510,8 +502,7 @@ function Set-WEMUserDSNAssignment {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMFileAssociationAssignment {
     [CmdletBinding()]
@@ -562,8 +553,7 @@ New-Alias -Name Set-WEMFileAssocAssignment -Value Set-WEMFileAssociationAssignme
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMActionGroupAssignment {
     [CmdletBinding()]

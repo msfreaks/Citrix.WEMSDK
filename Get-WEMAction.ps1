@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Returns one or more WEM Action objects from the WEM Database.
+    Returns one or more Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Action objects from the WEM Database.
+    Returns one or more Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -23,8 +23,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMAction {
     [CmdletBinding()]
@@ -64,10 +63,10 @@ function Get-WEMAction {
 
 <#
     .Synopsis
-    Helper function that returns one or more WEM Action objects from the WEM Database.
+    Helper function that returns one or more Action objects from the WEM Database.
 
     .Description
-    Helper function that returns one or more WEM Action objects from the WEM Database.
+    Helper function that returns one or more Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -90,8 +89,7 @@ function Get-WEMAction {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMActionsByCategory {
     param(
@@ -138,10 +136,10 @@ function Get-WEMActionsByCategory {
 
 <#
     .Synopsis
-    Returns one or more WEM Application Action objects from the WEM Database based on Category.
+    Returns one or more Application Action objects from the WEM Database based on Category.
 
     .Description
-    Returns one or more WEM Application Action objects from the WEM Database based on Category.
+    Returns one or more Application Action objects from the WEM Database based on Category.
 
     .Link
     https://msfreaks.wordpress.com
@@ -161,8 +159,7 @@ function Get-WEMActionsByCategory {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMApplication {
     [CmdletBinding()]
@@ -187,10 +184,10 @@ New-Alias -Name Get-WEMApp -Value Get-WEMApplication
 
 <#
     .Synopsis
-    Returns one or more WEM Printer Action objects from the WEM Database.
+    Returns one or more Printer Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Printer Action objects from the WEM Database.
+    Returns one or more Printer Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -210,8 +207,7 @@ New-Alias -Name Get-WEMApp -Value Get-WEMApplication
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMPrinter {
     [CmdletBinding()]
@@ -234,10 +230,10 @@ function Get-WEMPrinter {
 
 <#
     .Synopsis
-    Returns one or more WEM Network Drive Action objects from the WEM Database.
+    Returns one or more Network Drive Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Network Drive Action objects from the WEM Database.
+    Returns one or more Network Drive Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -257,8 +253,7 @@ function Get-WEMPrinter {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMNetworkDrive {
     [CmdletBinding()]
@@ -282,10 +277,10 @@ New-Alias -Name Get-WEMNetDrive -Value Get-WEMNetworkDrive
 
 <#
     .Synopsis
-    Returns one or more WEM Virtual Drive Action objects from the WEM Database.
+    Returns one or more Virtual Drive Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Virtual Drive Action objects from the WEM Database.
+    Returns one or more Virtual Drive Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -305,8 +300,7 @@ New-Alias -Name Get-WEMNetDrive -Value Get-WEMNetworkDrive
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMVirtualDrive {
     [CmdletBinding()]
@@ -329,10 +323,10 @@ function Get-WEMVirtualDrive {
 
 <#
     .Synopsis
-    Returns one or more WEM Registry Entry Action objects from the WEM Database.
+    Returns one or more Registry Entry Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Registry Entry Action objects from the WEM Database.
+    Returns one or more Registry Entry Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -352,8 +346,7 @@ function Get-WEMVirtualDrive {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMRegistryEntry {
     [CmdletBinding()]
@@ -377,10 +370,10 @@ New-Alias -Name Get-WEMRegValue -Value Get-WEMRegistryEntry
 
 <#
     .Synopsis
-    Returns one or more WEM Environment Variable Action objects from the WEM Database.
+    Returns one or more Environment Variable Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Environment Variable Action objects from the WEM Database.
+    Returns one or more Environment Variable Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -400,8 +393,7 @@ New-Alias -Name Get-WEMRegValue -Value Get-WEMRegistryEntry
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMEnvironmentVariable {
     [CmdletBinding()]
@@ -425,10 +417,10 @@ New-Alias -Name Get-WEMEnvVariable -Value Get-WEMEnvironmentVariable
 
 <#
     .Synopsis
-    Returns one or more WEM Port Action objects from the WEM Database.
+    Returns one or more Port Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Port Action objects from the WEM Database.
+    Returns one or more Port Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -448,8 +440,7 @@ New-Alias -Name Get-WEMEnvVariable -Value Get-WEMEnvironmentVariable
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMPort {
     [CmdletBinding()]
@@ -472,10 +463,10 @@ function Get-WEMPort {
 
 <#
     .Synopsis
-    Returns one or more WEM Ini File Operation Action objects from the WEM Database.
+    Returns one or more Ini File Operation Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM Ini File Operation Action objects from the WEM Database.
+    Returns one or more Ini File Operation Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -495,8 +486,7 @@ function Get-WEMPort {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMIniFileOperation {
     [CmdletBinding()]
@@ -520,10 +510,10 @@ New-Alias -Name Get-WEMIniFilesOp -Value Get-WEMIniFileOperation
 
 <#
     .Synopsis
-    Returns one or more WEM External Task Action objects from the WEM Database.
+    Returns one or more External Task Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM External Task Action objects from the WEM Database.
+    Returns one or more External Task Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -543,8 +533,7 @@ New-Alias -Name Get-WEMIniFilesOp -Value Get-WEMIniFileOperation
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMExternalTask {
     [CmdletBinding()]
@@ -568,10 +557,10 @@ New-Alias -Name Get-WEMExtTask -Value Get-WEMExternalTask
 
 <#
     .Synopsis
-    Returns one or more WEM File System Operation Action objects from the WEM Database.
+    Returns one or more File System Operation Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM File System Operation Action objects from the WEM Database.
+    Returns one or more File System Operation Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -591,8 +580,7 @@ New-Alias -Name Get-WEMExtTask -Value Get-WEMExternalTask
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMFileSystemOperation {
     [CmdletBinding()]
@@ -616,10 +604,10 @@ New-Alias -Name Get-WEMFileSystemOp -Value Get-WEMFileSystemOperation
 
 <#
     .Synopsis
-    Returns one or more WEM User DSN Action objects from the WEM Database.
+    Returns one or more User DSN Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM User DSN Action objects from the WEM Database.
+    Returns one or more User DSN Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -639,8 +627,7 @@ New-Alias -Name Get-WEMFileSystemOp -Value Get-WEMFileSystemOperation
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMUserDSN {
     [CmdletBinding()]
@@ -663,10 +650,10 @@ function Get-WEMUserDSN {
 
 <#
     .Synopsis
-    Returns one or more WEM File Association Action objects from the WEM Database.
+    Returns one or more File Association Action objects from the WEM Database.
 
     .Description
-    Returns one or more WEM File Association Action objects from the WEM Database.
+    Returns one or more File Association Action objects from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -686,8 +673,7 @@ function Get-WEMUserDSN {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Get-WEMFileAssociation {
     [CmdletBinding()]

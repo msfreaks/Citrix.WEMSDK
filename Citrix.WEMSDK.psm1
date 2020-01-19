@@ -19,8 +19,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Invoke-SQL {
     param(
@@ -258,8 +257,7 @@ function Get-IconStream {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function New-ChangesLogEntry {
     param(
@@ -308,8 +306,7 @@ function New-ChangesLogEntry {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMSiteObject() {
     param(
@@ -350,8 +347,7 @@ Function New-VUEMSiteObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMActionGroupObject() {
     param(
@@ -447,8 +443,7 @@ Function New-VUEMActionGroupObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMApplicationObject() {
     param(
@@ -514,8 +509,7 @@ Function New-VUEMApplicationObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMAppLockerRule() {
     param(
@@ -573,8 +567,7 @@ Function New-VUEMAppLockerRule() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMAppLockerRuleCondition() {
     param(
@@ -665,8 +658,7 @@ Function New-VUEMAppLockerRuleCondition() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMAssignmentObject() {
     param(
@@ -755,8 +747,7 @@ Function New-VUEMAssignmentObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMPrinterObject() {
     param(
@@ -811,8 +802,7 @@ Function New-VUEMPrinterObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMNetDriveObject() {
     param(
@@ -865,8 +855,7 @@ Function New-VUEMNetDriveObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMVirtualDriveObject() {
     param(
@@ -914,8 +903,7 @@ Function New-VUEMVirtualDriveObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMRegValueObject() {
     param(
@@ -963,8 +951,7 @@ Function New-VUEMRegValueObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMEnvVariableObject() {
     param(
@@ -1015,8 +1002,7 @@ Function New-VUEMEnvVariableObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMPortObject() {
     param(
@@ -1061,8 +1047,7 @@ Function New-VUEMPortObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMIniFileOpObject() {
     param(
@@ -1109,8 +1094,7 @@ Function New-VUEMIniFileOpObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMExtTaskObject() {
     param(
@@ -1164,8 +1148,7 @@ Function New-VUEMExtTaskObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMFileSystemOpObject() {
     param(
@@ -1217,8 +1200,7 @@ Function New-VUEMFileSystemOpObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMStorefrontSettingObject() {
     param(
@@ -1259,8 +1241,7 @@ Function New-VUEMStorefrontSettingObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMUserDSNObject() {
     param(
@@ -1311,8 +1292,7 @@ Function New-VUEMUserDSNObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMFileAssocObject() {
     param(
@@ -1363,8 +1343,7 @@ Function New-VUEMFileAssocObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMADAgentObject() {
     param(
@@ -1414,8 +1393,7 @@ Function New-VUEMADAgentObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMADUserObject() {
     param(
@@ -1472,8 +1450,7 @@ Function New-VUEMADUserObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMAdminObject() {
     param(
@@ -1530,8 +1507,7 @@ Function New-VUEMAdminObject() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMCondition() {
     param(
@@ -1575,8 +1551,7 @@ Function New-VUEMCondition() {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 Function New-VUEMRule() {
     param(

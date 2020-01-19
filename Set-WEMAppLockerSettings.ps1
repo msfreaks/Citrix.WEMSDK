@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM AppLocker Settings object in the WEM Database.
+    Updates a AppLocker Settings object in the WEM Database.
 
     .Description
-    Updates a WEM AppLocker Settings object in the WEM Database.
+    Updates a AppLocker Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -20,8 +20,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMAppLockerSettings {
     [CmdletBinding()]
@@ -94,10 +93,10 @@ function Set-WEMAppLockerSettings {
 
 <#
     .Synopsis
-    Resets a WEM AppLocker Settings object in the WEM Database.
+    Resets a AppLocker Settings object in the WEM Database.
 
     .Description
-    Resets a WEM AppLocker Settings object in the WEM Database.
+    Resets a AppLocker Settings object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -111,8 +110,7 @@ function Set-WEMAppLockerSettings {
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Reset-WEMAppLockerSettings {
     [CmdletBinding()]

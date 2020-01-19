@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Configuration object from WEM Database recursively.
+    Removes a Configuration object from WEM Database recursively.
 
     .Description
-    Removes a WEM Configuration object from WEM Database recursively.
+    Removes a Configuration object from WEM Database recursively.
 
     .Link
     https://msfreaks.wordpress.com
@@ -17,8 +17,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMConfiguration {
     [CmdletBinding()]

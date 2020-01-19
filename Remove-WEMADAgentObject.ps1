@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Removes a WEM Active Directory Agent or OU object from the WEM Database.
+    Removes a Active Directory Agent or OU object from the WEM Database.
 
     .Description
-    Removes a WEM Active Directory Agent or OU object from the WEM Database.
+    Removes a Active Directory Agent or OU object from the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -17,8 +17,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Remove-WEMADAgentObject {
     [CmdletBinding()]

@@ -1,9 +1,9 @@
 <#
     .Synopsis
-    Updates a WEM Storefront Setting object in the WEM Database.
+    Updates a Storefront Setting object in the WEM Database.
 
     .Description
-    Updates a WEM Storefront Setting object in the WEM Database.
+    Updates a Storefront Setting object in the WEM Database.
 
     .Link
     https://msfreaks.wordpress.com
@@ -26,8 +26,7 @@
     .Example
 
     .Notes
-    Author:  Arjan Mensch
-    Version: 0.9.0
+    Author: Arjan Mensch
 #>
 function Set-WEMStorefrontSetting {
     [CmdletBinding()]
