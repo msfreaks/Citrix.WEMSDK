@@ -1,4 +1,6 @@
 ~*.xlsx
+~*.xlsm
+*.xlsm
 *.bak
 test.ps1
 *.sql

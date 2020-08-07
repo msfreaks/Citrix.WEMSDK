@@ -44,6 +44,18 @@
     .Parameter RunOnce
     ..
 
+    .Parameter ExecuteAtLogon
+    ..
+
+    .Parameter ExecuteAtLogoff
+    ..
+
+    .Parameter ExecuteWhenRefresh
+    ..
+
+    .Parameter ExecuteWhenReconnect
+    ..
+
     .Parameter ExecuteOnlyAtLogon
     ..
 
@@ -84,6 +96,14 @@ function New-WEMExternalTask {
         [Parameter(Mandatory=$False)]
         [bool]$RunOnce = $True,
         [Parameter(Mandatory=$False)]
+        [bool]$ExecuteAtLogon = $True,
+        [Parameter(Mandatory=$False)]
+        [bool]$ExecuteAtLogoff = $False,
+        [Parameter(Mandatory=$False)]
+        [bool]$ExecuteWhenRefresh = $True,
+        [Parameter(Mandatory=$False)]
+        [bool]$ExecuteWhenReconnect = $True,
+        [Parameter(Mandatory=$False)]
         [bool]$ExecuteOnlyAtLogon = $False,
 
         [Parameter(Mandatory=$True)]
@@ -109,9 +129,26 @@ function New-WEMExternalTask {
 
         Write-Verbose "Name is unique: Continue"
 
+        # warn the user for use of the parameters combined with certain database versions
+        if ($script:databaseSchema -ge 2003 -and $ExecuteOnlyAtLogon) {
+            Write-Warning "Usage of the parameter ExecuteOnlyAtLogon is depricated as of version 2003. Ignoring value."
+        }
+        if ($script:databaseSchema -lt 2003 -and ($ExecuteAtLogon -or $ExecuteAtLogoff -or $ExecuteWhenReconnect -or $ExecuteWhenReconnect)) {
+            Write-Warning "Usage of the parameters ExecuteAtLogon, ExecuteAtLogoff, ExecuteWhenRefresh, and ExecuteWhenReconnect are not valid for this WEM version. Ignoring values."
+        }
+
         # apply Advanced Option values
         [xml]$actionReserved = $defaultVUEMExternalTaskReserved
-        ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteOnlyAtLogon"}).Value = [string][int]$ExecuteOnlyAtLogon
+        Write-Verbose "Checking databaseSchema additions for $($script:databaseSchema)"
+        if ($configurationSettings."$($script:databaseSchema)".VUEMExternalTaskReserved) {
+            [xml]$actionReserved = $configurationSettings.$script:databaseSchema.VUEMExternalTaskReserved
+            ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteAtLogon"}).Value = [string][int]$ExecuteAtLogon
+            ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteAtLogoff"}).Value = [string][int]$ExecuteAtLogoff
+            ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteWhenRefresh"}).Value = [string][int]$ExecuteWhenRefresh
+            ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteWhenReconnect"}).Value = [string][int]$ExecuteWhenReconnect
+        } else {
+            ($actionReserved.ArrayOfVUEMActionAdvancedOption.VUEMActionAdvancedOption | Where-Object {$_.Name -like "ExecuteOnlyAtLogon"}).Value = [string][int]$ExecuteOnlyAtLogon
+        }
 
         # build the query to update the action
         $SQLQuery = "INSERT INTO VUEMExtTasks (IdSite,Name,Description,State,ActionType,TargetPath,TargetArgs,RunHidden,WaitForFinish,TimeOut,ExecOrder,RunOnce,RevisionId,Reserved01) VALUES ($($IdSite),'$($Name)','$($Description)',$($tableVUEMState[$State]),$($tableVUEMExtTaskActionType[$ActionType]),'$($TargetPath)','$($TargetArguments)',$([int]$RunHidden),$([int]$WaitForFinish),$($TimeOut),$($ExecutionOrder),$([int]$RunOnce),1,'$($actionReserved.OuterXml)')"

@@ -107,6 +107,12 @@ function New-WEMConfiguration {
             $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
         }
         
+        # CitrixOptimizerConfigurations
+        if ($configurationSettings[$script:databaseSchema].CitrixOptimizerConfigurationsFields) {
+            $SQLQuery = ("INSERT INTO VUEMCitrixOptimizerConfigurations ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].CitrixOptimizerConfigurationsFields, ($configurationSettings[$script:databaseSchema].CitrixOptimizerConfigurationsValues -join ", ")) -f $IdSite
+            $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        }
+
         # VUEMItems
         $SQLQuery = ("INSERT INTO VUEMItems ({0}) VALUES {1}" -f $configurationSettings[$script:databaseSchema].ItemsFields, ($configurationSettings[$script:databaseSchema].ItemsValues -join ", ")) -f $IdSite
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
