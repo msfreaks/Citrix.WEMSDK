@@ -13,6 +13,7 @@ Get-WEMAppLockerRule
 Get-WEMAppLockerRuleConditionObject    
 Get-WEMAppLockerSettings               
 Get-WEMAssignment                      
+Get-WEMCitrixOptimizerConfiguration    
 Get-WEMCondition                       
 Get-WEMConfiguration                   
 Get-WEMEnvironmentalSettings           
@@ -127,6 +128,7 @@ Remove-WEMApplication
 Remove-WEMApplicationAssignment        
 Remove-WEMAppLockerRule                
 Remove-WEMAssignment                   
+Remove-WEMCitrixOptimizerConfiguration 
 Remove-WEMCondition                    
 Remove-WEMConfiguration                
 Remove-WEMEnvironmentVariable          
@@ -191,6 +193,7 @@ Set-WEMApplication
 Set-WEMApplicationAssignment           
 Set-WEMAppLockerRule                   
 Set-WEMAppLockerSettings               
+Set-WEMCitrixOptimizerConfiguration    
 Set-WEMCondition                       
 Set-WEMConfiguration                   
 Set-WEMEnvironmentalSettings           
