@@ -129,6 +129,7 @@ function New-WEMApplication {
 
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
+        Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
 
         # escape possible query breakers
         $Name = ConvertTo-StringEscaped $Name

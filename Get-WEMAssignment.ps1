@@ -577,6 +577,84 @@ function Get-WEMPortAssignment {
 
 <#
     .Synopsis
+    Helper function that returns one or more Group Policy Settings Assignment objects from the WEM Database.
+
+    .Description
+    Helper function that returns one or more Group Policy Settings Assignment objects from the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdSite
+    ..
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter IdAssignedObject
+    ..
+
+    .Parameter IdADObject
+    ..
+
+    .Parameter IdRule
+    ..
+
+    .Parameter Connection
+    ..
+
+    .Example
+
+    .Notes
+    Author: Arjan Mensch
+#>
+function Get-WEMGroupPolicyObjectAssignment {
+    param(
+        [Parameter(Mandatory=$False, ValueFromPipeline=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdSite,
+        [Parameter(Mandatory=$False)]
+        [int]$IdAssignment,
+        [Parameter(Mandatory=$False, ValueFromPipelineByPropertyName=$True)]
+		[int]$IdObject,
+        [Parameter(Mandatory=$False)]
+		[int]$IdADObject,
+        [Parameter(Mandatory=$False)]
+        [int]$IdRule,
+        
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+        Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
+
+        # build query
+        $SQLQuery = "SELECT * FROM GroupPolicyAssignments"
+        $SQLQueryFields = @()
+
+        if ($IdSite) { $SQLQueryFields += "IdSite = $($IdSite)" }
+        if ($IdAssignment) { $SQLQueryFields += "IdAssignment = $($IdAssignment)" }
+        if ($IdObject) { $SQLQueryFields += "IdObject = $($IdObject)" }
+        if ($IdADObject) { $SQLQueryFields += "IdItem = $($IdADObject)" }
+        if ($IdRule) { $SQLQueryFields += "IdFilterRule = $($IdRule)" }
+
+        if ($SQLQueryFields) {
+            $SQLQuery += " WHERE "
+            $SQLQuery += $SQLQueryFields -Join " AND "
+        }
+
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        $vuemAssignments = @()
+        foreach ($row in $result.Tables.Rows) { $vuemAssignments += New-VUEMGroupPolicySettingsAssignmentObject -DataRow $row -Connection $Connection }
+
+        return $vuemAssignments
+    }
+}
+
+<#
+    .Synopsis
     Returns one or more Ini File Operation Assignment objects from the WEM Database based on Category.
 
     .Description

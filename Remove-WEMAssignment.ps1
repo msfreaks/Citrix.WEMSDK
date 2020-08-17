@@ -360,6 +360,62 @@ function Remove-WEMPortAssignment {
 
 <#
     .Synopsis
+    Removes a Group Policy Settings Assignment object from the WEM Database.
+
+    .Description
+    Removes a Group Policy Settings Assignment object from the WEM Database.
+
+    .Link
+    https://msfreaks.wordpress.com
+
+    .Parameter IdAssignment
+    ..
+
+    .Parameter Connection
+    ..
+    
+    .Example
+
+    .Notes
+    Author: Arjan Mensch
+#>
+function Remove-WEMGroupPolicyObjectAssignment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True)]
+        [int]$IdAssignment,
+
+        [Parameter(Mandatory=$True)]
+        [System.Data.SqlClient.SqlConnection]$Connection
+    )
+
+    process {
+        Write-Verbose "Working with database version $($script:databaseVersion)"
+        Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
+
+        # grab original object
+        $origObject = Get-WEMGroupPolicyObjectAssignment -Connection $Connection -IdAssignment $IdAssignment
+
+        # only continue if the object was found
+        if (-not $origObject) { 
+            Write-Warning "No Group Policy Settings Assignment Object found for Id $($IdAssignment)"
+            Break
+        }
+
+        # build query
+        $SQLQuery = "DELETE FROM GroupPolicyAssignments WHERE IdAssignment = $($origObject.IdAssignment)"
+        write-verbose $SQLQuery
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # Updating the ChangeLog
+        New-ChangesLogEntry -Connection $Connection -IdSite $origObject.IdSite -IdElement $IdAssignment -ChangeType "Unassign" -ObjectName "$($origObject.AssignedObject.ToString()) ($($origObject.AssignedObject.Guid.ToString().ToLower()))" -ObjectType "Assignments\Group Policy" -NewValue "N/A" -ChangeDescription $null -Reserved01 $null
+
+        #>
+    }
+}
+
+<#
+    .Synopsis
     Removes a Ini File Operation Assignment object from the WEM Database.
 
     .Description

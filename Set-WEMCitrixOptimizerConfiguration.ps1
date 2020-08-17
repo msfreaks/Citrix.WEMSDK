@@ -111,9 +111,9 @@ function Set-WEMCitrixOptimizerConfiguration {
 
         $selectedGroups = @()
         $unselectedGroups = @()
-        $availableGroups = $origObject.TemplateXml.Root.Group.DisplayName
+        $availableGroups = $origObject.TemplateXml.root.group.displayname
 
-        # check Groups (only 1 Target OS template may be enabled at any time) 
+        # check Groups 
         if ([bool]($MyInvocation.BoundParameters.Keys -match 'groups')) {
             if (@($Groups | Where-Object { $availableGroups -notcontains $_ } | Select-Object -first 1).Count) {
                 Write-Host "One or more of the requested groups are not available in the template." -ForegroundColor Red

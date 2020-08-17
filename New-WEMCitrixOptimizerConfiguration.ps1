@@ -11,9 +11,6 @@
     .Parameter IdSite
     ..
 
-    .Parameter Name
-    ..
-
     .Parameter Description
     ..
 
@@ -32,29 +29,22 @@
     Author: Arjan Mensch
 #>
 function New-WEMCitrixOptimizerConfiguration {
-    [CmdletBinding(DefaultParameterSetName="byName")]
+    [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True, ParameterSetName="byName")]
-        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True, ParameterSetName="byFile")]
+        [Parameter(Mandatory=$True, ValueFromPipelineByPropertyName=$True, ValueFromPipeline=$True)]
         [int]$IdSite,
 
-        [Parameter(Mandatory=$True, ParameterSetName="byName")]
-        [string]$Name,
-        [Parameter(Mandatory=$True, ParameterSetName="byFile")]
+        [Parameter(Mandatory=$True)]
         [string]$TemplateXmlFile,
 
-        [Parameter(Mandatory=$False, ParameterSetName="byName")]
-        [Parameter(Mandatory=$False, ParameterSetName="byFile")]
-        [string[]]$Groups = @(""),
-        [Parameter(Mandatory=$True, ParameterSetName="byName")]
-        [Parameter(Mandatory=$True, ParameterSetName="byFile")]
-        [string[]]$Targets,
-        [Parameter(Mandatory=$False, ParameterSetName="byName")][ValidateSet("Enabled","Disabled")]
-        [Parameter(Mandatory=$False, ParameterSetName="byFile")][ValidateSet("Enabled","Disabled")]
+        [Parameter(Mandatory=$False)][ValidateSet("Enabled","Disabled")]
         [string]$State = "Enabled",
+        [Parameter(Mandatory=$False)]
+        [string[]]$Groups = @(),
+        [Parameter(Mandatory=$True)]
+        [string[]]$Targets,
 
-        [Parameter(Mandatory=$True, ParameterSetName="byName")]
-        [Parameter(Mandatory=$True, ParameterSetName="byFile")]
+        [Parameter(Mandatory=$True)]
         [System.Data.SqlClient.SqlConnection]$Connection
     )
 
@@ -74,79 +64,117 @@ function New-WEMCitrixOptimizerConfiguration {
             Break
         }
 
-        # escape possible query breakers
-        $Name = ConvertTo-StringEscaped $Name
-
-        # for byName set, only continue of the templatename actually exists and is not already being used
-        $contentId = $null
-        if ($PsCmdlet.ParameterSetName -eq "byName") {
-            # build query to check if there is a template with that name
-            $SQLQuery = "SELECT IdContent FROM VUEMCitrixOptimizerTemplatesContent WHERE TemplateContent LIKE '%<displayname>$($Name)</displayname>%'"
-            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-            if ($result.Tables) {
-                $contentId = $result.Tables.Rows.IdContent
-            } else {
-                Write-Host "There is no template in the database named '$($Name)'.`nName parameter should match the DisplayName tag in the template" -ForegroundColor Red
-                Break
-            }
-
-            # build query to check if there is a configuration with that contentId
-            $SQLQuery = "SELECT * FROM VUEMCitrixOptimizerConfigurations WHERE IdContent = $($contentId) AND IdSite = $($IdSite)"
-            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-            if ($result.Tables) {
-                Write-Host "There is already a Citrix Optimizer Configuration in this site referencing '$($Name)'" -ForegroundColor Red
-                Break
-            }
-        }
-
         # for byFile set, only continue of the templatefile can be found and is a Citrix Optimizer xml file
         $content = $null
+        $contentId = $null
+        $xmlContent = $null
 
-        if ($PsCmdlet.ParameterSetName -eq "byFile") {
-            # check if the file exists
-            if (-not (Test-Path -Path $TemplateXmlFile -Include "*.xml" -ErrorAction SilentlyContinue)) {
-                Write-Host "'$($TemplateXmlFile)' was not found" -ForegroundColor Red
-                Break
-            }
-
-            # load the file and check if it's a Citrix Optimizer file
-            try {
-                $content = [xml](Get-Content -Path $TemplateXmlFile)
-            }
-            catch {
-                Write-Host "Error loading '$($TemplateXmlFile)'" -ForegroundColor Red
-                Break                
-            }
-
-            if (-not ($content.root) -or -not ($content.root.metadata) -or -not ($content.root.group) -or -not ($content.root.metadata.category -eq "OS Optimizations")) {
-                Write-Host "'$($TemplateXmlFile)' was loaded but does not appear to be a Citrix Optimizer template file"
-                Break
-            }
-
-            # calculate hash
-            #
-            # NOTE:
-            # 2020-08-05 hash method unknown. Closest I get is MD5 the content, then Base64 that MD5 hash
-            #
-            $contenthash = ""
-            $SQLQuery = "SELECT * FROM VUEMCitrixOptimizerTemplatesHash WHERE TemplateHash = '$($contenthash)'"
-            $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
-            if ($result.Tables) {
-                Write-Host "This template is already in the database" -ForegroundColor Red
-                Break
-            }
-
-            # insert the template into the database
-
-            # insert the template-hash into the database
-
+        # check if the file exists
+        if (-not (Test-Path -Path $TemplateXmlFile -Include "*.xml" -ErrorAction SilentlyContinue)) {
+            Write-Host "'$($TemplateXmlFile)' was not found" -ForegroundColor Red
+            Break
         }
 
-        # check the other parameters
+        # load the file and check if it's a Citrix Optimizer file
+        try {
+            $content = Get-Content -Path $TemplateXmlFile -Encoding UTF8 -Raw
+        }
+        catch {
+            Write-Host "Error loading '$($TemplateXmlFile)'" -ForegroundColor Red
+            Break                
+        }
 
+        $xmlContent = [xml]$content
+        if (-not ($xmlContent.root) -or -not ($xmlContent.root.metadata) -or -not ($xmlContent.root.group) -or -not ($xmlContent.root.metadata.category -eq "OS Optimizations")) {
+            Write-Host "'$($TemplateXmlFile)' was loaded but does not appear to be a Citrix Optimizer template file" -ForegroundColor Red
+            Break
+        }
+
+        # calculate hash (Thanks Wayne!)
+        $mySHA256 = [System.Security.Cryptography.SHA256]::Create()
+        $contenthash = [System.Convert]::ToBase64String($mySHA256.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($content)))
+        
+        $SQLQuery = "SELECT IdContent FROM VUEMCitrixOptimizerTemplatesHash WHERE TemplateHash = '$($contenthash)'"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        if ($result.Tables.IdContent) {
+            Write-Host "This template is already in the database" -ForegroundColor Red
+            Break
+        }
+
+        # get the name from the XmlFile
+        $Name = ConvertTo-StringEscaped $xmlContent.root.metadata.displayname
+
+        # insert the template-hash into the database
+        $SQLQuery = "INSERT INTO VUEMCitrixOptimizerTemplatesHash (TemplateHash) VALUES ('$($contenthash)')"
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        # grab the contentId
+        $SQLQuery = "SELECT IdContent FROM VUEMCitrixOptimizerTemplatesHash WHERE TemplateHash = '$($ContentHash)'"
+        $result = Invoke-SQL -Connection $Connection -Query $SQLQuery
+        $contentId = $result.Tables.Rows.IdContent
+
+        # insert the template into the database
+        $content = ConvertTo-StringEscaped $content
+        $SQLQuery = "INSERT INTO VUEMCitrixOptimizerTemplatesContent (IdContent, TemplateContent) VALUES ($($contentId), '$($content)')"
+        $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
+
+        # paritally build query
+        $SQLQuery = "INSERT INTO VUEMCitrixOptimizerConfigurations (IdSite, Name, State, Targets, SelectedGroups, UnselectedGroups, IsDefaultTemplate, IdContent, RevisionId, Reserved01) VALUES ($($IdSite), '$($Name)', "
+
+        # check the other parameters
+        # check State (only 1 Target OS template may be enabled at any time) 
+        if ($State -eq "Enabled") {
+            $configurations = Get-WEMCitrixOptimizerConfiguration -Connection $Connection -IdSite $IdSite -State Enabled
+
+            # check Target OSs
+            foreach ($configuration in $configurations) {
+                $conftargets = 0
+                foreach ($target in $configuration.Targets) {
+                    $conftargets += [int]($configurationSettings."$($script:databaseSchema)".VUEMCitrixOptimizerTargets.GetEnumerator() | Where-Object {$_.Value -eq $target}).Name
+                }
+                if($newtargets -band $conftargets) {
+                    Write-Host "Cannot Enable this Citrix Optimizer Configuration.`nOnly one Target OS Template may be enabled at any time.`n'$($configuration.Name)' is already enabled for one or more of the requested target OSs." -ForegroundColor Red
+                    Break
+                }
+            }
+
+            Write-Verbose "Determined State can indeed be Enabled"
+        }
+
+        $SQLQuery += "$($tableVUEMState["$($State)"]), "
+
+        # determine targets
+        $newtargets = 0
+        foreach($target in $Targets) {
+            if ($configurationSettings."$($script:databaseSchema)".VUEMCitrixOptimizerTargets.GetEnumerator() | Where-Object {$_.Value -eq $target}) {
+                $newtargets += [int]($configurationSettings."$($script:databaseSchema)".VUEMCitrixOptimizerTargets.GetEnumerator() | Where-Object {$_.Value -eq $target}).Name
+            } else {
+                Write-Host "Cannot apply Targets parameter.`n'$($target)' does not exist in WEM $($script:databaseSchema)" -ForegroundColor Red
+                Break
+            }
+        }
+
+        Write-Verbose "Determined Targets are valid"
+
+        $SQLQuery += "$($newtargets), "
+
+        # determine groups
+        $selectedGroups = @()
+        $unselectedGroups = @()
+        $availableGroups = $xmlContent.root.group.displayname
+
+        # check Groups 
+        if (@($Groups | Where-Object { $availableGroups -notcontains $_ } | Select-Object -first 1).Count) {
+            Write-Host "One or more of the requested groups are not available in the template." -ForegroundColor Red
+            Break
+        }
+
+        $selectedGroups = $Groups
+        $unselectedGroups = @($availableGroups | Where-Object { $_ -notin $selectedGroups })
+
+        $SQLQuery += "'$($selectedGroups -join ",")', '$($unselectedGroups -join ",")', "
+        
         # insert everything into the CitrixOptimizerConfigurations table
-        # build the query to insert the Object
-        $SQLQuery = "INSERT INTO .."
+        $SQLQuery += "0, $($contentId), 1, NULL)"
         $null = Invoke-SQL -Connection $Connection -Query $SQLQuery
 
         # grab the new Object

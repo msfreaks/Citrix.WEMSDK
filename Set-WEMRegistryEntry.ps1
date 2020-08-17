@@ -72,6 +72,7 @@ function Set-WEMRegistryEntry {
 
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
+        Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
 
         # grab original action
         $origAction = Get-WEMRegistryEntry -Connection $Connection -IdAction $IdAction

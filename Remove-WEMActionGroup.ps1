@@ -31,6 +31,7 @@ function Remove-WEMActionGroup {
 
     process {
         Write-Verbose "Working with database version $($script:databaseVersion)"
+        Write-Verbose "Function name '$($MyInvocation.MyCommand.Name)'"
 
         # grab original object
         $origObject = Get-WEMActionGroup -Connection $Connection -IdActionGroup $IdActionGroup
