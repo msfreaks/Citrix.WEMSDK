@@ -253,4 +253,4 @@ Set-WEMUserDSN
 Set-WEMUserDSNAssignment               
 Set-WEMUSVSettings                     
 Set-WEMVirtualDrive                    
-Set-WEMVirtualDriveAssignment          
+Set-WEMVirtualDriveAssignment
