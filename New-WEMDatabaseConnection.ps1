@@ -53,8 +53,8 @@ function New-WEMDatabaseConnection {
     # 1903.0.1.1, 1906.0.1.1, 1909.1.0.1, 1912.1.0.1
     Write-Verbose "Database version $($script:databaseVersion) detected (schema $($script:databaseSchema))"
     if (-not $configurationSettings[$script:databaseSchema]) {
-        Write-Error "Connected to a database version with unsupported schema: $($script:databaseVersion) (schema $($script:databaseSchema))`nLatest supported schema version for this module: $($configurationSettings.Keys | Sort-Object -Descending | Select-Object -First 1)"
-        break
+        Write-Warning "Connected to a database version with unsupported schema: $($script:databaseVersion) (schema $($script:databaseSchema))`nLatest supported schema version for this module: $($configurationSettings.Keys | Sort-Object -Descending | Select-Object -First 1)`n`nFull functionality is not guaranteed`nFalling back to latest supported schema version"
+        $script:databaseSchema = ($configurationSettings.Keys | Sort-Object -Descending | Select-Object -First 1)
     }
     return $connection
 }
