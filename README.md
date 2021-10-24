@@ -1,3 +1,22 @@
+# Citrix.WEMSDK
+
+This module supports every action in the WEM Administrator console in a single PowerShell module.
+
+I meant to update this as new WEM versions were being released, but since it's now near impossiblie to get a trial license from Citrix, I have given up.
+It's a shame such a company does not embrace community driven projects like this one.
+
+The code is now open to the community. Feel free to use it, adopt in your own projects, continue development, or as you see fit :)
+
+You can also install this module from the PowerShell Gallery, but that version will not go beyond 2110.0.1; the latest version that is also available in this repo.
+You can also install the script from the PowerShell Gallery ([EvergreenAdmx][poshgallery-evergreenadmx]):
+```powershell
+Install-Script -Name Citrix.WEMSDK
+```
+
+
+Supports the following commands:
+
+```powershell
 Get-WEMApp                             
 Get-WEMAppAssignment                   
 Get-WEMEnvVariable                     
@@ -253,4 +272,7 @@ Set-WEMUserDSN
 Set-WEMUserDSNAssignment               
 Set-WEMUSVSettings                     
 Set-WEMVirtualDrive                    
-Set-WEMVirtualDriveAssignment
+Set-WEMVirtualDriveAssignment          
+```
+
+[poshgallery-citrixwemsdk]: https://www.powershellgallery.com/packages/Citrix.WEMSDK/
