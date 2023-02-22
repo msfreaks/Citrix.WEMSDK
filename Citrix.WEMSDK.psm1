@@ -275,7 +275,8 @@ function New-ChangesLogEntry {
 
     if (-not $UserId) { $UserId = "[Citrix.WEMSDK] $($env:USERDOMAIN)\$($env:USERNAME)"}
 
-    $SQLQuery = "INSERT INTO VUEMChangesLog (IdSite,IdElement,UserId,ChangeType,ObjectName,ObjectType,ChangeDate,NewValue,ChangeDescription,Reserved01) VALUES ($($IdSite),$($IdElement),'$($UserId)','$($ChangeType)','$($ObjectName)','$($ObjectType)',GETDATE(),'$($NewValue)',"    if ($ChangeDescription) { 
+    $SQLQuery = "INSERT INTO VUEMChangesLog (IdSite,IdElement,UserId,ChangeType,ObjectName,ObjectType,ChangeDate,NewValue,ChangeDescription,Reserved01) VALUES ($($IdSite),$($IdElement),'$($UserId)','$($ChangeType)','$($ObjectName)','$($ObjectType)',GETDATE(),'$($NewValue)',"    
+    if ($ChangeDescription) { 
         $SQLQuery += "'$($ChangeDescription)',"
     } else { 
         $SQLQuery += "NULL,"
